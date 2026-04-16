@@ -1,5 +1,11 @@
-# All alert data — keep locally, not committed to repo
-data/
+# Raw and analysis data — keep locally only
+data/raw/
+data/processed/alerts_clean.json
+data/processed/alerts_clean.csv
+data/processed/alerts_clean.xlsx
+
+# The 7 small processed files the website needs ARE committed (see data/processed/)
+
 
 # Python
 __pycache__/
