@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>UNDER FIRE — Timeline</title>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400;1,700&family=IBM+Plex+Mono:wght@300;400;500&family=IBM+Plex+Sans:wght@300;400;500&display=swap"
+        rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.8.5/d3.min.js"></script>
+    <link rel="stylesheet" href="css/style.css">
+    <style>
+        body {
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+            padding-top: 80px;
+        }
+
+        .viz-page-header {
+            padding: 4rem 6rem 2rem;
+        }
+
+        .viz-page-header .section-label {
+            color: var(--accent);
+        }
+
+        .viz-container {
+            flex: 1;
+            padding: 0 6rem;
+            position: relative;
+        }
+
+        #timeline-chart {
+            width: 100%;
+            height: 500px;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            margin-top: 2rem;
+            position: relative;
+        }
+
+        .filter-bar {
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+            background: rgba(22, 22, 30, 0.8);
+            padding: 1rem 2rem;
+            border-radius: 8px;
+            border: 1px solid var(--border);
+            margin-top: 1rem;
+        }
+
+        .filter-label {
+            font-family: 'IBM Plex Mono';
+            font-size: 0.65rem;
+            color: var(--muted);
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            margin-right: 1rem;
+        }
+
+        .filter-btn {
+            font-size: 0.8rem;
+            padding: 0.6rem 1.2rem;
+        }
+
+        .back-link {
+            position: absolute;
+            top: 2rem;
+            left: 3rem;
+            font-family: 'IBM Plex Mono';
+            font-size: 0.65rem;
+            color: var(--muted);
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            text-decoration: none;
+            transition: color 0.2s;
+        }
+
+        .back-link:hover {
+            color: #fff;
+        }
+    </style>
+</head>
+
+<body>
+
+    <nav>
+        <div class="nav-brand">Under Fire</div>
+        <div class="nav-links"><a href="index.html"
+                style="color:var(--text); text-decoration:none; font-family:'IBM Plex Mono'; font-size:0.65rem; text-transform:uppercase;">←
+                Back to Hub</a></div>
+        <div id="live-badge" class="nav-data-badge">⏳ Loading data…</div>
+    </nav>
+
+    <div class="viz-page-header">
+        <div class="section-label">Exploration 01</div>
+        <h1 class="section-title" style="font-size: 4rem;">The Master Timeline</h1>
+        <p class="section-desc">Seventeen years of rocket attacks. The density of strikes forms clear episodic clusters
+            (e.g., Cast Lead, Protective Edge, Oct 7). Use the filters below to isolate which actor fired the rockets.
+        </p>
+
+        <div class="filter-bar" id="timeline-filters">
+            <div class="filter-label">Filter by Actor:</div>
+            <button class="filter-btn active" data-actor="all">All Actors</button>
+            <button class="filter-btn" data-actor="Hamas"
+                style="border-color: rgba(214,48,49,0.3); color:#d63031;">Hamas</button>
+            <button class="filter-btn" data-actor="Hezbollah"
+                style="border-color: rgba(74,158,255,0.3); color:#4a9eff;">Hezbollah</button>
+            <button class="filter-btn" data-actor="PIJ"
+                style="border-color: rgba(232,184,75,0.3); color:#e8b84b;">PIJ</button>
+            <button class="filter-btn" data-actor="Iran Direct"
+                style="border-color: rgba(155,89,182,0.3); color:#9b59b6;">Iran</button>
+        </div>
+    </div>
+
+    <div class="viz-container">
+        <div id="timeline-chart"></div>
+    </div>
+
+    <div class="tooltip" id="tooltip"></div>
+
+    <script src="https://cdn.jsdelivr.net/gh/studio-freight/lenis@1.0.19/bundled/lenis.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+    <script>
+        // Add active state to inline styles specifically for this page.
+        document.getElementById("timeline-filters").addEventListener("click", e => {
+            if (!e.target.dataset.actor) return;
+            document.querySelectorAll(".filter-btn").forEach(btn => {
+                btn.classList.remove("active");
+                if (btn.dataset.actor !== "all") {
+                    btn.style.background = "transparent";
+                }
+            });
+            e.target.classList.add("active");
+            if (e.target.dataset.actor !== "all") {
+                e.target.style.background = e.target.style.borderColor.replace('0.3', '0.1');
+            }
+        });
+    </script>
+    <script src="js/app.js"></script>
+</body>
+
+</html>

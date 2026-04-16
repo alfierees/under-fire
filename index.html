@@ -1,0 +1,1560 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Under Fire — Israel Alert Data 2020–2026</title>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400;1,700&family=IBM+Plex+Mono:wght@300;400;500&family=IBM+Plex+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.8.5/d3.min.js"></script>
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+  <style>
+    /* ─── TOKENS ─── */
+    :root {
+      --bg: #07070a; --surface: #0f0f14; --surface2: #16161e;
+      --border: #252530; --accent: #e8b84b; --red: #d63031;
+      --blue: #4a9eff; --orange: #f39c12; --purple: #c678dd;
+      --text: #c8c8d8; --muted: #5a5a70; --dim: #2a2a38;
+      --hamas: #d63031; --hezbollah: #f39c12;
+      --houthis: #4a9eff; --iran: #c678dd; --unknown: #3a3a4a;
+    }
+    *, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+    html { scroll-behavior: smooth; }
+    body { background:var(--bg); color:var(--text); font-family:'IBM Plex Sans',sans-serif; font-weight:300; overflow-x:hidden; }
+    ::-webkit-scrollbar { width:4px; }
+    ::-webkit-scrollbar-track { background:var(--bg); }
+    ::-webkit-scrollbar-thumb { background:var(--border); border-radius:4px; }
+
+    /* ─── NAV ─── */
+    nav {
+      position:fixed; top:0; left:0; right:0; z-index:999;
+      background:rgba(7,7,10,0.9); backdrop-filter:blur(12px);
+      border-bottom:1px solid var(--border);
+      display:flex; align-items:center; justify-content:space-between;
+      padding:0 3rem; height:52px;
+    }
+    .nav-brand { font-family:'Playfair Display',serif; font-size:.95rem; font-weight:700; letter-spacing:.06em; text-transform:uppercase; color:var(--accent); }
+    .nav-links { display:flex; gap:2rem; }
+    .nav-links a {
+      font-family:'IBM Plex Mono',monospace; font-size:.58rem; letter-spacing:.12em;
+      text-transform:uppercase; color:var(--muted); text-decoration:none; transition:color .2s;
+      padding-bottom:2px; border-bottom:1px solid transparent; transition:color .2s, border-color .2s;
+    }
+    .nav-links a:hover { color:var(--text); }
+    .nav-links a.active { color:var(--accent); border-bottom-color:var(--accent); }
+    .nav-badge { font-family:'IBM Plex Mono',monospace; font-size:.58rem; letter-spacing:.1em; padding:.3rem .75rem; background:rgba(232,184,75,.12); border:1px solid rgba(232,184,75,.4); color:var(--accent); border-radius:2px; }
+
+    /* ─── TOOLTIP ─── */
+    #tooltip {
+      position:fixed; background:var(--surface2); border:1px solid var(--border);
+      padding:.75rem 1rem; border-radius:4px; font-family:'IBM Plex Mono',monospace;
+      font-size:.65rem; color:var(--text); pointer-events:none; opacity:0;
+      transition:opacity .15s; z-index:2000; white-space:nowrap; line-height:1.7;
+      box-shadow:0 4px 16px rgba(0,0,0,.4);
+    }
+
+    /* ─── SHARED SECTION ─── */
+    .section-wrapper {
+      padding: 7rem 6rem 6rem;
+      max-width: 1400px;
+      margin: 0 auto;
+    }
+    .section-label { font-family:'IBM Plex Mono',monospace; font-size:.6rem; letter-spacing:.2em; text-transform:uppercase; color:var(--red); margin-bottom:1rem; }
+    .section-title { font-family:'Playfair Display',serif; font-size:clamp(2.4rem,3.5vw,3.4rem); font-weight:700; color:#fff; line-height:1.1; margin-bottom:1rem; letter-spacing:-.01em; }
+    .section-desc { font-size:.88rem; color:var(--muted); max-width:640px; line-height:1.8; margin-bottom:2.5rem; }
+    .chart-note { font-family:'IBM Plex Mono',monospace; font-size:.55rem; color:var(--dim); margin-top:1rem; letter-spacing:.04em; }
+
+    /* ─── HERO ─── */
+    #hero {
+      height:100vh; min-height:600px; display:flex; flex-direction:column;
+      justify-content:center; padding:0 6rem; position:relative; overflow:hidden;
+    }
+    .hero-bg {
+      position:absolute; inset:0; z-index:0;
+      background-image: url('images/hero-bg.jpg');
+      background-size: cover;
+      background-position: center 40%;
+      background-repeat: no-repeat;
+    }
+    /* Dark overlay — heavy on the left so text stays readable, lighter right so photo shows */
+    .hero-bg::before {
+      content:''; position:absolute; inset:0;
+      background:
+        linear-gradient(to right, rgba(7,7,10,.94) 0%, rgba(7,7,10,.78) 48%, rgba(7,7,10,.40) 100%),
+        linear-gradient(to top,   rgba(7,7,10,1.0) 0%, transparent 38%);
+    }
+    /* Fallback tint if image fails to load */
+    .hero-bg::after {
+      content:''; position:absolute; inset:0;
+      background:
+        radial-gradient(ellipse at 85% 25%, rgba(214,48,49,.12) 0%, transparent 50%),
+        radial-gradient(ellipse at 15% 70%, rgba(74,158,255,.08) 0%, transparent 45%);
+      z-index:1;
+    }
+    .hero-content { position:relative; z-index:10; max-width:700px; }
+    /* Eyebrow: "—— SPECIAL INVESTIGATION" style */
+    .hero-eyebrow {
+      font-family:'IBM Plex Mono',monospace; font-size:.62rem; letter-spacing:.22em;
+      text-transform:uppercase; color:var(--accent); margin-bottom:1.5rem;
+      display:flex; align-items:center; gap:1rem;
+    }
+    .hero-eyebrow::before { content:''; display:block; width:36px; height:1px; background:var(--accent); flex-shrink:0; }
+    h1.hero-title {
+      font-family:'Playfair Display',serif; font-size:clamp(5rem,10vw,9rem);
+      font-weight:900; line-height:.88; letter-spacing:-.03em; margin-bottom:1.8rem;
+      /* Gradient: interceptor blue → explosion gold → missile red — left to right */
+      background: linear-gradient(108deg,
+        #74b9ff 0%,
+        #e8b84b 38%,
+        #f39c12 58%,
+        #d63031 100%
+      );
+      -webkit-background-clip: text;
+      background-clip: text;
+      -webkit-text-fill-color: transparent;
+      color: transparent;
+      /* Warm glow behind the letters */
+      filter: drop-shadow(0 0 28px rgba(214,48,49,0.35)) drop-shadow(0 2px 8px rgba(0,0,0,0.7));
+    }
+    .hero-subtitle { font-family:'IBM Plex Mono',monospace; font-size:.78rem; color:rgba(195,200,220,0.82); line-height:1.9; max-width:520px; margin-bottom:3.5rem; }
+    .hero-stats { display:flex; gap:5rem; flex-wrap:wrap; }
+    .stat-num { font-family:'Playfair Display',serif; font-size:3rem; font-weight:900; color:var(--accent); line-height:1; }
+    .stat-num span { color:var(--accent); font-size:1.8rem; opacity:.8; }
+    .stat-actors-dots { display:inline-flex; gap:4px; align-items:center; margin-left:.5rem; vertical-align:middle; }
+    .stat-actors-dots span { display:inline-block; width:8px; height:8px; border-radius:2px; }
+    .stat-label { font-family:'IBM Plex Mono',monospace; font-size:.58rem; letter-spacing:.14em; text-transform:uppercase; color:rgba(165,170,195,0.75); margin-top:.55rem; }
+    .hero-scroll { position:absolute; bottom:3rem; left:6rem; font-family:'IBM Plex Mono',monospace; font-size:.58rem; letter-spacing:.16em; text-transform:uppercase; color:rgba(200,200,216,.35); display:flex; align-items:center; gap:.8rem; }
+    .hero-scroll::before { content:''; display:block; width:40px; height:1px; background:rgba(200,200,216,.25); }
+
+    /* ─── IRON DOME CANVAS ─── */
+    #iron-dome-canvas {
+      position:absolute; inset:0; z-index:2;
+      width:100%; height:100%;
+      pointer-events:none;
+    }
+
+    /* ─── TIMELINE ─── */
+    #timeline { background:var(--surface); border-top:1px solid var(--border); }
+    #timeline-chart { width:100%; position:relative; }
+    #timeline-chart svg { display:block; overflow:visible; }
+    .tl-annotation { font-family:'IBM Plex Mono',monospace; font-size:.6rem; fill:var(--accent); letter-spacing:.06em; }
+
+    /* ─── OCT 7 ─── */
+    #oct7 { background:var(--bg); border-top:1px solid var(--border); padding-bottom:0; }
+    #oct7 .section-wrapper { padding-bottom:0; }
+    #map-container { position:relative; width:100%; height:72vh; min-height:480px; margin-top:2rem; border:1px solid var(--border); border-radius:4px; overflow:hidden; }
+    #oct7-map { width:100%; height:100%; }
+    .map-overlay { position:absolute; z-index:1000; bottom:2rem; left:2rem; background:rgba(7,7,10,.88); backdrop-filter:blur(10px); border:1px solid var(--border); padding:1.5rem 2rem; border-radius:4px; min-width:220px; }
+    .map-clock { font-family:'Playfair Display',serif; font-size:2.4rem; font-weight:700; color:#fff; line-height:1; margin-bottom:.4rem; }
+    .map-clock-label { font-family:'IBM Plex Mono',monospace; font-size:.55rem; letter-spacing:.14em; text-transform:uppercase; color:var(--muted); margin-bottom:1.2rem; }
+    .map-counter { font-family:'Playfair Display',serif; font-size:1.4rem; font-weight:700; color:var(--red); }
+    .map-counter-label { font-family:'IBM Plex Mono',monospace; font-size:.55rem; letter-spacing:.1em; text-transform:uppercase; color:var(--muted); margin-top:.2rem; }
+    .map-controls { position:absolute; z-index:1000; bottom:2rem; right:2rem; display:flex; gap:.6rem; }
+    .map-btn { font-family:'IBM Plex Mono',monospace; font-size:.62rem; letter-spacing:.1em; text-transform:uppercase; padding:.5rem 1.2rem; border:1px solid var(--border); background:rgba(7,7,10,.85); color:var(--text); cursor:pointer; border-radius:2px; transition:all .2s; }
+    .map-btn:hover, .map-btn.active { border-color:var(--accent); color:var(--accent); }
+    .map-btn.play-btn { border-color:var(--red); color:var(--red); }
+    .map-btn.play-btn:hover { background:var(--red); color:#fff; }
+    .map-legend { position:absolute; z-index:1000; top:1.5rem; right:1.5rem; background:rgba(7,7,10,.85); border:1px solid var(--border); padding:1rem; border-radius:4px; }
+    .legend-item { display:flex; align-items:center; gap:.5rem; font-family:'IBM Plex Mono',monospace; font-size:.55rem; letter-spacing:.06em; color:var(--muted); margin-bottom:.4rem; }
+    .legend-dot { width:8px; height:8px; border-radius:50%; flex-shrink:0; }
+
+    /* ─── FRONTS ─── */
+    #fronts { background:var(--surface); border-top:1px solid var(--border); }
+    #fronts-chart svg { display:block; overflow:visible; }
+    .actor-legend { display:flex; gap:1.5rem; flex-wrap:wrap; margin-bottom:1.5rem; }
+    .actor-tag { display:flex; align-items:center; gap:.5rem; font-family:'IBM Plex Mono',monospace; font-size:.6rem; letter-spacing:.08em; color:var(--muted); }
+    .actor-swatch { width:10px; height:10px; border-radius:2px; flex-shrink:0; }
+
+    /* ─── PATTERNS ─── */
+    #patterns { background:var(--bg); border-top:1px solid var(--border); }
+    .patterns-grid { display:grid; grid-template-columns:1fr 1fr; gap:4rem; align-items:start; }
+    #clock-chart, #dow-chart { width:100%; }
+    #clock-chart svg, #dow-chart svg { display:block; overflow:visible; }
+    .chart-title { font-family:'IBM Plex Mono',monospace; font-size:.62rem; letter-spacing:.14em; text-transform:uppercase; color:var(--text); margin-bottom:1.5rem; }
+
+    /* ─── AREAS ─── */
+    #areas { background:var(--surface); border-top:1px solid var(--border); }
+    #area-chart { width:100%; overflow-x:auto; }
+    #area-chart svg { display:block; }
+
+    /* ─── ODDS ─── */
+    #odds { background:var(--bg); border-top:1px solid var(--border); }
+    .odds-layout { display:grid; grid-template-columns:1fr 1fr; gap:5rem; align-items:start; }
+    .odds-controls-col { }
+    .odds-result-col { display:flex; flex-direction:column; align-items:center; justify-content:center; padding:3rem; border:1px solid var(--border); border-radius:4px; background:var(--surface); min-height:320px; text-align:center; }
+    .odds-select-label { font-family:'IBM Plex Mono',monospace; font-size:.6rem; letter-spacing:.14em; text-transform:uppercase; color:var(--muted); margin-bottom:.6rem; display:block; }
+    #region-select {
+      width:100%; background:var(--surface2); border:1px solid var(--border);
+      color:var(--text); font-family:'IBM Plex Mono',monospace; font-size:.72rem;
+      padding:.7rem 1rem; border-radius:2px; cursor:pointer; margin-bottom:1.5rem;
+      appearance:none; -webkit-appearance:none;
+    }
+    #region-select:focus { outline:none; border-color:var(--accent); }
+    .activity-grid { display:grid; grid-template-columns:repeat(2,1fr); gap:.5rem; }
+    .activity-btn {
+      background:var(--surface2); border:1px solid var(--border);
+      color:var(--muted); font-family:'IBM Plex Mono',monospace;
+      font-size:.58rem; letter-spacing:.06em; padding:.7rem .8rem;
+      border-radius:2px; cursor:pointer; transition:all .2s;
+      display:flex; flex-direction:column; align-items:flex-start; gap:.2rem;
+    }
+    .activity-btn .act-name { color:var(--text); font-size:.65rem; }
+    .activity-btn .act-dur { color:var(--muted); }
+    .activity-btn:hover { border-color:var(--text); }
+    .activity-btn.active { border-color:var(--accent); background:rgba(232,184,75,.08); color:var(--accent); }
+    .activity-btn.active .act-name { color:var(--accent); }
+    .odds-big-num { font-family:'Playfair Display',serif; font-size:5.5rem; font-weight:900; color:#fff; line-height:1; margin-bottom:.5rem; transition:color .3s; }
+    .odds-big-label { font-family:'IBM Plex Mono',monospace; font-size:.62rem; letter-spacing:.14em; text-transform:uppercase; color:var(--muted); margin-bottom:2rem; }
+    .odds-comparison { width:100%; }
+    .odds-comp-row { display:flex; justify-content:space-between; align-items:center; padding:.6rem 0; border-bottom:1px solid var(--dim); }
+    .odds-comp-row:last-child { border-bottom:none; }
+    .odds-comp-label { font-family:'IBM Plex Mono',monospace; font-size:.58rem; letter-spacing:.08em; color:var(--muted); }
+    .odds-comp-val { font-family:'Playfair Display',serif; font-size:1.1rem; font-weight:700; color:#fff; }
+    .odds-comp-val.highlight { color:var(--red); }
+
+    /* Scale section */
+    .scale-section { margin-top:5rem; padding-top:4rem; border-top:1px solid var(--border); }
+    .scale-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:2rem; margin-top:2.5rem; }
+    .scale-card { background:var(--surface); border:1px solid var(--border); padding:2rem; border-radius:4px; border-left:3px solid var(--red); }
+    .scale-card.blue { border-left-color:var(--blue); }
+    .scale-card.gold { border-left-color:var(--accent); }
+    .scale-big { font-family:'Playfair Display',serif; font-size:2.8rem; font-weight:900; color:#fff; line-height:1; }
+    .scale-unit { font-family:'IBM Plex Mono',monospace; font-size:.6rem; letter-spacing:.12em; text-transform:uppercase; color:var(--accent); margin:.4rem 0 .8rem; }
+    .scale-desc { font-size:.82rem; color:var(--muted); line-height:1.65; }
+
+    /* ─── FOOTER ─── */
+    footer {
+      border-top:1px solid var(--border); padding:2.5rem 6rem;
+      display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:1rem;
+    }
+    .footer-left { font-family:'IBM Plex Mono',monospace; font-size:.58rem; color:var(--dim); letter-spacing:.1em; text-transform:uppercase; }
+    .footer-credit { font-family:'IBM Plex Mono',monospace; font-size:.6rem; color:var(--muted); }
+    .footer-credit a { color:var(--accent); text-decoration:none; }
+    .footer-credit a:hover { text-decoration:underline; }
+
+    /* ─── FINDING CARD ─── */
+    .finding-row { display:flex; gap:1rem; margin-bottom:2.5rem; flex-wrap:wrap; }
+    .finding-card { background:rgba(0,0,0,.3); border-left:3px solid var(--red); padding:1.2rem 1.4rem; border-radius:0 4px 4px 0; flex:1; min-width:200px; }
+    .finding-card.blue { border-left-color:var(--blue); }
+    .finding-card.gold { border-left-color:var(--accent); }
+    .finding-head { font-family:'IBM Plex Mono',monospace; font-size:.58rem; letter-spacing:.1em; text-transform:uppercase; color:var(--muted); margin-bottom:.4rem; }
+    .finding-stat { font-family:'Playfair Display',serif; font-size:1.7rem; font-weight:700; color:#fff; }
+    .finding-text { font-size:.8rem; color:var(--muted); line-height:1.6; margin-top:.3rem; }
+
+    /* ─── RESPONSIVE ─── */
+    @media (max-width:900px) {
+      nav { padding:0 1.5rem; }
+      .nav-links { display:none; }
+      #hero, .section-wrapper { padding-left:1.8rem; padding-right:1.8rem; }
+      h1.hero-title { font-size:4.5rem; }
+      .hero-stats { gap:2.5rem; }
+      .patterns-grid, .odds-layout, .scale-grid { grid-template-columns:1fr; gap:2.5rem; }
+      footer { padding:2rem 1.8rem; flex-direction:column; gap:.8rem; }
+      .hero-scroll { left:1.8rem; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ─── FILE:// WARNING ─────────────────────────────────────────────────── -->
+<div id="file-protocol-warning" style="display:none; position:fixed; bottom:1.5rem; left:50%; transform:translateX(-50%);
+  z-index:9999; background:#1a0a0a; border:1px solid var(--red); border-radius:4px;
+  padding:1rem 1.5rem; font-family:'IBM Plex Mono',monospace; font-size:.68rem;
+  color:#e8b84b; line-height:1.7; max-width:540px; box-shadow:0 4px 24px rgba(214,48,49,.25);">
+  <strong style="color:#d63031; display:block; margin-bottom:.3rem; letter-spacing:.06em;">
+    ⚠ CHARTS WON'T LOAD VIA FILE://
+  </strong>
+  Run a local server to see all visualisations:<br>
+  <code style="color:#fff; background:rgba(255,255,255,.06); padding:.2rem .5rem; border-radius:2px;">
+    python3 -m http.server 8000
+  </code>
+  &nbsp;then open&nbsp;
+  <code style="color:#4a9eff;">http://localhost:8000</code>
+  <span onclick="this.parentElement.style.display='none'"
+    style="position:absolute; top:.6rem; right:.8rem; cursor:pointer; color:var(--muted);">✕</span>
+</div>
+<script>
+  if (window.location.protocol === 'file:') {
+    document.getElementById('file-protocol-warning').style.display = 'block';
+  }
+</script>
+
+<!-- NAV -->
+<nav>
+  <div class="nav-brand">Under Fire</div>
+  <div class="nav-links">
+    <a href="#timeline">Timeline</a>
+    <a href="#oct7">Oct 7</a>
+    <a href="#fronts">The Fronts</a>
+    <a href="#patterns">Patterns</a>
+    <a href="#areas">By Area</a>
+    <a href="#odds">Odds</a>
+  </div>
+  <div class="nav-badge" id="nav-badge">🔔 Loading…</div>
+</nav>
+
+<div id="tooltip"></div>
+
+<!-- ═══════════════════════════════════════════
+     CH 1 — HERO COUNTER
+═══════════════════════════════════════════ -->
+<section id="hero">
+  <div class="hero-bg"></div>
+  <canvas id="iron-dome-canvas" aria-hidden="true"></canvas>
+  <div class="hero-content">
+    <div class="hero-eyebrow">Special Investigation</div>
+    <h1 class="hero-title">UNDER<br>FIRE</h1>
+    <p class="hero-subtitle">
+      Six years of rocket, missile, and drone alerts across Israel — every single one
+      recorded, mapped, and analysed. This is what the data looks like.
+    </p>
+    <div class="hero-stats">
+      <div class="stat">
+        <div class="stat-num" id="counter-alerts">0<span>+</span></div>
+        <div class="stat-label">Total alerts</div>
+      </div>
+      <div class="stat">
+        <div class="stat-num"><span id="counter-actors">0</span><span class="stat-actors-dots">
+          <span style="background:#d63031"></span>
+          <span style="background:#f39c12"></span>
+          <span style="background:#4a9eff"></span>
+          <span style="background:#c678dd"></span>
+        </span></div>
+        <div class="stat-label">Threat actors</div>
+      </div>
+      <div class="stat">
+        <div class="stat-num" id="counter-years">0</div>
+        <div class="stat-label">Years of data</div>
+      </div>
+    </div>
+  </div>
+  <div class="hero-scroll">Scroll to explore</div>
+</section>
+
+<!-- ═══════════════════════════════════════════
+     CH 2 — TIMELINE
+═══════════════════════════════════════════ -->
+<section id="timeline">
+  <div class="section-wrapper">
+    <div class="section-label">01 — Timeline</div>
+    <h2 class="section-title">Six Years of Alerts</h2>
+    <p class="section-desc">Weekly alert totals from January 2020 to March 2026. Each bar is one week. The scale of October 7, 2023 is not a typo.</p>
+
+    <div class="finding-row">
+      <div class="finding-card">
+        <div class="finding-head">Pre-Oct 7 (Jan 2020–Oct 2023)</div>
+        <div class="finding-stat" id="stat-pre-oct7">—</div>
+        <div class="finding-text">alerts over 3+ years</div>
+      </div>
+      <div class="finding-card blue">
+        <div class="finding-head">Post-Oct 7 (Oct 2023–Mar 2026)</div>
+        <div class="finding-stat" id="stat-post-oct7">—</div>
+        <div class="finding-text">alerts in under 2.5 years</div>
+      </div>
+      <div class="finding-card gold">
+        <div class="finding-head">Single Busiest Day</div>
+        <div class="finding-stat">4,000</div>
+        <div class="finding-text">alerts on Oct 7, 2023</div>
+      </div>
+    </div>
+
+    <div id="timeline-chart"></div>
+    <p class="chart-note">Weekly alert counts. Vertical line marks October 7, 2023. Source: RocketAlert.live</p>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════
+     CH 3 — OCT 7 REPLAY
+═══════════════════════════════════════════ -->
+<section id="oct7">
+  <div class="section-wrapper">
+    <div class="section-label">02 — October 7, 2023</div>
+    <h2 class="section-title">The Day It Changed</h2>
+    <p class="section-desc">4,000 individual alerts fired across Israel on October 7, 2023 — from 06:29 in the morning to 23:13 at night. Press play to watch it unfold.</p>
+  </div>
+
+  <div id="map-container">
+    <div id="oct7-map"></div>
+
+    <div class="map-overlay">
+      <div class="map-clock" id="map-clock">06:29</div>
+      <div class="map-clock-label">Time of day</div>
+      <div class="map-counter" id="map-counter">0</div>
+      <div class="map-counter-label">Alerts so far</div>
+    </div>
+
+    <div class="map-controls">
+      <button class="map-btn" id="reset-btn" onclick="resetOct7()">↺ Reset</button>
+      <button class="map-btn play-btn" id="play-btn" onclick="togglePlay()">▶ Play</button>
+    </div>
+
+    <div class="map-legend">
+      <div class="legend-item"><div class="legend-dot" style="background:#4a9eff"></div>Early morning</div>
+      <div class="legend-item"><div class="legend-dot" style="background:#e8b84b"></div>Midday</div>
+      <div class="legend-item"><div class="legend-dot" style="background:#d63031"></div>Evening</div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════
+     CH 4 — FOUR FRONTS
+═══════════════════════════════════════════ -->
+<section id="fronts">
+  <div class="section-wrapper">
+    <div class="section-label">03 — The Four Fronts</div>
+    <h2 class="section-title">From One Front to Four</h2>
+    <p class="section-desc">Before October 2023, almost all alerts originated from Hamas in Gaza. What followed was the opening of three additional fronts simultaneously. Iran alone accounts for more than half of all recorded alerts.</p>
+
+    <div class="actor-legend" id="actor-legend">
+      <div class="actor-tag"><div class="actor-swatch" style="background:var(--iran)"></div>Iran</div>
+      <div class="actor-tag"><div class="actor-swatch" style="background:var(--hezbollah)"></div>Hezbollah</div>
+      <div class="actor-tag"><div class="actor-swatch" style="background:var(--houthis)"></div>Houthis (Yemen)</div>
+      <div class="actor-tag"><div class="actor-swatch" style="background:var(--hamas)"></div>Hamas</div>
+      <div class="actor-tag"><div class="actor-swatch" style="background:var(--unknown)"></div>Unattributed</div>
+    </div>
+
+    <div id="fronts-chart"></div>
+    <p class="chart-note">Monthly alert counts by estimated origin. Pre-Oct 2023 data does not include origin attribution. Source: RocketAlert.live</p>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════
+     CH 5 — PATTERNS
+═══════════════════════════════════════════ -->
+<section id="patterns">
+  <div class="section-wrapper">
+    <div class="section-label">04 — Patterns</div>
+    <h2 class="section-title">When Do They Strike?</h2>
+    <p class="section-desc">Alerts happen around the clock — there is no safe hour. But the data reveals clear patterns: a 10am peak, and Saturday as the single most targeted day of the week.</p>
+
+    <div class="patterns-grid">
+      <div>
+        <div class="chart-title">Alerts by Hour of Day</div>
+        <div id="clock-chart"></div>
+      </div>
+      <div>
+        <div class="chart-title">Alerts by Day of Week</div>
+        <div id="dow-chart"></div>
+      </div>
+    </div>
+    <p class="chart-note">All 142,837 alerts, 2020–2026. Source: RocketAlert.live</p>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════
+     CH 6 — AREA LEADERBOARD
+═══════════════════════════════════════════ -->
+<section id="areas">
+  <div class="section-wrapper">
+    <div class="section-label">05 — By Region</div>
+    <h2 class="section-title">Area Vulnerability</h2>
+    <p class="section-desc">Total alerts received by each region of Israel, ranked. Every part of the country has been targeted. Some more than others.</p>
+
+    <div id="area-chart"></div>
+    <p class="chart-note">Total alerts per region, 2020–2026. Source: RocketAlert.live</p>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════
+     CH 7 — WHAT ARE THE ODDS
+═══════════════════════════════════════════ -->
+<section id="odds">
+  <div class="section-wrapper">
+    <div class="section-label">06 — Interactive</div>
+    <h2 class="section-title">What Are the Odds?</h2>
+    <p class="section-desc">Select a region and an everyday activity. See the statistical probability — based on historical alert rates — of an alert firing while you do it.</p>
+
+    <div class="odds-layout">
+      <div class="odds-controls-col">
+        <label class="odds-select-label">Select a region</label>
+        <select id="region-select"></select>
+
+        <label class="odds-select-label">Select an activity</label>
+        <div class="activity-grid" id="activity-grid">
+          <button class="activity-btn active" data-activity="shower">
+            <span class="act-name">🚿 Shower</span>
+            <span class="act-dur">8 minutes</span>
+          </button>
+          <button class="activity-btn" data-activity="tea">
+            <span class="act-name">☕ Make Tea</span>
+            <span class="act-dur">5 minutes</span>
+          </button>
+          <button class="activity-btn" data-activity="commute">
+            <span class="act-name">🚌 Commute</span>
+            <span class="act-dur">30 minutes</span>
+          </button>
+          <button class="activity-btn" data-activity="lunch">
+            <span class="act-name">🍽️ Lunch</span>
+            <span class="act-dur">45 minutes</span>
+          </button>
+          <button class="activity-btn" data-activity="workout">
+            <span class="act-name">🏃 Workout</span>
+            <span class="act-dur">60 minutes</span>
+          </button>
+          <button class="activity-btn" data-activity="film">
+            <span class="act-name">🎬 Watch a Film</span>
+            <span class="act-dur">2 hours</span>
+          </button>
+          <button class="activity-btn" data-activity="sleep">
+            <span class="act-name">😴 Sleep</span>
+            <span class="act-dur">8 hours</span>
+          </button>
+        </div>
+      </div>
+
+      <div class="odds-result-col">
+        <div class="odds-big-num" id="odds-number">—</div>
+        <div class="odds-big-label">chance of an alert</div>
+        <div class="odds-comparison">
+          <div class="odds-comp-row">
+            <span class="odds-comp-label">All-time average</span>
+            <span class="odds-comp-val" id="odds-alltime">—</span>
+          </div>
+          <div class="odds-comp-row">
+            <span class="odds-comp-label">Since Oct 7, 2023</span>
+            <span class="odds-comp-val highlight" id="odds-oct7">—</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Scale of It -->
+    <div class="scale-section">
+      <div class="section-label" style="margin-bottom:.5rem;">The Scale of It</div>
+      <h3 class="section-title" style="font-size:2rem;">142,837 is not an abstract number.</h3>
+      <div class="scale-grid">
+        <div class="scale-card">
+          <div class="scale-big">24.8</div>
+          <div class="scale-unit">days non-stop</div>
+          <div class="scale-desc">If each of the 142,837 alerts played as a 15-second siren, you would listen continuously for nearly 25 days.</div>
+        </div>
+        <div class="scale-card blue">
+          <div class="scale-big">1 / 14<span style="font-size:1.4rem">min</span></div>
+          <div class="scale-unit">average rate since Oct 7</div>
+          <div class="scale-desc">Since October 7, 2023, an alert has fired somewhere in Israel on average once every 14 minutes — day and night.</div>
+        </div>
+        <div class="scale-card gold">
+          <div class="scale-big">4,000</div>
+          <div class="scale-unit">in a single day</div>
+          <div class="scale-desc">On October 7 alone, 4,000 alerts fired — roughly one every 15 seconds across 17 hours of sustained attack.</div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-left">Under Fire — Data Visualisation Project — 2026</div>
+  <div class="footer-credit">
+    Alert data provided by <a href="https://rocketalert.live" target="_blank">RocketAlert.live</a>.
+    Origin attribution is estimated based on alert location and timing.
+    Built by Alfie Rees.
+  </div>
+</footer>
+
+<!-- ════════════════════════════════════════
+     JAVASCRIPT
+════════════════════════════════════════ -->
+<script>
+// ── Utilities ──────────────────────────────────────────────────────────────
+const DATA = 'data/processed/';
+async function fetchData(file) {
+  const r = await fetch(DATA + file);
+  if (!r.ok) throw new Error(`Failed to load ${file}`);
+  return r.json();
+}
+
+const tooltip = document.getElementById('tooltip');
+function showTip(html, e) {
+  tooltip.innerHTML = html;
+  tooltip.style.opacity = 1;
+  moveTip(e);
+}
+function moveTip(e) {
+  let x = e.clientX + 14, y = e.clientY - 28;
+  if (x + 200 > window.innerWidth) x = e.clientX - 180;
+  tooltip.style.left = x + 'px';
+  tooltip.style.top = y + 'px';
+}
+function hideTip() { tooltip.style.opacity = 0; }
+
+function fmtNum(n) { return n.toLocaleString(); }
+function fmtPct(p) { return (p * 100).toFixed(1) + '%'; }
+
+// ── Active nav link tracking ───────────────────────────────────────────────
+(function() {
+  const navLinks = document.querySelectorAll('.nav-links a');
+  const sectionIds = Array.from(navLinks).map(a => a.getAttribute('href').replace('#',''));
+  const sections = sectionIds.map(id => document.getElementById(id)).filter(Boolean);
+  function updateActiveNav() {
+    const scrollY = window.scrollY + 80;
+    let current = sectionIds[0];
+    sections.forEach(sec => { if (sec && sec.offsetTop <= scrollY) current = sec.id; });
+    navLinks.forEach(a => {
+      a.classList.toggle('active', a.getAttribute('href') === '#' + current);
+    });
+  }
+  window.addEventListener('scroll', updateActiveNav, { passive: true });
+  updateActiveNav();
+})();
+
+// ── Animate counter ────────────────────────────────────────────────────────
+function animateCounter(el, target, duration = 2000, suffix = '') {
+  const start = performance.now();
+  const startVal = parseInt(el.textContent) || 0;
+  function update(ts) {
+    const pct = Math.min((ts - start) / duration, 1);
+    const ease = 1 - Math.pow(1 - pct, 3);
+    el.textContent = Math.round(startVal + (target - startVal) * ease).toLocaleString() + suffix;
+    if (pct < 1) requestAnimationFrame(update);
+  }
+  requestAnimationFrame(update);
+}
+
+// ── INIT: load summary and animate hero ───────────────────────────────────
+(async () => {
+  try {
+    const s = await fetchData('stats_summary.json');
+    // Nav badge
+    document.getElementById('nav-badge').textContent = '🔔 ' + fmtNum(s.total_alerts) + ' alerts';
+    // Pre/post stats
+    const pre = s.total_alerts - (s.origins['Hamas'] || 0) - (s.origins['Hezbollah'] || 0)
+                - (s.origins['Houthis'] || 0) - (s.origins['Iran'] || 0);
+    document.getElementById('stat-pre-oct7').textContent = fmtNum(s.origins['Unknown'] || 8596);
+    document.getElementById('stat-post-oct7').textContent = fmtNum(
+      (s.origins['Hamas'] || 0) + (s.origins['Hezbollah'] || 0) +
+      (s.origins['Houthis'] || 0) + (s.origins['Iran'] || 0)
+    );
+    // Hero counters
+    animateCounter(document.getElementById('counter-alerts'), s.total_alerts, 2200, '+');
+    animateCounter(document.getElementById('counter-actors'), 4, 1000);
+    animateCounter(document.getElementById('counter-years'), 6, 800);
+  } catch(e) {
+    console.warn('Summary load failed:', e);
+    document.getElementById('nav-badge').textContent = '🔔 142,837 alerts';
+    document.getElementById('counter-alerts').textContent = '142,837+';
+    document.getElementById('counter-actors').textContent = '4';
+    document.getElementById('counter-years').textContent = '6';
+    document.getElementById('stat-pre-oct7').textContent = '8,596';
+    document.getElementById('stat-post-oct7').textContent = '134,241';
+  }
+})();
+
+// ── GSAP ScrollTrigger section entrances ──────────────────────────────────
+gsap.registerPlugin(ScrollTrigger);
+document.querySelectorAll('.section-label, .section-title, .section-desc, .finding-row').forEach(el => {
+  gsap.from(el, {
+    y: 30, opacity: 0, duration: .9, ease: 'power2.out',
+    scrollTrigger: { trigger: el, start: 'top 88%', once: true }
+  });
+});
+
+// ══════════════════════════════════════════════════════════════════════════
+// CH 2 — TIMELINE CHART
+// ══════════════════════════════════════════════════════════════════════════
+let timelineDrawn = false;
+const timelineObs = new IntersectionObserver(async (entries) => {
+  if (entries[0].isIntersecting && !timelineDrawn) {
+    timelineDrawn = true;
+    timelineObs.disconnect();
+    try {
+      const data = await fetchData('timeline_weekly.json');
+      drawTimeline(data);
+    } catch(e) { console.warn('Timeline load failed:', e); }
+  }
+}, { threshold: 0.05, rootMargin: '0px 0px -80px 0px' });
+timelineObs.observe(document.getElementById('timeline'));
+
+function drawTimeline(data) {
+  const container = document.getElementById('timeline-chart');
+  const W = container.clientWidth || 1000;
+  const H = 300;
+  const M = { top: 20, right: 20, bottom: 40, left: 50 };
+  const w = W - M.left - M.right;
+  const h = H - M.top - M.bottom;
+
+  const svg = d3.select('#timeline-chart').append('svg')
+    .attr('width', W).attr('height', H);
+  const g = svg.append('g').attr('transform', `translate(${M.left},${M.top})`);
+
+  const parseWeek = d3.timeParse('%Y-%m-%d');
+  const oct7 = new Date('2023-10-07');
+
+  const x = d3.scaleTime()
+    .domain(d3.extent(data, d => parseWeek(d.week)))
+    .range([0, w]);
+
+  const y = d3.scaleLinear()
+    .domain([0, d3.max(data, d => d.total)])
+    .range([h, 0]).nice();
+
+  // Grid lines
+  g.append('g').attr('class', 'grid')
+    .call(d3.axisLeft(y).ticks(5).tickSize(-w).tickFormat(''))
+    .call(g => g.select('.domain').remove())
+    .call(g => g.selectAll('line').attr('stroke', 'rgba(255,255,255,0.04)'));
+
+  // Area fill - two colors: pre/post Oct7
+  const areaGen = d3.area()
+    .x(d => x(parseWeek(d.week)))
+    .y0(h).y1(d => y(d.total))
+    .curve(d3.curveMonotoneX);
+
+  const pre = data.filter(d => parseWeek(d.week) < oct7);
+  const post = data.filter(d => parseWeek(d.week) >= oct7);
+
+  // Gradient defs
+  const defs = svg.append('defs');
+  const gradPre = defs.append('linearGradient').attr('id','grad-pre').attr('x1',0).attr('y1',0).attr('x2',0).attr('y2',1);
+  gradPre.append('stop').attr('offset','0%').attr('stop-color','rgba(200,200,216,0.4)');
+  gradPre.append('stop').attr('offset','100%').attr('stop-color','rgba(200,200,216,0.02)');
+  const gradPost = defs.append('linearGradient').attr('id','grad-post').attr('x1',0).attr('y1',0).attr('x2',0).attr('y2',1);
+  gradPost.append('stop').attr('offset','0%').attr('stop-color','rgba(214,48,49,0.55)');
+  gradPost.append('stop').attr('offset','100%').attr('stop-color','rgba(214,48,49,0.02)');
+
+  if (pre.length > 1) {
+    g.append('path').datum(pre).attr('fill','url(#grad-pre)').attr('stroke','rgba(200,200,216,0.5)').attr('stroke-width',1).attr('d', areaGen);
+  }
+  if (post.length > 1) {
+    g.append('path').datum(post).attr('fill','url(#grad-post)').attr('stroke','rgba(214,48,49,0.7)').attr('stroke-width',1).attr('d', areaGen);
+  }
+
+  // Oct 7 line
+  const oct7x = x(oct7);
+  g.append('line')
+    .attr('x1', oct7x).attr('x2', oct7x)
+    .attr('y1', 0).attr('y2', h)
+    .attr('stroke', '#e8b84b').attr('stroke-width', 1.5)
+    .attr('stroke-dasharray', '4,3');
+  g.append('text')
+    .attr('x', oct7x + 6).attr('y', 14)
+    .attr('class', 'tl-annotation').text('Oct 7, 2023');
+
+  // Axes
+  g.append('g').attr('transform', `translate(0,${h})`).call(
+    d3.axisBottom(x).ticks(8).tickFormat(d3.timeFormat('%Y'))
+  ).call(g => {
+    g.select('.domain').attr('stroke', 'var(--border)');
+    g.selectAll('text').attr('fill', 'var(--muted)').attr('font-family', 'IBM Plex Mono').attr('font-size', '10px');
+    g.selectAll('line').attr('stroke', 'var(--border)');
+  });
+
+  g.append('g').call(d3.axisLeft(y).ticks(5).tickFormat(d => d >= 1000 ? (d/1000)+'k' : d))
+  .call(g => {
+    g.select('.domain').remove();
+    g.selectAll('text').attr('fill', 'var(--muted)').attr('font-family', 'IBM Plex Mono').attr('font-size', '10px');
+    g.selectAll('line').remove();
+  });
+
+  // Hover interaction
+  const bisect = d3.bisector(d => parseWeek(d.week)).left;
+  const hoverLine = g.append('line').attr('y1',0).attr('y2',h)
+    .attr('stroke','rgba(255,255,255,0.2)').attr('stroke-width',1).attr('opacity',0);
+
+  svg.append('rect')
+    .attr('transform', `translate(${M.left},${M.top})`)
+    .attr('width', w).attr('height', h)
+    .attr('fill', 'transparent')
+    .on('mousemove', function(event) {
+      const [mx] = d3.pointer(event);
+      const date = x.invert(mx);
+      const idx = Math.min(bisect(data, date), data.length - 1);
+      const d = data[idx];
+      if (!d) return;
+      hoverLine.attr('x1', mx).attr('x2', mx).attr('opacity', 1);
+      showTip(`<b>${d.week}</b><br>Alerts: ${fmtNum(d.total)}`, event);
+    })
+    .on('mouseleave', () => { hoverLine.attr('opacity', 0); hideTip(); });
+}
+
+// ══════════════════════════════════════════════════════════════════════════
+// CH 3 — OCT 7 MAP
+// ══════════════════════════════════════════════════════════════════════════
+let oct7Map = null;
+let oct7Data = [];
+let alertIdx = 0;
+let isPlaying = false;
+let rAFId = null;
+let lastRafTime = null;
+let simMinutes = 0;
+const OCT7_START_MINS = 6 * 60 + 29;  // 06:29 in minutes from midnight
+const OCT7_END_MINS = 23 * 60 + 13;   // 23:13
+const OCT7_TOTAL_MINS = OCT7_END_MINS - OCT7_START_MINS; // 1004 mins
+const PLAYBACK_SECS = 90; // play through in 90 real seconds
+const SPEED = OCT7_TOTAL_MINS / PLAYBACK_SECS; // sim mins per real sec
+
+const colorScale = d3.scaleSequential()
+  .domain([OCT7_START_MINS, OCT7_END_MINS])
+  .interpolator(t => {
+    if (t < 0.5) return d3.interpolateRgb('#4a9eff', '#e8b84b')(t * 2);
+    return d3.interpolateRgb('#e8b84b', '#d63031')((t - 0.5) * 2);
+  });
+
+function initOct7Map() {
+  if (oct7Map) return;
+  oct7Map = L.map('oct7-map', {
+    center: [31.5, 35.0], zoom: 7, zoomControl: true,
+    attributionControl: true
+  });
+  L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+    attribution: '&copy; OpenStreetMap contributors &copy; CARTO',
+    subdomains: 'abcd', maxZoom: 19
+  }).addTo(oct7Map);
+}
+
+let mapObs = new IntersectionObserver(async (entries) => {
+  if (entries[0].isIntersecting) {
+    initOct7Map();
+    if (oct7Data.length === 0) {
+      try {
+        oct7Data = await fetchData('oct7_replay.json');
+      } catch(e) { console.warn('Oct7 data load failed:', e); }
+    }
+    setTimeout(() => oct7Map && oct7Map.invalidateSize(), 200);
+  }
+}, { threshold: 0.05, rootMargin: '0px 0px -80px 0px' });
+mapObs.observe(document.getElementById('oct7'));
+
+const canvasRenderer = L.canvas ? L.canvas({ padding: 0.5 }) : null;
+
+function addAlertMarker(alert) {
+  const timeParts = alert.ts.split(' ')[1].split(':');
+  const mins = parseInt(timeParts[0]) * 60 + parseInt(timeParts[1]);
+  const color = colorScale(mins);
+  const opts = { radius: 4, color, fillColor: color, fillOpacity: 0.75, weight: 0 };
+  if (canvasRenderer) opts.renderer = canvasRenderer;
+  L.circleMarker([alert.lat, alert.lon], opts).addTo(oct7Map);
+}
+
+function updateOct7UI() {
+  const totalMins = OCT7_START_MINS + simMinutes;
+  const h = Math.floor(totalMins / 60);
+  const m = Math.floor(totalMins % 60);
+  document.getElementById('map-clock').textContent =
+    String(h).padStart(2,'0') + ':' + String(m).padStart(2,'0');
+  document.getElementById('map-counter').textContent = fmtNum(alertIdx);
+}
+
+function animateOct7(ts) {
+  if (lastRafTime === null) lastRafTime = ts;
+  const dt = Math.min((ts - lastRafTime) / 1000, 0.1); // cap at 100ms
+  lastRafTime = ts;
+
+  simMinutes += dt * SPEED;
+  const currentTotalMins = OCT7_START_MINS + simMinutes;
+
+  while (alertIdx < oct7Data.length) {
+    const a = oct7Data[alertIdx];
+    const parts = a.ts.split(' ')[1].split(':');
+    const alertMins = parseInt(parts[0]) * 60 + parseInt(parts[1]) + parseInt(parts[2]) / 60;
+    if (alertMins <= currentTotalMins) {
+      addAlertMarker(a);
+      alertIdx++;
+    } else break;
+  }
+
+  updateOct7UI();
+
+  if (simMinutes < OCT7_TOTAL_MINS && alertIdx < oct7Data.length) {
+    rAFId = requestAnimationFrame(animateOct7);
+  } else {
+    isPlaying = false;
+    simMinutes = OCT7_TOTAL_MINS;
+    alertIdx = oct7Data.length;
+    updateOct7UI();
+    document.getElementById('play-btn').textContent = '✓ Done';
+  }
+}
+
+function togglePlay() {
+  if (!oct7Map || oct7Data.length === 0) return;
+  if (isPlaying) {
+    isPlaying = false;
+    if (rAFId) cancelAnimationFrame(rAFId);
+    rAFId = null;
+    lastRafTime = null;
+    document.getElementById('play-btn').textContent = '▶ Play';
+  } else {
+    isPlaying = true;
+    lastRafTime = null;
+    document.getElementById('play-btn').textContent = '⏸ Pause';
+    rAFId = requestAnimationFrame(animateOct7);
+  }
+}
+
+function resetOct7() {
+  isPlaying = false;
+  if (rAFId) cancelAnimationFrame(rAFId);
+  rAFId = null;
+  lastRafTime = null;
+  simMinutes = 0;
+  alertIdx = 0;
+  document.getElementById('play-btn').textContent = '▶ Play';
+  document.getElementById('map-clock').textContent = '06:29';
+  document.getElementById('map-counter').textContent = '0';
+  if (oct7Map) {
+    oct7Map.eachLayer(l => { if (l instanceof L.CircleMarker) oct7Map.removeLayer(l); });
+  }
+}
+
+// ══════════════════════════════════════════════════════════════════════════
+// CH 4 — FOUR FRONTS (Stacked Area)
+// ══════════════════════════════════════════════════════════════════════════
+let frontsDrawn = false;
+const frontsObs = new IntersectionObserver(async (entries) => {
+  if (entries[0].isIntersecting && !frontsDrawn) {
+    frontsDrawn = true;
+    frontsObs.disconnect();
+    try {
+      const data = await fetchData('actors_monthly.json');
+      drawFronts(data);
+    } catch(e) { console.warn('Fronts load failed:', e); }
+  }
+}, { threshold: 0.05, rootMargin: '0px 0px -80px 0px' });
+frontsObs.observe(document.getElementById('fronts'));
+
+function drawFronts(raw) {
+  const container = document.getElementById('fronts-chart');
+  const W = container.clientWidth || 1000;
+  const H = 380;
+  const M = { top: 20, right: 20, bottom: 40, left: 55 };
+  const w = W - M.left - M.right;
+  const h = H - M.top - M.bottom;
+
+  const actors = ['Iran', 'Hezbollah', 'Houthis', 'Hamas', 'Unknown'];
+  const colors = { Iran:'var(--iran)', Hezbollah:'var(--hezbollah)', Houthis:'var(--houthis)', Hamas:'var(--hamas)', Unknown:'var(--unknown)' };
+
+  // Normalise: ensure all actors present for each month
+  const data = raw.map(d => {
+    const row = { month: d.month };
+    actors.forEach(a => row[a] = d[a] || 0);
+    return row;
+  });
+
+  const svg = d3.select('#fronts-chart').append('svg').attr('width', W).attr('height', H);
+  const g = svg.append('g').attr('transform', `translate(${M.left},${M.top})`);
+
+  const parseMonth = d3.timeParse('%Y-%m');
+  const x = d3.scaleTime().domain(d3.extent(data, d => parseMonth(d.month))).range([0, w]);
+  const stack = d3.stack().keys(actors);
+  const stacked = stack(data);
+  const yMax = d3.max(stacked[stacked.length - 1], d => d[1]);
+  const y = d3.scaleLinear().domain([0, yMax]).range([h, 0]).nice();
+
+  // Grid
+  g.append('g').call(d3.axisLeft(y).ticks(5).tickSize(-w).tickFormat(''))
+    .call(g => g.select('.domain').remove())
+    .call(g => g.selectAll('line').attr('stroke', 'rgba(255,255,255,0.04)'));
+
+  const area = d3.area()
+    .x(d => x(parseMonth(d.data.month)))
+    .y0(d => y(d[0])).y1(d => y(d[1]))
+    .curve(d3.curveBasis);
+
+  stacked.forEach((layer, i) => {
+    g.append('path').datum(layer)
+      .attr('fill', colors[actors[i]])
+      .attr('opacity', 0.82)
+      .attr('d', area);
+  });
+
+  // Oct 7 line
+  const oct7x = x(new Date('2023-10-01'));
+  g.append('line').attr('x1', oct7x).attr('x2', oct7x).attr('y1', 0).attr('y2', h)
+    .attr('stroke', '#e8b84b').attr('stroke-width', 1.5).attr('stroke-dasharray', '4,3');
+  g.append('text').attr('x', oct7x + 6).attr('y', 14)
+    .attr('class', 'tl-annotation').text('Oct 7, 2023');
+
+  // Axes
+  g.append('g').attr('transform', `translate(0,${h})`).call(
+    d3.axisBottom(x).ticks(8).tickFormat(d3.timeFormat('%Y'))
+  ).call(g => {
+    g.select('.domain').attr('stroke', 'var(--border)');
+    g.selectAll('text').attr('fill','var(--muted)').attr('font-family','IBM Plex Mono').attr('font-size','10px');
+    g.selectAll('line').attr('stroke','var(--border)');
+  });
+  g.append('g').call(d3.axisLeft(y).ticks(5).tickFormat(d => d >= 1000 ? (d/1000).toFixed(0)+'k' : d))
+  .call(g => {
+    g.select('.domain').remove();
+    g.selectAll('text').attr('fill','var(--muted)').attr('font-family','IBM Plex Mono').attr('font-size','10px');
+    g.selectAll('line').remove();
+  });
+
+  // Hover
+  const bisect = d3.bisector(d => parseMonth(d.month)).left;
+  const vLine = g.append('line').attr('y1',0).attr('y2',h)
+    .attr('stroke','rgba(255,255,255,0.2)').attr('stroke-width',1).attr('opacity',0);
+  svg.append('rect').attr('transform',`translate(${M.left},${M.top})`).attr('width',w).attr('height',h).attr('fill','transparent')
+    .on('mousemove', function(event) {
+      const [mx] = d3.pointer(event);
+      const date = x.invert(mx);
+      const idx = Math.min(bisect(data, date), data.length - 1);
+      const d = data[idx];
+      if (!d) return;
+      vLine.attr('x1',mx).attr('x2',mx).attr('opacity',1);
+      const total = actors.reduce((s, a) => s + d[a], 0);
+      showTip(`<b>${d.month}</b><br>` + actors.filter(a => d[a] > 0).map(a => `${a}: ${fmtNum(d[a])}`).join('<br>') + `<br><b>Total: ${fmtNum(total)}</b>`, event);
+    })
+    .on('mouseleave', () => { vLine.attr('opacity',0); hideTip(); });
+}
+
+// ══════════════════════════════════════════════════════════════════════════
+// CH 5 — PATTERNS (Clock + DoW)
+// ══════════════════════════════════════════════════════════════════════════
+let patternsDrawn = false;
+const patternsObs = new IntersectionObserver(async (entries) => {
+  if (entries[0].isIntersecting && !patternsDrawn) {
+    patternsDrawn = true;
+    patternsObs.disconnect();
+    try {
+      const data = await fetchData('hourly_dow.json');
+      drawClock(data.hourly);
+      drawDoW(data.day_of_week);
+    } catch(e) { console.warn('Patterns load failed:', e); }
+  }
+}, { threshold: 0.05, rootMargin: '0px 0px -80px 0px' });
+patternsObs.observe(document.getElementById('patterns'));
+
+function drawClock(data) {
+  const container = document.getElementById('clock-chart');
+  const size = Math.min(container.clientWidth || 360, 380);
+  const cx = size / 2, cy = size / 2;
+  const innerR = 40, outerMaxR = size / 2 - 30;
+  const maxVal = d3.max(data, d => d.count);
+  const rScale = d3.scaleLinear().domain([0, maxVal]).range([innerR, outerMaxR]);
+
+  const svg = d3.select('#clock-chart').append('svg').attr('width', size).attr('height', size);
+  const g = svg.append('g').attr('transform', `translate(${cx},${cy})`);
+
+  const tau = 2 * Math.PI;
+  const sliceAngle = tau / 24;
+
+  data.forEach(d => {
+    const startAngle = (d.hour / 24) * tau - Math.PI / 2;
+    const endAngle = startAngle + sliceAngle - 0.01;
+    const arc = d3.arc()
+      .innerRadius(innerR).outerRadius(rScale(d.count))
+      .startAngle(startAngle).endAngle(endAngle);
+    const isNight = d.hour < 6 || d.hour >= 22;
+    const isPeak = d.hour === 10;
+    g.append('path').attr('d', arc)
+      .attr('fill', isPeak ? 'var(--red)' : isNight ? 'rgba(74,158,255,0.5)' : 'rgba(232,184,75,0.6)')
+      .attr('stroke', 'var(--bg)').attr('stroke-width', 0.5)
+      .on('mouseover', (e) => showTip(`${String(d.hour).padStart(2,'0')}:00 — ${fmtNum(d.count)} alerts`, e))
+      .on('mousemove', moveTip).on('mouseleave', hideTip);
+  });
+
+  // Hour labels (every 6 hours)
+  [0, 6, 12, 18].forEach(h => {
+    const angle = (h / 24) * tau - Math.PI / 2;
+    const r = outerMaxR + 16;
+    g.append('text')
+      .attr('x', Math.cos(angle) * r).attr('y', Math.sin(angle) * r + 4)
+      .attr('text-anchor', 'middle').attr('fill', 'var(--muted)')
+      .attr('font-family', 'IBM Plex Mono').attr('font-size', '10px')
+      .text(String(h).padStart(2,'0') + ':00');
+  });
+
+  // Centre label
+  g.append('text').attr('text-anchor','middle').attr('dy','0.35em')
+    .attr('fill','var(--muted)').attr('font-family','IBM Plex Mono').attr('font-size','9px')
+    .text('24h');
+}
+
+function drawDoW(data) {
+  const container = document.getElementById('dow-chart');
+  const W = container.clientWidth || 380;
+  const H = 280;
+  const M = { top: 10, right: 20, bottom: 10, left: 110 };
+  const w = W - M.left - M.right, h = H - M.top - M.bottom;
+
+  const svg = d3.select('#dow-chart').append('svg').attr('width', W).attr('height', H);
+  const g = svg.append('g').attr('transform', `translate(${M.left},${M.top})`);
+
+  const maxVal = d3.max(data, d => d.count);
+  const x = d3.scaleLinear().domain([0, maxVal]).range([0, w]);
+  const y = d3.scaleBand().domain(data.map(d => d.day)).range([0, h]).padding(0.25);
+
+  const dayColors = { Saturday: 'var(--red)', Sunday: 'rgba(214,48,49,0.6)' };
+
+  data.forEach(d => {
+    const isWeekend = d.day === 'Saturday' || d.day === 'Sunday';
+    g.append('rect')
+      .attr('x', 0).attr('y', y(d.day))
+      .attr('width', x(d.count)).attr('height', y.bandwidth())
+      .attr('fill', dayColors[d.day] || 'rgba(232,184,75,0.5)')
+      .attr('rx', 2);
+    g.append('text')
+      .attr('x', x(d.count) + 8).attr('y', y(d.day) + y.bandwidth() / 2 + 4)
+      .attr('font-family','IBM Plex Mono').attr('font-size','10px')
+      .attr('fill', isWeekend ? '#fff' : 'var(--muted)')
+      .text(fmtNum(d.count));
+  });
+
+  g.append('g').call(d3.axisLeft(y).tickSize(0))
+    .call(g => {
+      g.select('.domain').remove();
+      g.selectAll('text').attr('fill','var(--muted)').attr('font-family','IBM Plex Mono').attr('font-size','11px').attr('dx','-6px');
+    });
+}
+
+// ══════════════════════════════════════════════════════════════════════════
+// CH 6 — AREA LEADERBOARD
+// ══════════════════════════════════════════════════════════════════════════
+let areasDrawn = false;
+const areasObs = new IntersectionObserver(async (entries) => {
+  if (entries[0].isIntersecting && !areasDrawn) {
+    areasDrawn = true;
+    areasObs.disconnect();
+    try {
+      const data = await fetchData('areas_summary.json');
+      drawAreas(data);
+    } catch(e) { console.warn('Areas load failed:', e); }
+  }
+}, { threshold: 0.05, rootMargin: '0px 0px -80px 0px' });
+areasObs.observe(document.getElementById('areas'));
+
+function drawAreas(data) {
+  const container = document.getElementById('area-chart');
+  const W = container.clientWidth || 900;
+  const barH = 26, barPad = 6;
+  const M = { top: 10, right: 120, bottom: 30, left: 160 };
+  const H = data.length * (barH + barPad) + M.top + M.bottom;
+  const w = W - M.left - M.right;
+
+  const svg = d3.select('#area-chart').append('svg').attr('width', W).attr('height', H);
+  const g = svg.append('g').attr('transform', `translate(${M.left},${M.top})`);
+
+  const maxVal = d3.max(data, d => d.total);
+  const x = d3.scaleLinear().domain([0, maxVal]).range([0, w]);
+
+  data.forEach((d, i) => {
+    const y = i * (barH + barPad);
+    const isTop3 = i < 3;
+    const barColor = isTop3 ? 'var(--red)' : i < 10 ? 'rgba(232,184,75,0.55)' : 'rgba(74,158,255,0.4)';
+
+    g.append('rect').attr('x',0).attr('y',y).attr('width', x(d.total)).attr('height', barH)
+      .attr('fill', barColor).attr('rx', 2)
+      .on('mouseover', (e) => showTip(
+        `<b>${d.area}</b><br>Total: ${fmtNum(d.total)}<br>Avg/day: ${d.avg_per_day.toFixed(2)}<br>Active days: ${fmtNum(d.active_days)}`, e
+      ))
+      .on('mousemove', moveTip).on('mouseleave', hideTip);
+
+    g.append('text').attr('x',-8).attr('y', y + barH/2 + 4)
+      .attr('text-anchor','end').attr('font-family','IBM Plex Mono').attr('font-size','11px')
+      .attr('fill', isTop3 ? '#fff' : 'var(--muted)').text(d.area);
+
+    g.append('text').attr('x', x(d.total) + 8).attr('y', y + barH/2 + 4)
+      .attr('font-family','IBM Plex Mono').attr('font-size','10px')
+      .attr('fill', 'var(--muted)').text(fmtNum(d.total));
+  });
+
+  g.append('g').attr('transform', `translate(0,${H - M.top - M.bottom})`).call(
+    d3.axisBottom(x).ticks(5).tickFormat(d => d >= 1000 ? (d/1000).toFixed(0)+'k' : d)
+  ).call(g => {
+    g.select('.domain').attr('stroke','var(--border)');
+    g.selectAll('text').attr('fill','var(--muted)').attr('font-family','IBM Plex Mono').attr('font-size','10px');
+    g.selectAll('line').attr('stroke','var(--border)');
+  });
+}
+
+// ══════════════════════════════════════════════════════════════════════════
+// CH 7 — WHAT ARE THE ODDS
+// ══════════════════════════════════════════════════════════════════════════
+let showerProbs = null;
+
+(async () => {
+  try {
+    showerProbs = await fetchData('shower_probs.json');
+    populateRegions();
+    updateOdds();
+  } catch(e) { console.warn('Shower probs load failed:', e); }
+})();
+
+function populateRegions() {
+  const sel = document.getElementById('region-select');
+  // Sort by all_time shower probability (highest risk first)
+  const areas = Object.keys(showerProbs).sort((a, b) =>
+    (showerProbs[b].shower?.all_time || 0) - (showerProbs[a].shower?.all_time || 0)
+  );
+  areas.forEach(area => {
+    const opt = document.createElement('option');
+    opt.value = area;
+    opt.textContent = area;
+    if (area === 'Confrontation Line') opt.selected = true;
+    sel.appendChild(opt);
+  });
+}
+
+function updateOdds() {
+  if (!showerProbs) return;
+  const region = document.getElementById('region-select').value;
+  const activity = document.querySelector('.activity-btn.active')?.dataset.activity || 'shower';
+  const probs = showerProbs[region]?.[activity];
+  if (!probs) return;
+
+  const allTime = probs.all_time;
+  const sinceOct7 = probs.since_oct7;
+  const display = sinceOct7 > 0 ? sinceOct7 : allTime;
+
+  const numEl = document.getElementById('odds-number');
+  const pctStr = (display * 100).toFixed(1) + '%';
+  numEl.textContent = pctStr;
+  numEl.style.color = display > 0.5 ? 'var(--red)' : display > 0.15 ? 'var(--accent)' : '#fff';
+
+  document.getElementById('odds-alltime').textContent = fmtPct(allTime);
+  document.getElementById('odds-oct7').textContent = fmtPct(sinceOct7);
+}
+
+document.getElementById('region-select')?.addEventListener('change', updateOdds);
+document.getElementById('activity-grid')?.addEventListener('click', function(e) {
+  const btn = e.target.closest('.activity-btn');
+  if (!btn) return;
+  document.querySelectorAll('.activity-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  updateOdds();
+});
+
+// ══════════════════════════════════════════════════════════════════════════
+// IRON DOME INTERCEPTION ANIMATION
+// Canvas-based animation showing missile arcs being intercepted mid-air.
+// Missiles: red arcs from screen edges. Interceptors: blue arcs rising from
+// city. Explosions: gold/white burst at interception point.
+// ══════════════════════════════════════════════════════════════════════════
+(function ironDomeAnimation() {
+  const canvas = document.getElementById('iron-dome-canvas');
+  if (!canvas) return;
+  const ctx = canvas.getContext('2d');
+
+  // Resize canvas pixel buffer to match its CSS size
+  function resize() {
+    const rect = canvas.getBoundingClientRect();
+    canvas.width = Math.round(rect.width);
+    canvas.height = Math.round(rect.height);
+  }
+  resize();
+  window.addEventListener('resize', resize, { passive: true });
+
+  // ── Stars ──────────────────────────────────────────────────────────────
+  // Normalized coords (0–1). Upper 75% of screen only.
+  const STARS = Array.from({ length: 220 }, () => ({
+    x: Math.random(),
+    y: Math.random() * 0.75,
+    r: Math.random() * 1.0 + 0.2,
+    alpha: Math.random() * 0.45 + 0.12,
+    phase: Math.random() * Math.PI * 2  // for twinkle
+  }));
+
+  // ── City silhouette ─────────────────────────────────────────────────────
+  // Each entry: [normalised_x, normalised_width, normalised_height]
+  const BUILDINGS = [
+    [0.00,0.030,0.055],[0.03,0.018,0.095],[0.05,0.035,0.048],
+    [0.09,0.025,0.085],[0.12,0.045,0.065],[0.17,0.018,0.040],
+    [0.20,0.038,0.110],[0.24,0.028,0.075],[0.27,0.055,0.095],
+    [0.33,0.028,0.055],[0.36,0.048,0.130],[0.41,0.038,0.080],
+    [0.45,0.025,0.065],[0.48,0.058,0.120],[0.54,0.035,0.070],
+    [0.58,0.048,0.100],[0.63,0.028,0.055],[0.66,0.055,0.140],
+    [0.72,0.038,0.082],[0.76,0.048,0.115],[0.81,0.028,0.062],
+    [0.84,0.048,0.095],[0.89,0.038,0.058],[0.93,0.065,0.078]
+  ];
+  const GROUND_Y = 0.83; // normalised y of city roofline baseline
+
+  // Iron Dome battery positions (normalised x along ground)
+  const BATTERIES = [0.14, 0.33, 0.52, 0.71, 0.88];
+
+  // ── Quadratic Bezier helpers ───────────────────────────────────────────
+  function bezierQ(t, p0, cp, p1) {
+    const mt = 1 - t;
+    return mt * mt * p0 + 2 * mt * t * cp + t * t * p1;
+  }
+
+  // ── State ──────────────────────────────────────────────────────────────
+  let projectiles = [];  // { type, sx, sy, ex, ey, cpx, cpy, duration, startTime, t, trail, done, intercepted }
+  let explosions  = [];  // { x, y, startTime, t, done, particles }
+
+  // ── Spawn one interception event ───────────────────────────────────────
+  // Picks a random interception point in the sky, fires a missile toward it
+  // from an edge, then after a delay launches an interceptor from the nearest
+  // battery position on the ground.
+  function spawnEvent() {
+    // Interception point in upper-middle sky (normalised)
+    const intercX = 0.20 + Math.random() * 0.60;
+    const intercY = 0.12 + Math.random() * 0.38;
+
+    // Missile origin: random edge (left, right, or top corners)
+    const side = Math.random();
+    let msX, msY;
+    if (side < 0.42) {
+      msX = -0.06;
+      msY = 0.04 + Math.random() * 0.42;
+    } else if (side < 0.84) {
+      msX = 1.06;
+      msY = 0.04 + Math.random() * 0.42;
+    } else {
+      // Top edge, angled inward
+      msX = 0.05 + Math.random() * 0.90;
+      msY = -0.06;
+    }
+
+    // Missile Bezier control: arc toward interception (dip below straight line)
+    const msCpX = (msX + intercX) * 0.5 + (Math.random() - 0.5) * 0.12;
+    const msCpY = Math.min(msY, intercY) - 0.06 - Math.random() * 0.10;
+
+    const msDuration = 2600 + Math.random() * 1600; // 2.6–4.2 s
+
+    // Register missile projectile
+    const missileEntry = {
+      type: 'missile',
+      sx: msX, sy: msY,
+      ex: intercX, ey: intercY,
+      cpx: msCpX, cpy: msCpY,
+      duration: msDuration,
+      startTime: null, t: 0,
+      trail: [], done: false, intercepted: false
+    };
+    projectiles.push(missileEntry);
+
+    // Interceptor launches from nearest battery after a delay
+    const intDelay    = msDuration * 0.36;
+    const intDuration = msDuration * 0.60;
+
+    // Nearest battery (normalised x)
+    const battX = BATTERIES.reduce((best, bx) =>
+      Math.abs(bx - intercX) < Math.abs(best - intercX) ? bx : best, BATTERIES[0]);
+
+    const intCpX = battX + (intercX - battX) * 0.35 + (Math.random() - 0.5) * 0.05;
+    const intCpY = intercY - 0.12 - Math.random() * 0.08; // soar above then arc down
+
+    setTimeout(() => {
+      projectiles.push({
+        type: 'interceptor',
+        sx: battX, sy: GROUND_Y,
+        ex: intercX, ey: intercY,
+        cpx: intCpX, cpy: intCpY,
+        duration: intDuration,
+        startTime: null, t: 0,
+        trail: [], done: false, intercepted: false
+      });
+
+      // Detonate at interception time
+      setTimeout(() => {
+        explosions.push({
+          x: intercX, y: intercY,
+          startTime: null, t: 0, done: false,
+          particles: Array.from({ length: 28 }, () => ({
+            angle: Math.random() * Math.PI * 2,
+            speed: 0.007 + Math.random() * 0.022,
+            r: 0.7 + Math.random() * 1.8
+          }))
+        });
+        // Mark missile as intercepted so it vanishes
+        missileEntry.intercepted = true;
+      }, intDuration);
+    }, intDelay);
+  }
+
+  // ── Main draw loop ─────────────────────────────────────────────────────
+  let lastSpawn = -Infinity;
+  const SPAWN_INTERVAL = 2600; // ms between new events
+
+  function draw(ts) {
+    const W = canvas.width, H = canvas.height;
+    ctx.clearRect(0, 0, W, H);
+    ctx.globalAlpha = 1;
+
+    // Stars — subtle twinkle
+    STARS.forEach(s => {
+      const twinkle = 0.72 + 0.28 * Math.sin(ts * 0.00085 + s.phase);
+      ctx.beginPath();
+      ctx.arc(s.x * W, s.y * H, s.r, 0, Math.PI * 2);
+      ctx.fillStyle = `rgba(195,210,235,${s.alpha * twinkle})`;
+      ctx.fill();
+    });
+
+    // Spawn new events on interval
+    if (ts - lastSpawn > SPAWN_INTERVAL) {
+      spawnEvent();
+      lastSpawn = ts;
+    }
+
+    // ── Projectiles ──────────────────────────────────────────────────────
+    projectiles = projectiles.filter(p => !p.done);
+
+    projectiles.forEach(p => {
+      if (!p.startTime) p.startTime = ts;
+      p.t = Math.min((ts - p.startTime) / p.duration, 1);
+
+      const isMissile = p.type === 'missile';
+      const px = bezierQ(p.t, p.sx, p.cpx, p.ex);
+      const py = bezierQ(p.t, p.sy, p.cpy, p.ey);
+
+      // Record trail position
+      p.trail.push({ x: px, y: py, alpha: 1 });
+      // Fade trail history
+      p.trail.forEach(pt => { pt.alpha *= 0.89; });
+      p.trail = p.trail.filter(pt => pt.alpha > 0.018);
+
+      // Draw trail segments
+      const trailRGB = isMissile ? '214,68,49' : '74,158,255';
+      for (let i = 1; i < p.trail.length; i++) {
+        const a = p.trail[i - 1], b = p.trail[i];
+        ctx.beginPath();
+        ctx.moveTo(a.x * W, a.y * H);
+        ctx.lineTo(b.x * W, b.y * H);
+        ctx.strokeStyle = `rgba(${trailRGB},${b.alpha * 0.78})`;
+        ctx.lineWidth  = isMissile ? 1.6 : 1.1;
+        ctx.lineCap    = 'round';
+        ctx.stroke();
+      }
+
+      // Draw glowing head (only while active)
+      if (p.t < 1 && !p.intercepted) {
+        const headColor = isMissile ? '#ff7675' : '#74b9ff';
+        const headR     = isMissile ? 5 : 3.5;
+        const grad = ctx.createRadialGradient(px * W, py * H, 0, px * W, py * H, headR * 2.5);
+        grad.addColorStop(0, headColor);
+        grad.addColorStop(1, 'rgba(0,0,0,0)');
+        ctx.beginPath();
+        ctx.arc(px * W, py * H, headR * 2.5, 0, Math.PI * 2);
+        ctx.fillStyle = grad;
+        ctx.fill();
+
+        // Solid core
+        ctx.beginPath();
+        ctx.arc(px * W, py * H, headR * 0.55, 0, Math.PI * 2);
+        ctx.fillStyle = '#fff';
+        ctx.globalAlpha = 0.85;
+        ctx.fill();
+        ctx.globalAlpha = 1;
+      }
+
+      if (p.t >= 1 || p.intercepted) p.done = true;
+    });
+
+    // ── Explosions ───────────────────────────────────────────────────────
+    explosions = explosions.filter(e => !e.done);
+
+    explosions.forEach(exp => {
+      if (!exp.startTime) exp.startTime = ts;
+      exp.t = Math.min((ts - exp.startTime) / 1600, 1);
+
+      const ex = exp.x * W, ey = exp.y * H;
+      const t  = exp.t;
+      const fadeOut = 1 - t;
+
+      // Core flash — bright white → gold, shrinks over time
+      if (t < 0.55) {
+        const coreR = (1 - t) * 22 + t * 8;
+        const grad  = ctx.createRadialGradient(ex, ey, 0, ex, ey, coreR);
+        grad.addColorStop(0,   `rgba(255,255,255,${(1 - t) * 0.98})`);
+        grad.addColorStop(0.35,`rgba(232,184,75,${(1 - t) * 0.85})`);
+        grad.addColorStop(1,   'rgba(214,48,49,0)');
+        ctx.beginPath();
+        ctx.arc(ex, ey, coreR, 0, Math.PI * 2);
+        ctx.fillStyle = grad;
+        ctx.fill();
+      }
+
+      // Expanding shockwave ring
+      const ringR = t * 62;
+      ctx.beginPath();
+      ctx.arc(ex, ey, ringR, 0, Math.PI * 2);
+      ctx.strokeStyle = `rgba(232,184,75,${Math.max(0, 0.55 - t * 0.65)})`;
+      ctx.lineWidth   = 1.2;
+      ctx.stroke();
+
+      // Secondary debris ring
+      const ring2R = t * 38;
+      ctx.beginPath();
+      ctx.arc(ex, ey, ring2R, 0, Math.PI * 2);
+      ctx.strokeStyle = `rgba(255,255,255,${Math.max(0, 0.30 - t * 0.40)})`;
+      ctx.lineWidth   = 0.6;
+      ctx.stroke();
+
+      // Debris particles
+      exp.particles.forEach(part => {
+        const dist = t * part.speed * W;
+        const px2  = ex + Math.cos(part.angle) * dist;
+        const py2  = ey + Math.sin(part.angle) * dist;
+        const pr   = part.r * (1 - t * 0.7);
+        if (pr <= 0) return;
+        const pRGB = t < 0.35 ? '232,184,75' : '214,68,49';
+        ctx.beginPath();
+        ctx.arc(px2, py2, pr, 0, Math.PI * 2);
+        ctx.fillStyle = `rgba(${pRGB},${fadeOut * 0.88})`;
+        ctx.fill();
+      });
+
+      if (t >= 1) exp.done = true;
+    });
+
+    // ── City silhouette ──────────────────────────────────────────────────
+    const groundPx = GROUND_Y * H;
+
+    // Battery glow halos (Iron Dome launch sites)
+    BATTERIES.forEach(bx => {
+      const bgx = bx * W;
+      const battGrad = ctx.createRadialGradient(bgx, groundPx, 0, bgx, groundPx, 48);
+      battGrad.addColorStop(0, 'rgba(74,158,255,0.22)');
+      battGrad.addColorStop(1, 'rgba(74,158,255,0)');
+      ctx.beginPath();
+      ctx.arc(bgx, groundPx, 48, 0, Math.PI * 2);
+      ctx.fillStyle = battGrad;
+      ctx.fill();
+
+      // Small battery indicator dot
+      ctx.beginPath();
+      ctx.arc(bgx, groundPx - 3, 2.5, 0, Math.PI * 2);
+      ctx.fillStyle = 'rgba(74,158,255,0.80)';
+      ctx.fill();
+    });
+
+    // Skyline polygon
+    ctx.save();
+    ctx.beginPath();
+    ctx.moveTo(0, H);
+    ctx.lineTo(0, groundPx);
+    BUILDINGS.forEach(([bx, bw, bh]) => {
+      const bpx = bx * W, bpw = bw * W, bph = bh * H;
+      ctx.lineTo(bpx,         groundPx);
+      ctx.lineTo(bpx,         groundPx - bph);
+      ctx.lineTo(bpx + bpw,   groundPx - bph);
+      ctx.lineTo(bpx + bpw,   groundPx);
+    });
+    ctx.lineTo(W, groundPx);
+    ctx.lineTo(W, H);
+    ctx.closePath();
+    ctx.fillStyle = '#07070a';
+    ctx.fill();
+
+    // Skyline edge highlight
+    ctx.beginPath();
+    ctx.moveTo(0, groundPx);
+    BUILDINGS.forEach(([bx, bw, bh]) => {
+      const bpx = bx * W, bpw = bw * W, bph = bh * H;
+      ctx.lineTo(bpx,       groundPx);
+      ctx.lineTo(bpx,       groundPx - bph);
+      ctx.lineTo(bpx + bpw, groundPx - bph);
+      ctx.lineTo(bpx + bpw, groundPx);
+    });
+    ctx.lineTo(W, groundPx);
+    ctx.strokeStyle = 'rgba(37,37,58,0.90)';
+    ctx.lineWidth   = 0.8;
+    ctx.stroke();
+    ctx.restore();
+
+    requestAnimationFrame(draw);
+  }
+
+  // Kick off immediately with one event so there's no blank period
+  spawnEvent();
+  lastSpawn = performance.now();
+  requestAnimationFrame(draw);
+})();
+</script>
+</body>
+</html>

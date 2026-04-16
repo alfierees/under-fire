@@ -1,0 +1,17 @@
+# Large raw/analysis data files — not needed by the website
+data/raw/data2.json
+data/processed/alerts_clean.json
+data/processed/alerts_clean.csv
+data/processed/alerts_clean.xlsx
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+.env
+
+# macOS
+.DS_Store
+
+# Editor
+.vscode/

@@ -1,0 +1,757 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Under Fire — Design Brief & Style Guide</title>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400&family=IBM+Plex+Mono:wght@300;400;500&family=IBM+Plex+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #07070a; --surface: #0f0f14; --surface2: #16161e;
+      --border: #252530; --accent: #e8b84b; --red: #d63031;
+      --blue: #4a9eff; --orange: #f39c12; --purple: #c678dd;
+      --text: #c8c8d8; --muted: #5a5a70; --dim: #2a2a38;
+    }
+    * { margin:0; padding:0; box-sizing:border-box; }
+    body { background:#1a1a20; font-family:'IBM Plex Sans',sans-serif; font-weight:300; color:#c8c8d8; }
+
+    /* ── PAGE CHROME ── */
+    .brief-nav {
+      background:#0d0d12; border-bottom:2px solid var(--accent);
+      padding:1rem 3rem; display:flex; align-items:center; justify-content:space-between;
+      position:sticky; top:0; z-index:100;
+    }
+    .brief-nav-title { font-family:'IBM Plex Mono',monospace; font-size:.75rem; letter-spacing:.2em; text-transform:uppercase; color:var(--accent); }
+    .brief-nav-sub { font-family:'IBM Plex Mono',monospace; font-size:.6rem; color:var(--muted); letter-spacing:.1em; }
+
+    .brief-section { padding:4rem 4rem; border-bottom:1px solid #252530; max-width:1300px; margin:0 auto; }
+    .brief-heading { font-family:'IBM Plex Mono',monospace; font-size:.6rem; letter-spacing:.25em; text-transform:uppercase; color:var(--red); margin-bottom:1.5rem; padding-bottom:.75rem; border-bottom:1px solid var(--dim); }
+    .brief-title { font-family:'Playfair Display',serif; font-size:2rem; font-weight:700; color:#fff; margin-bottom:1rem; }
+    .brief-body { font-size:.88rem; color:var(--muted); line-height:1.85; max-width:800px; }
+    .brief-body p { margin-bottom:.75rem; }
+
+    /* ── COLOUR SYSTEM ── */
+    .color-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(160px,1fr)); gap:1rem; margin-top:1.5rem; }
+    .color-chip { border-radius:4px; overflow:hidden; border:1px solid rgba(255,255,255,0.06); }
+    .color-swatch { height:80px; }
+    .color-meta { padding:.75rem; background:rgba(0,0,0,0.4); }
+    .color-name { font-family:'IBM Plex Mono',monospace; font-size:.65rem; color:#fff; font-weight:500; }
+    .color-hex { font-family:'IBM Plex Mono',monospace; font-size:.6rem; color:var(--muted); margin-top:.2rem; }
+    .color-role { font-family:'IBM Plex Sans',sans-serif; font-size:.7rem; color:var(--muted); margin-top:.3rem; line-height:1.4; }
+
+    /* ── TYPOGRAPHY ── */
+    .type-sample { margin-bottom:2.5rem; padding:2rem; background:var(--bg); border:1px solid var(--border); border-radius:4px; }
+    .type-label { font-family:'IBM Plex Mono',monospace; font-size:.58rem; letter-spacing:.16em; text-transform:uppercase; color:var(--muted); margin-bottom:1rem; }
+    .type-specs { font-family:'IBM Plex Mono',monospace; font-size:.58rem; color:var(--dim); margin-top:.75rem; }
+
+    /* ── SECTION MOCKUPS ── */
+    .mockup-wrap { margin-top:2rem; border:1px solid var(--border); border-radius:4px; overflow:hidden; }
+    .mockup-label { background:#0d0d12; padding:.6rem 1rem; font-family:'IBM Plex Mono',monospace; font-size:.58rem; letter-spacing:.1em; text-transform:uppercase; color:var(--muted); border-bottom:1px solid var(--border); }
+
+    /* Hero mockup */
+    .mock-hero {
+      background:var(--bg);
+      background-image: radial-gradient(ellipse at 80% 30%, rgba(214,48,49,.18) 0%, transparent 55%),
+                        radial-gradient(ellipse at 20% 75%, rgba(74,158,255,.10) 0%, transparent 50%);
+      padding:5rem 5rem 4rem; min-height:340px; position:relative;
+    }
+    .mock-nav { position:absolute; top:0; left:0; right:0; height:44px; background:rgba(7,7,10,0.9); border-bottom:1px solid var(--border); display:flex; align-items:center; justify-content:space-between; padding:0 2rem; }
+    .mock-nav-brand { font-family:'IBM Plex Mono',monospace; font-size:.65rem; letter-spacing:.18em; text-transform:uppercase; color:var(--accent); }
+    .mock-nav-links { display:flex; gap:1.5rem; }
+    .mock-nav-link { font-family:'IBM Plex Mono',monospace; font-size:.52rem; letter-spacing:.1em; text-transform:uppercase; color:var(--muted); }
+    .mock-nav-badge { font-family:'IBM Plex Mono',monospace; font-size:.52rem; padding:.2rem .6rem; border:1px solid rgba(232,184,75,.3); color:var(--accent); border-radius:2px; }
+    .mock-eyebrow { font-family:'IBM Plex Mono',monospace; font-size:.58rem; letter-spacing:.2em; text-transform:uppercase; color:var(--red); margin-bottom:1.2rem; margin-top:2rem; }
+    .mock-h1 { font-family:'Playfair Display',serif; font-size:6rem; font-weight:900; line-height:.88; letter-spacing:-.03em; color:#fff; margin-bottom:1.5rem; }
+    .mock-subtitle { font-family:'IBM Plex Mono',monospace; font-size:.72rem; color:var(--muted); line-height:1.8; max-width:460px; margin-bottom:2.5rem; }
+    .mock-stats { display:flex; gap:4rem; }
+    .mock-stat-num { font-family:'Playfair Display',serif; font-size:2.4rem; font-weight:900; color:#fff; line-height:1; }
+    .mock-stat-num span { color:var(--accent); font-size:1.4rem; }
+    .mock-stat-label { font-family:'IBM Plex Mono',monospace; font-size:.52rem; letter-spacing:.12em; text-transform:uppercase; color:var(--muted); margin-top:.4rem; }
+
+    /* Timeline mockup */
+    .mock-timeline { background:var(--surface); padding:3.5rem 4rem 2.5rem; }
+    .mock-section-label { font-family:'IBM Plex Mono',monospace; font-size:.55rem; letter-spacing:.2em; text-transform:uppercase; color:var(--red); margin-bottom:.75rem; }
+    .mock-section-title { font-family:'Playfair Display',serif; font-size:2.2rem; font-weight:700; color:#fff; margin-bottom:.75rem; }
+    .mock-section-desc { font-size:.82rem; color:var(--muted); line-height:1.75; max-width:600px; margin-bottom:1.5rem; }
+    .mock-finding-row { display:flex; gap:1rem; margin-bottom:1.5rem; }
+    .mock-finding { flex:1; background:rgba(0,0,0,.3); border-left:3px solid var(--red); padding:1rem 1.2rem; border-radius:0 4px 4px 0; }
+    .mock-finding.blue { border-left-color:var(--blue); }
+    .mock-finding.gold { border-left-color:var(--accent); }
+    .mock-finding-head { font-family:'IBM Plex Mono',monospace; font-size:.52rem; letter-spacing:.08em; text-transform:uppercase; color:var(--muted); margin-bottom:.3rem; }
+    .mock-finding-num { font-family:'Playfair Display',serif; font-size:1.5rem; font-weight:700; color:#fff; }
+    .mock-finding-sub { font-size:.75rem; color:var(--muted); margin-top:.2rem; }
+    /* Chart placeholder */
+    .chart-placeholder { height:240px; background:rgba(0,0,0,.3); border:1px dashed var(--dim); border-radius:2px; display:flex; align-items:center; justify-content:center; position:relative; overflow:hidden; }
+    .chart-placeholder-label { font-family:'IBM Plex Mono',monospace; font-size:.62rem; letter-spacing:.12em; text-transform:uppercase; color:var(--dim); }
+    /* Fake timeline bars */
+    .fake-timeline { position:absolute; bottom:0; left:0; right:0; height:100%; display:flex; align-items:flex-end; padding:20px 20px 30px; gap:2px; }
+    .fake-bar { flex:1; border-radius:1px 1px 0 0; opacity:.7; }
+
+    /* Map mockup */
+    .mock-map-section { background:var(--bg); padding:3.5rem 4rem 0; }
+    .mock-map { height:360px; background:#111318; border:1px solid var(--border); border-radius:4px; position:relative; overflow:hidden; margin-top:1.5rem; }
+    .mock-map-bg { position:absolute; inset:0; background: radial-gradient(circle at 50% 50%, rgba(74,158,255,.08) 0%, transparent 70%); }
+    .mock-map-overlay { position:absolute; bottom:1.5rem; left:1.5rem; background:rgba(7,7,10,.88); border:1px solid var(--border); padding:1.2rem 1.5rem; border-radius:4px; }
+    .mock-map-clock { font-family:'Playfair Display',serif; font-size:2rem; font-weight:700; color:#fff; }
+    .mock-map-label { font-family:'IBM Plex Mono',monospace; font-size:.5rem; letter-spacing:.12em; text-transform:uppercase; color:var(--muted); margin-top:.2rem; margin-bottom:.8rem; }
+    .mock-map-count { font-family:'Playfair Display',serif; font-size:1.2rem; font-weight:700; color:var(--red); }
+    .mock-map-controls { position:absolute; bottom:1.5rem; right:1.5rem; display:flex; gap:.5rem; }
+    .mock-map-btn { font-family:'IBM Plex Mono',monospace; font-size:.55rem; letter-spacing:.08em; text-transform:uppercase; padding:.4rem 1rem; border:1px solid var(--border); background:rgba(7,7,10,.85); color:var(--text); border-radius:2px; }
+    .mock-map-btn.play { border-color:var(--red); color:var(--red); }
+    /* Fake dot cluster */
+    .map-dots { position:absolute; inset:0; }
+    .map-dot { position:absolute; border-radius:50%; }
+
+    /* Fronts mockup */
+    .mock-fronts { background:var(--surface); padding:3.5rem 4rem 2.5rem; }
+    .actor-legend { display:flex; gap:1.5rem; flex-wrap:wrap; margin-bottom:1.5rem; }
+    .actor-tag { display:flex; align-items:center; gap:.5rem; font-family:'IBM Plex Mono',monospace; font-size:.58rem; letter-spacing:.06em; color:var(--muted); }
+    .actor-dot { width:10px; height:10px; border-radius:2px; flex-shrink:0; }
+    /* Fake stacked area chart */
+    .fake-stacked { height:220px; background:rgba(0,0,0,.3); border-radius:2px; position:relative; overflow:hidden; display:flex; align-items:flex-end; padding-bottom:1px; }
+    .stacked-bar-group { display:flex; flex-direction:column-reverse; }
+
+    /* Patterns mockup */
+    .mock-patterns { background:var(--bg); padding:3.5rem 4rem 2.5rem; }
+    .patterns-grid { display:grid; grid-template-columns:1fr 1fr; gap:3rem; margin-top:1.5rem; }
+    .chart-title-sm { font-family:'IBM Plex Mono',monospace; font-size:.58rem; letter-spacing:.14em; text-transform:uppercase; color:var(--text); margin-bottom:1rem; }
+    .fake-clock { width:240px; height:240px; border-radius:50%; background:rgba(0,0,0,.3); border:1px dashed var(--dim); margin:0 auto; display:flex; align-items:center; justify-content:center; position:relative; overflow:hidden; }
+    .clock-inner { width:70px; height:70px; border-radius:50%; background:var(--bg); z-index:2; display:flex; align-items:center; justify-content:center; }
+    .clock-inner-label { font-family:'IBM Plex Mono',monospace; font-size:.5rem; color:var(--muted); }
+
+    /* Odds mockup */
+    .mock-odds { background:var(--bg); padding:3.5rem 4rem 2.5rem; }
+    .odds-layout { display:grid; grid-template-columns:1fr 1fr; gap:3rem; margin-top:2rem; }
+    .odds-result-box { background:var(--surface); border:1px solid var(--border); padding:2.5rem; border-radius:4px; display:flex; flex-direction:column; align-items:center; justify-content:center; min-height:260px; }
+    .odds-big { font-family:'Playfair Display',serif; font-size:5rem; font-weight:900; color:var(--red); line-height:1; }
+    .odds-label { font-family:'IBM Plex Mono',monospace; font-size:.58rem; letter-spacing:.14em; text-transform:uppercase; color:var(--muted); margin-top:.5rem; margin-bottom:2rem; }
+    .odds-row { display:flex; justify-content:space-between; width:100%; padding:.5rem 0; border-bottom:1px solid var(--dim); }
+    .odds-row-label { font-family:'IBM Plex Mono',monospace; font-size:.55rem; color:var(--muted); }
+    .odds-row-val { font-family:'Playfair Display',serif; font-size:1rem; font-weight:700; color:#fff; }
+    .odds-row-val.red { color:var(--red); }
+    .mock-select { width:100%; background:var(--surface2); border:1px solid var(--border); color:var(--text); font-family:'IBM Plex Mono',monospace; font-size:.68rem; padding:.65rem 1rem; border-radius:2px; margin-bottom:1.2rem; }
+    .activity-grid { display:grid; grid-template-columns:1fr 1fr; gap:.4rem; }
+    .activity-btn { background:var(--surface2); border:1px solid var(--border); color:var(--muted); font-family:'IBM Plex Mono',monospace; font-size:.55rem; padding:.65rem .75rem; border-radius:2px; }
+    .activity-btn.active { border-color:var(--accent); color:var(--accent); background:rgba(232,184,75,.08); }
+
+    /* Scale cards */
+    .scale-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:1.5rem; margin-top:1.5rem; }
+    .scale-card { background:var(--surface); border:1px solid var(--border); border-left:3px solid var(--red); padding:1.8rem; border-radius:4px; }
+    .scale-card.blue { border-left-color:var(--blue); }
+    .scale-card.gold { border-left-color:var(--accent); }
+    .scale-big { font-family:'Playfair Display',serif; font-size:2.5rem; font-weight:900; color:#fff; }
+    .scale-unit { font-family:'IBM Plex Mono',monospace; font-size:.55rem; letter-spacing:.12em; text-transform:uppercase; color:var(--accent); margin:.3rem 0 .6rem; }
+    .scale-desc { font-size:.78rem; color:var(--muted); line-height:1.65; }
+
+    /* Footer mockup */
+    .mock-footer { background:var(--bg); border-top:1px solid var(--border); padding:2rem 4rem; display:flex; justify-content:space-between; flex-wrap:wrap; gap:1rem; }
+    .footer-left { font-family:'IBM Plex Mono',monospace; font-size:.55rem; color:var(--dim); text-transform:uppercase; letter-spacing:.1em; }
+    .footer-credit { font-family:'IBM Plex Mono',monospace; font-size:.58rem; color:var(--muted); }
+    .footer-credit span { color:var(--accent); }
+
+    /* ── DESIGN NOTES ── */
+    .notes-grid { display:grid; grid-template-columns:1fr 1fr; gap:1.5rem; margin-top:1.5rem; }
+    .note-card { background:var(--bg); border:1px solid var(--border); border-radius:4px; padding:1.5rem; }
+    .note-card-title { font-family:'IBM Plex Mono',monospace; font-size:.62rem; letter-spacing:.12em; text-transform:uppercase; color:var(--accent); margin-bottom:.75rem; }
+    .note-card-body { font-size:.82rem; color:var(--muted); line-height:1.75; }
+    .note-card-body li { margin-bottom:.4rem; margin-left:1rem; }
+
+    /* Component specs table */
+    .spec-table { width:100%; border-collapse:collapse; margin-top:1.5rem; font-size:.8rem; }
+    .spec-table th { font-family:'IBM Plex Mono',monospace; font-size:.55rem; letter-spacing:.12em; text-transform:uppercase; color:var(--muted); text-align:left; padding:.75rem 1rem; border-bottom:1px solid var(--border); }
+    .spec-table td { padding:.75rem 1rem; border-bottom:1px solid var(--dim); color:var(--text); vertical-align:top; }
+    .spec-table td:first-child { font-family:'IBM Plex Mono',monospace; font-size:.72rem; color:var(--accent); }
+    .spec-table tr:hover td { background:rgba(255,255,255,.02); }
+
+    /* Improvement areas */
+    .improvement-item { background:var(--bg); border:1px solid var(--border); border-radius:4px; padding:1.5rem 2rem; margin-bottom:1rem; display:flex; gap:1.5rem; align-items:flex-start; }
+    .improvement-num { font-family:'Playfair Display',serif; font-size:2rem; font-weight:900; color:var(--dim); line-height:1; flex-shrink:0; width:40px; }
+    .improvement-title { font-family:'IBM Plex Mono',monospace; font-size:.7rem; letter-spacing:.1em; text-transform:uppercase; color:var(--text); margin-bottom:.4rem; }
+    .improvement-desc { font-size:.82rem; color:var(--muted); line-height:1.7; }
+    .improvement-prompt { margin-top:.6rem; background:rgba(232,184,75,.06); border:1px solid rgba(232,184,75,.15); border-radius:2px; padding:.6rem .8rem; font-family:'IBM Plex Mono',monospace; font-size:.62rem; color:var(--accent); line-height:1.6; }
+    .improvement-prompt::before { content:'Stitch prompt → '; color:var(--muted); }
+
+    code { font-family:'IBM Plex Mono',monospace; font-size:.75rem; background:rgba(255,255,255,.05); padding:.1rem .4rem; border-radius:2px; color:var(--accent); }
+  </style>
+</head>
+<body>
+
+<!-- Brief Header -->
+<div class="brief-nav">
+  <div>
+    <div class="brief-nav-title">Under Fire — Design Brief & Style Guide</div>
+    <div class="brief-nav-sub">For use with Stitch, Figma, or any AI design tool — April 2026</div>
+  </div>
+  <div style="font-family:'IBM Plex Mono',monospace;font-size:.58rem;color:var(--muted);">Built by Alfie Rees · Data: RocketAlert.live</div>
+</div>
+
+<!-- ═══════════════════════════════════════ -->
+<!-- 1. OVERVIEW                            -->
+<!-- ═══════════════════════════════════════ -->
+<div class="brief-section">
+  <div class="brief-heading">01 — Project Overview</div>
+  <div class="brief-title">What is Under Fire?</div>
+  <div class="brief-body">
+    <p><strong style="color:#fff;">Under Fire</strong> is a single-page, scrollytelling data visualisation website tracking rocket, missile, and drone alerts across Israel from January 2020 to March 2026. It contains 142,837 individually recorded alerts. The site is built by Alfie Rees as a data science project.</p>
+    <p>The tone is <strong style="color:#fff;">editorial, neutral, and data-first</strong> — inspired by data journalism outlets like The Pudding, NYT Graphics, and Guardian Data. No political commentary; purely data-driven. The audience is general public following the conflict who want to understand the scale of what's happened through data.</p>
+    <p>The existing design uses a <strong style="color:#fff;">dark editorial aesthetic</strong> — near-black backgrounds, large serif headlines (Playfair Display 900), monospace data labels (IBM Plex Mono), and restrained colour accents. The goal of this brief is to iteratively improve the UI while preserving that core identity.</p>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════ -->
+<!-- 2. COLOUR SYSTEM                       -->
+<!-- ═══════════════════════════════════════ -->
+<div class="brief-section">
+  <div class="brief-heading">02 — Colour System</div>
+  <div class="brief-title">Exact Colour Tokens</div>
+  <div class="brief-body"><p>These are the precise CSS variables used throughout the site. All new design work must use these values — do not introduce new colours without first fitting them into this palette.</p></div>
+  <div class="color-grid">
+    <div class="color-chip"><div class="color-swatch" style="background:#07070a;border-bottom:1px solid #252530"></div><div class="color-meta"><div class="color-name">--bg</div><div class="color-hex">#07070a</div><div class="color-role">Page background. Near-black with a very faint blue-black tone.</div></div></div>
+    <div class="color-chip"><div class="color-swatch" style="background:#0f0f14"></div><div class="color-meta"><div class="color-name">--surface</div><div class="color-hex">#0f0f14</div><div class="color-role">Section backgrounds (alternates with --bg to create depth between sections).</div></div></div>
+    <div class="color-chip"><div class="color-swatch" style="background:#16161e"></div><div class="color-meta"><div class="color-name">--surface2</div><div class="color-hex">#16161e</div><div class="color-role">Card backgrounds, input fields, inner containers.</div></div></div>
+    <div class="color-chip"><div class="color-swatch" style="background:#252530"></div><div class="color-meta"><div class="color-name">--border</div><div class="color-hex">#252530</div><div class="color-role">All borders, dividers, and chart axes.</div></div></div>
+    <div class="color-chip"><div class="color-swatch" style="background:#e8b84b"></div><div class="color-meta"><div class="color-name">--accent</div><div class="color-hex">#e8b84b</div><div class="color-role">Gold. Primary accent — nav brand, labels, highlights, active states.</div></div></div>
+    <div class="color-chip"><div class="color-swatch" style="background:#d63031"></div><div class="color-meta"><div class="color-name">--red</div><div class="color-hex">#d63031</div><div class="color-role">Section labels, Hamas data, high-probability values, danger states.</div></div></div>
+    <div class="color-chip"><div class="color-swatch" style="background:#4a9eff"></div><div class="color-meta"><div class="color-name">--blue</div><div class="color-hex">#4a9eff</div><div class="color-role">Houthis data, cool/safe tones, secondary data colour.</div></div></div>
+    <div class="color-chip"><div class="color-swatch" style="background:#f39c12"></div><div class="color-meta"><div class="color-name">--orange</div><div class="color-hex">#f39c12</div><div class="color-role">Hezbollah data only.</div></div></div>
+    <div class="color-chip"><div class="color-swatch" style="background:#c678dd"></div><div class="color-meta"><div class="color-name">--purple</div><div class="color-hex">#c678dd</div><div class="color-role">Iran data only. The dominant actor (82k of 142k alerts).</div></div></div>
+    <div class="color-chip"><div class="color-swatch" style="background:#c8c8d8"></div><div class="color-meta"><div class="color-name">--text</div><div class="color-hex">#c8c8d8</div><div class="color-role">Body text, primary readable content.</div></div></div>
+    <div class="color-chip"><div class="color-swatch" style="background:#5a5a70"></div><div class="color-meta"><div class="color-name">--muted</div><div class="color-hex">#5a5a70</div><div class="color-role">Secondary text, descriptions, axis labels, chart annotations.</div></div></div>
+    <div class="color-chip"><div class="color-swatch" style="background:#2a2a38"></div><div class="color-meta"><div class="color-name">--dim</div><div class="color-hex">#2a2a38</div><div class="color-role">Chart grid lines, very subtle UI elements.</div></div></div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════ -->
+<!-- 3. TYPOGRAPHY                          -->
+<!-- ═══════════════════════════════════════ -->
+<div class="brief-section">
+  <div class="brief-heading">03 — Typography System</div>
+  <div class="brief-title">Three-Font Stack</div>
+  <div class="brief-body"><p>The site uses three fonts in strict roles. Never mix roles — a data label must always be IBM Plex Mono, a section title must always be Playfair Display.</p></div>
+
+  <div class="type-sample">
+    <div class="type-label">Display / Hero Title — Playfair Display 900</div>
+    <div style="font-family:'Playfair Display',serif;font-size:5rem;font-weight:900;color:#fff;line-height:.9;letter-spacing:-.03em;">UNDER<br>FIRE</div>
+    <div class="type-specs">font-family: 'Playfair Display' · weight: 900 · size: clamp(5rem,10vw,9rem) · letter-spacing: -0.03em · use: hero H1 only</div>
+  </div>
+
+  <div class="type-sample">
+    <div class="type-label">Section Title — Playfair Display 700</div>
+    <div style="font-family:'Playfair Display',serif;font-size:2.8rem;font-weight:700;color:#fff;line-height:1.1;letter-spacing:-.01em;">Six Years of Alerts</div>
+    <div class="type-specs">font-family: 'Playfair Display' · weight: 700 · size: clamp(2.4rem,3.5vw,3.4rem) · use: all section headings (h2)</div>
+  </div>
+
+  <div class="type-sample">
+    <div class="type-label">Data Numbers — Playfair Display 900</div>
+    <div style="font-family:'Playfair Display',serif;font-size:3rem;font-weight:900;color:#fff;line-height:1;">142,837<span style="color:var(--accent);font-size:1.8rem;">+</span></div>
+    <div class="type-specs">font-family: 'Playfair Display' · weight: 900 · size: 3rem (hero stats), 1.7rem (finding cards), 5.5rem (odds widget) · colour: #fff or --accent or --red</div>
+  </div>
+
+  <div class="type-sample">
+    <div class="type-label">Section Label — IBM Plex Mono 400 (uppercase)</div>
+    <div style="font-family:'IBM Plex Mono',monospace;font-size:.6rem;letter-spacing:.2em;text-transform:uppercase;color:var(--red);">01 — Timeline</div>
+    <div class="type-specs">font-family: 'IBM Plex Mono' · weight: 400 · size: 0.6rem · letter-spacing: 0.2em · colour: --red · use: all section chapter labels</div>
+  </div>
+
+  <div class="type-sample">
+    <div class="type-label">Data Labels / Axes — IBM Plex Mono 400</div>
+    <div style="font-family:'IBM Plex Mono',monospace;font-size:.68rem;letter-spacing:.12em;text-transform:uppercase;color:var(--text);">Chart Title · Axis Label · Nav Link</div>
+    <div style="font-family:'IBM Plex Mono',monospace;font-size:.6rem;color:var(--accent);letter-spacing:.1em;margin-top:.5rem;">142,837 alerts · 0.4KB · Active state</div>
+    <div class="type-specs">font-family: 'IBM Plex Mono' · weight: 300–500 · size: 0.55–0.75rem · use: all UI chrome, labels, badges, chart annotations, nav</div>
+  </div>
+
+  <div class="type-sample">
+    <div class="type-label">Body / Descriptions — IBM Plex Sans 300</div>
+    <div style="font-family:'IBM Plex Sans',sans-serif;font-weight:300;font-size:.88rem;color:var(--muted);line-height:1.8;">Six years of rocket, missile, and drone alerts across Israel — every single one recorded, mapped, and analysed. This is what the data looks like.</div>
+    <div class="type-specs">font-family: 'IBM Plex Sans' · weight: 300 · size: 0.85–0.95rem · colour: --muted · use: all paragraph/description text under section titles</div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════ -->
+<!-- 4. FULL SITE MOCKUP                    -->
+<!-- ═══════════════════════════════════════ -->
+<div class="brief-section">
+  <div class="brief-heading">04 — Full Site Layout (Annotated Mockup)</div>
+  <div class="brief-title">Current Design — Section by Section</div>
+  <div class="brief-body"><p>All 7 sections shown below as they currently render. These are accurate representations of the live site's layout, spacing, and visual hierarchy.</p></div>
+
+  <!-- HERO -->
+  <div class="mockup-wrap" style="margin-top:2rem;">
+    <div class="mockup-label">Section 1 — Hero / Counter</div>
+    <div class="mock-hero">
+      <div class="mock-nav">
+        <div class="mock-nav-brand">Under Fire</div>
+        <div class="mock-nav-links">
+          <span class="mock-nav-link">Timeline</span>
+          <span class="mock-nav-link">Oct 7</span>
+          <span class="mock-nav-link">The Fronts</span>
+          <span class="mock-nav-link">Patterns</span>
+          <span class="mock-nav-link">By Area</span>
+          <span class="mock-nav-link">Odds</span>
+        </div>
+        <div class="mock-nav-badge">142,837 alerts</div>
+      </div>
+      <div class="mock-eyebrow">▶ Data Investigation — January 2020 to March 2026</div>
+      <div class="mock-h1">UNDER<br>FIRE</div>
+      <div class="mock-subtitle">Six years of rocket, missile, and drone alerts across Israel — every single one recorded, mapped, and analysed.</div>
+      <div class="mock-stats">
+        <div><div class="mock-stat-num">142,837<span>+</span></div><div class="mock-stat-label">Total alerts</div></div>
+        <div><div class="mock-stat-num">4</div><div class="mock-stat-label">Threat actors</div></div>
+        <div><div class="mock-stat-num">6</div><div class="mock-stat-label">Years of data</div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- TIMELINE -->
+  <div class="mockup-wrap" style="margin-top:1rem;">
+    <div class="mockup-label">Section 2 — Six Years of Alerts (Timeline)</div>
+    <div class="mock-timeline">
+      <div class="mock-section-label">01 — Timeline</div>
+      <div class="mock-section-title">Six Years of Alerts</div>
+      <div class="mock-section-desc">Weekly alert totals from January 2020 to March 2026. Each bar is one week. The scale of October 7, 2023 is not a typo.</div>
+      <div class="mock-finding-row">
+        <div class="mock-finding"><div class="mock-finding-head">Pre-Oct 7</div><div class="mock-finding-num">8,596</div><div class="mock-finding-sub">alerts over 3+ years</div></div>
+        <div class="mock-finding blue"><div class="mock-finding-head">Post-Oct 7</div><div class="mock-finding-num">134,241</div><div class="mock-finding-sub">alerts in under 2.5 years</div></div>
+        <div class="mock-finding gold"><div class="mock-finding-head">Busiest Single Day</div><div class="mock-finding-num">4,000</div><div class="mock-finding-sub">alerts on Oct 7, 2023</div></div>
+      </div>
+      <div class="chart-placeholder">
+        <div class="fake-timeline" id="fakeTimeline"></div>
+        <div style="position:absolute;left:73%;top:10px;height:90%;width:1.5px;background:rgba(232,184,75,.7);"></div>
+        <div style="position:absolute;left:73.5%;top:12px;font-family:'IBM Plex Mono',monospace;font-size:.55rem;color:var(--accent);letter-spacing:.06em;">Oct 7, 2023</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- OCT 7 MAP -->
+  <div class="mockup-wrap" style="margin-top:1rem;">
+    <div class="mockup-label">Section 3 — October 7 Replay (Leaflet Map)</div>
+    <div class="mock-map-section">
+      <div class="mock-section-label">02 — October 7, 2023</div>
+      <div class="mock-section-title">The Day It Changed</div>
+      <div class="mock-section-desc">4,000 individual alerts fired across Israel on October 7, 2023 — from 06:29 in the morning to 23:13 at night. Press play to watch it unfold.</div>
+      <div class="mock-map">
+        <div class="mock-map-bg"></div>
+        <!-- Fake dots representing alerts scattered across Israel shape -->
+        <div class="map-dots" id="mapDots"></div>
+        <div class="mock-map-overlay">
+          <div class="mock-map-clock">14:32</div>
+          <div class="mock-map-label">Time of day</div>
+          <div class="mock-map-count">2,847</div>
+          <div style="font-family:'IBM Plex Mono',monospace;font-size:.5rem;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);">Alerts so far</div>
+        </div>
+        <div class="mock-map-controls">
+          <div class="mock-map-btn">↺ Reset</div>
+          <div class="mock-map-btn play">⏸ Pause</div>
+        </div>
+        <!-- Legend -->
+        <div style="position:absolute;top:1rem;right:1rem;background:rgba(7,7,10,.85);border:1px solid var(--border);padding:.8rem;border-radius:4px;">
+          <div style="display:flex;align-items:center;gap:.5rem;font-family:'IBM Plex Mono',monospace;font-size:.52rem;color:var(--muted);margin-bottom:.3rem;"><div style="width:7px;height:7px;border-radius:50%;background:#4a9eff;"></div>Early morning</div>
+          <div style="display:flex;align-items:center;gap:.5rem;font-family:'IBM Plex Mono',monospace;font-size:.52rem;color:var(--muted);margin-bottom:.3rem;"><div style="width:7px;height:7px;border-radius:50%;background:#e8b84b;"></div>Midday</div>
+          <div style="display:flex;align-items:center;gap:.5rem;font-family:'IBM Plex Mono',monospace;font-size:.52rem;color:var(--muted);"><div style="width:7px;height:7px;border-radius:50%;background:#d63031;"></div>Evening</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- FOUR FRONTS -->
+  <div class="mockup-wrap" style="margin-top:1rem;">
+    <div class="mockup-label">Section 4 — The Four Fronts (Stacked Area Chart)</div>
+    <div class="mock-fronts">
+      <div class="mock-section-label">03 — The Four Fronts</div>
+      <div class="mock-section-title">From One Front to Four</div>
+      <div class="mock-section-desc">Before October 2023, almost all alerts originated from Hamas in Gaza. Iran alone accounts for more than half of all recorded alerts.</div>
+      <div class="actor-legend">
+        <div class="actor-tag"><div class="actor-dot" style="background:#c678dd"></div>Iran (82,288)</div>
+        <div class="actor-tag"><div class="actor-dot" style="background:#f39c12"></div>Hezbollah (29,950)</div>
+        <div class="actor-tag"><div class="actor-dot" style="background:#4a9eff"></div>Houthis (13,022)</div>
+        <div class="actor-tag"><div class="actor-dot" style="background:#d63031"></div>Hamas (8,981)</div>
+        <div class="actor-tag"><div class="actor-dot" style="background:#3a3a4a"></div>Unattributed (8,596)</div>
+      </div>
+      <div class="fake-stacked" id="fakeStacked">
+        <div style="position:absolute;left:73%;top:0;height:100%;width:1.5px;background:rgba(232,184,75,.7);z-index:2;"></div>
+        <div style="position:absolute;left:73.5%;top:8px;font-family:'IBM Plex Mono',monospace;font-size:.52rem;color:var(--accent);z-index:3;">Oct 7, 2023</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- PATTERNS -->
+  <div class="mockup-wrap" style="margin-top:1rem;">
+    <div class="mockup-label">Section 5 — Patterns (Polar Clock + Day of Week)</div>
+    <div class="mock-patterns">
+      <div class="mock-section-label">04 — Patterns</div>
+      <div class="mock-section-title">When Do They Strike?</div>
+      <div class="mock-section-desc">Alerts happen around the clock — there is no safe hour. 10am is the peak. Saturday is the most targeted day of the week.</div>
+      <div class="patterns-grid">
+        <div>
+          <div class="chart-title-sm">Alerts by Hour of Day</div>
+          <div class="fake-clock" id="fakeClock">
+            <div class="clock-inner"><div class="clock-inner-label">24h</div></div>
+          </div>
+        </div>
+        <div>
+          <div class="chart-title-sm">Alerts by Day of Week</div>
+          <div id="fakeDow" style="padding-top:.5rem;"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- AREAS -->
+  <div class="mockup-wrap" style="margin-top:1rem;">
+    <div class="mockup-label">Section 6 — Area Vulnerability (Horizontal Bar Leaderboard)</div>
+    <div style="background:var(--surface);padding:3.5rem 4rem 2.5rem;">
+      <div class="mock-section-label">05 — By Region</div>
+      <div class="mock-section-title">Area Vulnerability</div>
+      <div class="mock-section-desc">Total alerts received by each of the 30 regions of Israel, ranked. Every part of the country has been targeted.</div>
+      <div id="fakeAreaBars" style="margin-top:1rem;"></div>
+    </div>
+  </div>
+
+  <!-- ODDS -->
+  <div class="mockup-wrap" style="margin-top:1rem;">
+    <div class="mockup-label">Section 7 — What Are the Odds? (Interactive Widget)</div>
+    <div class="mock-odds">
+      <div class="mock-section-label">06 — Interactive</div>
+      <div class="mock-section-title">What Are the Odds?</div>
+      <div class="mock-section-desc">Select a region and an everyday activity. See the statistical probability of an alert firing while you do it.</div>
+      <div class="odds-layout">
+        <div>
+          <select class="mock-select"><option>Confrontation Line</option><option>Shfela (Lowlands)</option><option>Sharon</option><option>Gaza Envelope</option></select>
+          <div style="font-family:'IBM Plex Mono',monospace;font-size:.6rem;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);margin-bottom:.6rem;">Select an activity</div>
+          <div class="activity-grid">
+            <div class="activity-btn active">🚿 Shower<br><span style="color:var(--muted);font-size:.5rem;">8 minutes</span></div>
+            <div class="activity-btn">☕ Make Tea<br><span style="color:var(--muted);font-size:.5rem;">5 minutes</span></div>
+            <div class="activity-btn">🚌 Commute<br><span style="color:var(--muted);font-size:.5rem;">30 minutes</span></div>
+            <div class="activity-btn">🍽️ Lunch<br><span style="color:var(--muted);font-size:.5rem;">45 minutes</span></div>
+            <div class="activity-btn">🏃 Workout<br><span style="color:var(--muted);font-size:.5rem;">60 minutes</span></div>
+            <div class="activity-btn">🎬 Film<br><span style="color:var(--muted);font-size:.5rem;">2 hours</span></div>
+          </div>
+        </div>
+        <div class="odds-result-box">
+          <div class="odds-big">4.7%</div>
+          <div class="odds-label">chance of an alert</div>
+          <div class="odds-row"><span class="odds-row-label">All-time average</span><span class="odds-row-val">4.7%</span></div>
+          <div class="odds-row"><span class="odds-row-label">Since Oct 7, 2023</span><span class="odds-row-val red">5.1%</span></div>
+        </div>
+      </div>
+      <!-- Scale -->
+      <div style="margin-top:3rem;padding-top:3rem;border-top:1px solid var(--border);">
+        <div class="mock-section-label" style="margin-bottom:.5rem;">The Scale of It</div>
+        <div style="font-family:'Playfair Display',serif;font-size:1.8rem;font-weight:700;color:#fff;margin-bottom:1.5rem;">142,837 is not an abstract number.</div>
+        <div class="scale-grid">
+          <div class="scale-card"><div class="scale-big">24.8</div><div class="scale-unit">days non-stop</div><div class="scale-desc">If each alert played as a 15-second siren, you'd listen for nearly 25 days continuously.</div></div>
+          <div class="scale-card blue"><div class="scale-big">1/14<span style="font-size:1.2rem">min</span></div><div class="scale-unit">rate since Oct 7</div><div class="scale-desc">An alert has fired somewhere in Israel on average once every 14 minutes — day and night.</div></div>
+          <div class="scale-card gold"><div class="scale-big">4,000</div><div class="scale-unit">in one day</div><div class="scale-desc">On October 7 alone, roughly one alert every 15 seconds across 17 hours.</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- FOOTER -->
+  <div class="mockup-wrap" style="margin-top:1rem;">
+    <div class="mockup-label">Footer</div>
+    <div class="mock-footer">
+      <div class="footer-left">Under Fire — Data Visualisation Project — 2026</div>
+      <div class="footer-credit">Alert data provided by <span>RocketAlert.live</span>. Origin attribution is estimated. Built by Alfie Rees.</div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════ -->
+<!-- 5. IMPROVEMENT AREAS FOR STITCH        -->
+<!-- ═══════════════════════════════════════ -->
+<div class="brief-section">
+  <div class="brief-heading">05 — Suggested Improvements for Stitch</div>
+  <div class="brief-title">Areas to Explore with AI Design</div>
+  <div class="brief-body"><p>These are the specific UI/UX areas that would benefit most from iterative AI design work. Each includes a ready-to-use Stitch prompt.</p></div>
+
+  <div class="improvement-item">
+    <div class="improvement-num">1</div>
+    <div>
+      <div class="improvement-title">Hero Section — Add a Background Image or Texture</div>
+      <div class="improvement-desc">The hero is currently text-only on a near-black gradient background. Adding a subtle, dark photographic background (smoke, skyline at night, aerial view of Israel) or a noise/grain texture could significantly increase emotional impact without breaking the dark editorial tone. The text legibility must be preserved.</div>
+      <div class="improvement-prompt">Dark editorial data journalism hero section. Background: dark aerial night photo of city with radial red gradient overlay at 15% opacity. Foreground: large serif title "UNDER FIRE" in white at 9rem, monospace subtitle in grey, three stat counters. Fonts: Playfair Display 900 + IBM Plex Mono. Colour palette: #07070a background, #e8b84b gold accent, #d63031 red.</div>
+    </div>
+  </div>
+
+  <div class="improvement-item">
+    <div class="improvement-num">2</div>
+    <div>
+      <div class="improvement-title">Finding Cards — Visual Hierarchy Improvement</div>
+      <div class="improvement-desc">The three finding cards above the timeline chart (pre-Oct7 / post-Oct7 / busiest day) are functional but could be more visually striking. Consider larger stat numbers, better contrast between the card types, or adding a subtle icon/glyph.</div>
+      <div class="improvement-prompt">Three data stat cards on dark background (#0f0f14). Card 1: red left border, headline "Pre-Oct 7", large number "8,596" in Playfair Display serif, subtext in grey mono. Card 2: blue left border, headline "Post-Oct 7", number "134,241". Card 3: gold left border, headline "Busiest Day", number "4,000". Dark, editorial, data journalism style.</div>
+    </div>
+  </div>
+
+  <div class="improvement-item">
+    <div class="improvement-num">3</div>
+    <div>
+      <div class="improvement-title">October 7 Section — Emotional Context Strip</div>
+      <div class="improvement-desc">Before the map, there could be a single stark text callout — something like "06:29:00 — The first alert. What followed was unprecedented." — that primes the reader emotionally before they press play. A horizontal strip with a timeline of the day's progression would help.</div>
+      <div class="improvement-prompt">Stark dark callout bar. Background #07070a, left-aligned. Monospace timestamp "06:29:00" in red at 1.2rem. Below: large serif italic text "The first alert." in white. Then a thin horizontal timeline bar showing progression from 06:29 to 23:13 with dots marking escalation moments. Minimal, editorial, sombre.</div>
+    </div>
+  </div>
+
+  <div class="improvement-item">
+    <div class="improvement-num">4</div>
+    <div>
+      <div class="improvement-title">Nav — Progress Indicator</div>
+      <div class="improvement-desc">A subtle reading progress bar below the nav (a thin line that fills left-to-right as you scroll) would reinforce the scrollytelling experience and tell users how far through the story they are.</div>
+      <div class="improvement-prompt">Fixed navigation bar, dark background, with a thin 2px progress bar at the very bottom of the nav that fills from left to right as the user scrolls. Bar colour: #e8b84b (gold). Nav contains: brand name in gold monospace left, 6 navigation links center, "142,837 alerts" badge right. Height: 52px.</div>
+    </div>
+  </div>
+
+  <div class="improvement-item">
+    <div class="improvement-num">5</div>
+    <div>
+      <div class="improvement-title">What Are the Odds — Result Display</div>
+      <div class="improvement-desc">The probability result (large percentage number) could be made more visually dramatic — perhaps with a circular progress indicator, a filled arc, or a colour-coded severity scale (green → amber → red) to help readers instantly grasp the magnitude of the number.</div>
+      <div class="improvement-prompt">Interactive probability display widget. Dark card (#0f0f14). Centre: large circular arc indicator (like a gauge) filled to the probability percentage. Inside the arc: giant percentage number in Playfair Display serif 900. Arc colour changes from white (0%) to amber (#e8b84b at 25%) to red (#d63031 at 75%). Below: two comparison rows showing "All-time" and "Since Oct 7" values.</div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════ -->
+<!-- 6. COMPONENT SPECS                     -->
+<!-- ═══════════════════════════════════════ -->
+<div class="brief-section">
+  <div class="brief-heading">06 — Component Specifications</div>
+  <div class="brief-title">Reusable UI Patterns</div>
+  <table class="spec-table">
+    <thead><tr><th>Component</th><th>Styles</th><th>Usage</th></tr></thead>
+    <tbody>
+      <tr><td>Section Label</td><td>IBM Plex Mono · 0.6rem · letter-spacing 0.2em · uppercase · colour: --red</td><td>Above every section title. Format: "01 — Name"</td></tr>
+      <tr><td>Section Title (h2)</td><td>Playfair Display · 700 · clamp(2.4rem, 3.5vw, 3.4rem) · colour: #fff</td><td>Primary heading for each chapter</td></tr>
+      <tr><td>Section Desc</td><td>IBM Plex Sans · 300 · 0.88rem · line-height 1.8 · colour: --muted · max-width 640px</td><td>1–2 sentence explainer below section title</td></tr>
+      <tr><td>Finding Card</td><td>border-left: 3px solid [accent colour] · background rgba(0,0,0,0.3) · padding 1.2rem 1.4rem · border-radius 0 4px 4px 0</td><td>Stat callout before charts. Three variants: red / blue / gold</td></tr>
+      <tr><td>Filter Button</td><td>IBM Plex Mono · 0.62rem · border: 1px solid --border · background transparent. Active: background --accent, colour #000</td><td>Data filter toggles on charts</td></tr>
+      <tr><td>Map Control Button</td><td>IBM Plex Mono · 0.62rem · border: 1px solid --border · background rgba(7,7,10,0.85). Play variant: border --red, colour --red</td><td>Play/Pause/Reset on Oct 7 map</td></tr>
+      <tr><td>Glass Card</td><td>background rgba(22,22,30,0.65) · backdrop-filter blur(12px) · border 1px solid rgba(255,255,255,0.05) · border-radius 8px · box-shadow 0 20px 40px rgba(0,0,0,0.4)</td><td>Floating overlay panels (map overlay, tooltips)</td></tr>
+      <tr><td>Tooltip</td><td>background --surface2 · border 1px solid --border · IBM Plex Mono 0.65rem · box-shadow 0 4px 16px rgba(0,0,0,0.4)</td><td>Hover tooltips on all D3 charts</td></tr>
+      <tr><td>Scale Card</td><td>background --surface · border-left 3px solid [colour] · padding 1.8rem · border-radius 4px</td><td>The "Scale of It" stat cards at bottom</td></tr>
+      <tr><td>Activity Button</td><td>IBM Plex Mono · 0.58rem · background --surface2 · border 1px solid --border. Active: border --accent, background rgba(232,184,75,0.08)</td><td>Activity selector in "What Are the Odds" widget</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<!-- ═══════════════════════════════════════ -->
+<!-- 7. IMAGE SUGGESTIONS                   -->
+<!-- ═══════════════════════════════════════ -->
+<div class="brief-section">
+  <div class="brief-heading">07 — Image & Asset Suggestions</div>
+  <div class="brief-title">Photographic Assets That Would Work</div>
+  <div class="brief-body">
+    <p>All images should be used as dark, low-opacity overlays — never as foreground elements that compete with the data. The data is the hero; photography adds atmosphere and emotional weight.</p>
+  </div>
+  <div class="notes-grid">
+    <div class="note-card">
+      <div class="note-card-title">Hero Background</div>
+      <div class="note-card-body">
+        <ul>
+          <li>Dark aerial night photo of an Israeli city (Tel Aviv skyline from above)</li>
+          <li>Iron Dome missile intercept trail photograph (bright arc against dark sky)</li>
+          <li>Abstract noise/grain texture at 10–15% opacity over the gradient</li>
+          <li>Any image should be blurred (filter: blur(2px)) and darkened to opacity 0.15–0.25</li>
+        </ul>
+      </div>
+    </div>
+    <div class="note-card">
+      <div class="note-card-title">Oct 7 Section Header</div>
+      <div class="note-card-body">
+        <ul>
+          <li>A dark, abstract dawn/sunrise photograph as a thin horizontal strip before the map</li>
+          <li>Should reinforce the 06:29 timestamp — earliest light before the attacks began</li>
+          <li>Apply: brightness(0.3) and a red gradient overlay at 20% opacity</li>
+        </ul>
+      </div>
+    </div>
+    <div class="note-card">
+      <div class="note-card-title">What NOT to Use</div>
+      <div class="note-card-body">
+        <ul>
+          <li>No graphic imagery of casualties or damage</li>
+          <li>No political symbols or flags</li>
+          <li>No images that imply a narrative beyond the data</li>
+          <li>The site is strictly data-focused and neutral</li>
+        </ul>
+      </div>
+    </div>
+    <div class="note-card">
+      <div class="note-card-title">Free Image Sources</div>
+      <div class="note-card-body">
+        <ul>
+          <li>Unsplash (unsplash.com) — search "city night aerial", "sky smoke abstract"</li>
+          <li>NASA Earth Observatory — free satellite imagery</li>
+          <li>Pexels — dark abstract textures, "grain film", "dark sky"</li>
+          <li>Generate with Midjourney/DALL-E: "dark aerial city night, minimal, blue tones, 16:9"</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════ -->
+<!-- 8. STITCH QUICK-START GUIDE            -->
+<!-- ═══════════════════════════════════════ -->
+<div class="brief-section" style="border-bottom:none;padding-bottom:2rem;">
+  <div class="brief-heading">08 — Stitch Quick-Start Guide</div>
+  <div class="brief-title">How to Use This Document in Stitch</div>
+  <div class="brief-body">
+    <p>Stitch works best when given a screenshot of what already exists plus a clear description of what you want to change. Here's the workflow:</p>
+    <p><strong style="color:#fff;">Step 1</strong> — Screenshot any section mockup from this document (Section 4 above) and upload it to Stitch as your "current design" reference.</p>
+    <p><strong style="color:#fff;">Step 2</strong> — Paste any of the "Stitch prompt →" text from Section 5 as your generation prompt.</p>
+    <p><strong style="color:#fff;">Step 3</strong> — When Stitch generates a variant, check it against the colour tokens in Section 2 and type system in Section 3. Ask Stitch to adjust specific values until it matches.</p>
+    <p><strong style="color:#fff;">Step 4</strong> — Export the Stitch output and bring the CSS/design back to this Cowork session to implement in the actual index.html.</p>
+  </div>
+
+  <div style="margin-top:2rem;background:var(--bg);border:1px solid rgba(232,184,75,.2);border-radius:4px;padding:1.5rem 2rem;">
+    <div style="font-family:'IBM Plex Mono',monospace;font-size:.58rem;letter-spacing:.14em;text-transform:uppercase;color:var(--accent);margin-bottom:.75rem;">Note on "Pencil"</div>
+    <div style="font-size:.85rem;color:var(--muted);line-height:1.8;">
+      There are a few tools that go by "Pencil" — the most likely ones are <strong style="color:#fff;">Penpot</strong> (open-source Figma alternative, free), <strong style="color:#fff;">Pencil Project</strong> (wireframing tool), or you may be thinking of <strong style="color:#fff;">Framer</strong> or <strong style="color:#fff;">Sketch</strong>. If you can confirm which one you mean, I can tailor the export format — Penpot uses SVG, Figma/Sketch use design tokens, and Framer works best with React components. All the colour tokens and typography specs in this document will paste directly into any of them.
+    </div>
+  </div>
+</div>
+
+<div style="background:#07070a;padding:1.5rem 4rem;border-top:1px solid #252530;font-family:'IBM Plex Mono',monospace;font-size:.55rem;color:#2a2a38;text-align:center;letter-spacing:.1em;text-transform:uppercase;">
+  Under Fire — Design Brief · Generated April 2026 · Data: RocketAlert.live · Built by Alfie Rees
+</div>
+
+<script>
+// Generate fake timeline bars (visual only)
+const tl = document.getElementById('fakeTimeline');
+for (let i = 0; i < 177; i++) {
+  const bar = document.createElement('div');
+  bar.className = 'fake-bar';
+  const isPostOct7 = i > 128;
+  const isOct7Week = i === 129;
+  let h;
+  if (isOct7Week) h = 95;
+  else if (isPostOct7) h = 20 + Math.random() * 55;
+  else h = 2 + Math.random() * 18;
+  bar.style.height = h + '%';
+  bar.style.background = isPostOct7 ? 'rgba(214,48,49,0.65)' : 'rgba(200,200,216,0.35)';
+  tl.appendChild(bar);
+}
+
+// Generate fake stacked area (visual only)
+const stacked = document.getElementById('fakeStacked');
+const months = 63;
+for (let i = 0; i < months; i++) {
+  const col = document.createElement('div');
+  col.style.flex = '1';
+  col.style.display = 'flex';
+  col.style.flexDirection = 'column-reverse';
+  col.style.height = '100%';
+  col.style.alignItems = 'stretch';
+  col.style.gap = '1px';
+  const isPost = i > 45;
+  const total = isPost ? 60 + Math.random() * 120 : 2 + Math.random() * 8;
+  const layers = isPost
+    ? [{c:'rgba(198,120,221,0.8)',h:total*0.55},{c:'rgba(243,156,18,0.8)',h:total*0.2},{c:'rgba(74,158,255,0.8)',h:total*0.12},{c:'rgba(214,48,49,0.8)',h:total*0.08},{c:'rgba(58,58,74,0.8)',h:total*0.05}]
+    : [{c:'rgba(214,48,49,0.7)',h:total*0.7},{c:'rgba(58,58,74,0.5)',h:total*0.3}];
+  layers.forEach(l => {
+    const s = document.createElement('div');
+    s.style.height = l.h + '%';
+    s.style.background = l.c;
+    s.style.minHeight = '1px';
+    col.appendChild(s);
+  });
+  stacked.appendChild(col);
+}
+
+// Generate fake polar clock segments
+const clock = document.getElementById('fakeClock');
+const clockSvg = document.createElementNS('http://www.w3.org/2000/svg','svg');
+clockSvg.setAttribute('width','240');
+clockSvg.setAttribute('height','240');
+clockSvg.style.position='absolute';
+clockSvg.style.top='0';
+clockSvg.style.left='0';
+const hourCounts = [5528,5837,4134,3316,3970,4899,6300,7716,5079,4071,10302,6545,5304,7981,6826,5752,8628,6540,5586,7284,6561,6460,4059,4159];
+const maxH = Math.max(...hourCounts);
+const cx = 120, cy = 120, innerR = 35, outerMax = 105;
+hourCounts.forEach((count, h) => {
+  const startAngle = (h/24)*2*Math.PI - Math.PI/2;
+  const endAngle = ((h+0.92)/24)*2*Math.PI - Math.PI/2;
+  const outerR = innerR + (count/maxH) * (outerMax - innerR);
+  const x1 = cx + innerR * Math.cos(startAngle), y1 = cy + innerR * Math.sin(startAngle);
+  const x2 = cx + outerR * Math.cos(startAngle), y2 = cy + outerR * Math.sin(startAngle);
+  const x3 = cx + outerR * Math.cos(endAngle), y3 = cy + outerR * Math.sin(endAngle);
+  const x4 = cx + innerR * Math.cos(endAngle), y4 = cy + innerR * Math.sin(endAngle);
+  const path = document.createElementNS('http://www.w3.org/2000/svg','path');
+  path.setAttribute('d', `M${x1},${y1} L${x2},${y2} A${outerR},${outerR} 0 0,1 ${x3},${y3} L${x4},${y4} A${innerR},${innerR} 0 0,0 ${x1},${y1}`);
+  const isPeak = h === 10;
+  const isNight = h < 6 || h >= 22;
+  path.setAttribute('fill', isPeak ? 'rgba(214,48,49,0.85)' : isNight ? 'rgba(74,158,255,0.5)' : 'rgba(232,184,75,0.6)');
+  clockSvg.appendChild(path);
+});
+clock.appendChild(clockSvg);
+
+// Fake DoW bars
+const dow = document.getElementById('fakeDow');
+const days = [{d:'Saturday',c:29033,col:'var(--red)'},{d:'Sunday',c:24651,col:'rgba(214,48,49,0.6)'},{d:'Tuesday',c:24049,col:'rgba(232,184,75,0.5)'},{d:'Monday',c:17285,col:'rgba(232,184,75,0.45)'},{d:'Thursday',c:17700,col:'rgba(232,184,75,0.4)'},{d:'Friday',c:15505,col:'rgba(232,184,75,0.35)'},{d:'Wednesday',c:14614,col:'rgba(232,184,75,0.3)'}];
+const maxD = 29033;
+days.forEach(({d,c,col}) => {
+  const row = document.createElement('div');
+  row.style.cssText = 'display:flex;align-items:center;gap:.75rem;margin-bottom:.55rem;';
+  const label = document.createElement('div');
+  label.style.cssText = 'font-family:"IBM Plex Mono",monospace;font-size:.62rem;color:var(--muted);width:90px;flex-shrink:0;';
+  label.textContent = d;
+  const barWrap = document.createElement('div');
+  barWrap.style.cssText = 'flex:1;background:rgba(0,0,0,.3);border-radius:2px;height:18px;overflow:hidden;';
+  const bar = document.createElement('div');
+  bar.style.cssText = `height:100%;width:${(c/maxD)*100}%;background:${col};border-radius:2px;`;
+  const val = document.createElement('div');
+  val.style.cssText = 'font-family:"IBM Plex Mono",monospace;font-size:.6rem;color:var(--muted);width:50px;flex-shrink:0;';
+  val.textContent = (c/1000).toFixed(0)+'k';
+  barWrap.appendChild(bar);
+  row.appendChild(label);
+  row.appendChild(barWrap);
+  row.appendChild(val);
+  dow.appendChild(row);
+});
+
+// Fake area bars (top 10)
+const areaData = document.getElementById('fakeAreaBars');
+const areas = [['Confrontation Line',19590,'var(--red)'],['Shfela (Lowlands)',13056,'rgba(214,48,49,0.7)'],['Sharon',12414,'rgba(214,48,49,0.6)'],['Lakhish',11417,'rgba(232,184,75,0.55)'],['Upper Galilee',9679,'rgba(232,184,75,0.5)'],['Shfelat Yehuda',8014,'rgba(232,184,75,0.45)'],['Yarkon',7349,'rgba(74,158,255,0.45)'],['Dan',7231,'rgba(74,158,255,0.4)'],['Gaza Envelope',6991,'rgba(74,158,255,0.35)'],['Samaria',6785,'rgba(74,158,255,0.3)']];
+const maxA = 19590;
+areas.forEach(([name,count,color],i) => {
+  const row = document.createElement('div');
+  row.style.cssText = 'display:flex;align-items:center;gap:1rem;margin-bottom:.55rem;';
+  const label = document.createElement('div');
+  label.style.cssText = `font-family:'IBM Plex Mono',monospace;font-size:.65rem;color:${i<3?'#fff':'var(--muted)'};width:170px;flex-shrink:0;`;
+  label.textContent = name;
+  const barWrap = document.createElement('div');
+  barWrap.style.cssText = 'flex:1;background:rgba(0,0,0,.3);border-radius:2px;height:20px;overflow:hidden;';
+  const bar = document.createElement('div');
+  bar.style.cssText = `height:100%;width:${(count/maxA)*100}%;background:${color};border-radius:2px;`;
+  const val = document.createElement('div');
+  val.style.cssText = 'font-family:"IBM Plex Mono",monospace;font-size:.62rem;color:var(--muted);width:55px;flex-shrink:0;';
+  val.textContent = count.toLocaleString();
+  barWrap.appendChild(bar);
+  row.appendChild(label);
+  row.appendChild(barWrap);
+  row.appendChild(val);
+  areaData.appendChild(row);
+});
+
+// Fake map dots
+const mapDots = document.getElementById('mapDots');
+const dotData = [
+  {x:48,y:72,c:'rgba(214,48,49,0.8)',s:5},{x:52,y:68,c:'rgba(214,48,49,0.7)',s:4},{x:45,y:76,c:'rgba(232,184,75,0.8)',s:4},
+  {x:55,y:62,c:'rgba(214,48,49,0.9)',s:5},{x:50,y:58,c:'rgba(232,184,75,0.8)',s:3},{x:42,y:80,c:'rgba(74,158,255,0.8)',s:4},
+  {x:58,y:55,c:'rgba(232,184,75,0.7)',s:3},{x:47,y:65,c:'rgba(214,48,49,0.75)',s:4},{x:53,y:70,c:'rgba(214,48,49,0.85)',s:5},
+  {x:40,y:72,c:'rgba(74,158,255,0.7)',s:3},{x:62,y:48,c:'rgba(232,184,75,0.75)',s:3},{x:48,y:55,c:'rgba(232,184,75,0.9)',s:4},
+  {x:44,y:85,c:'rgba(214,48,49,0.7)',s:3},{x:56,y:78,c:'rgba(214,48,49,0.8)',s:4},{x:50,y:45,c:'rgba(232,184,75,0.7)',s:3},
+  {x:38,y:65,c:'rgba(74,158,255,0.75)',s:3},{x:60,y:60,c:'rgba(232,184,75,0.8)',s:4},{x:45,y:50,c:'rgba(74,158,255,0.8)',s:3},
+  {x:54,y:82,c:'rgba(214,48,49,0.75)',s:4},{x:49,y:42,c:'rgba(74,158,255,0.7)',s:3}
+];
+dotData.forEach(({x,y,c,s}) => {
+  const dot = document.createElement('div');
+  dot.className = 'map-dot';
+  dot.style.cssText = `left:${x}%;top:${y}%;width:${s}px;height:${s}px;background:${c};box-shadow:0 0 ${s*2}px ${c};`;
+  mapDots.appendChild(dot);
+});
+</script>
+</body>
+</html>

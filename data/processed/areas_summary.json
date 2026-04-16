@@ -1,0 +1,475 @@
+[
+  {
+    "area": "Confrontation Line",
+    "total": 19590,
+    "rocket": 12422,
+    "uav": 7168,
+    "active_days": 448,
+    "avg_per_day": 8.641,
+    "peak_day": "2026-02-28",
+    "origins": {
+      "Unknown": 103,
+      "Hezbollah": 16417,
+      "Iran": 3060,
+      "Houthis": 10
+    },
+    "peak_day_count": 10162
+  },
+  {
+    "area": "Shfela (Lowlands)",
+    "total": 13056,
+    "rocket": 13032,
+    "uav": 24,
+    "active_days": 163,
+    "avg_per_day": 5.759,
+    "peak_day": "2026-02-28",
+    "origins": {
+      "Unknown": 753,
+      "Hamas": 1609,
+      "Houthis": 2872,
+      "Iran": 7822
+    },
+    "peak_day_count": 10162
+  },
+  {
+    "area": "Sharon",
+    "total": 12414,
+    "rocket": 12406,
+    "uav": 8,
+    "active_days": 115,
+    "avg_per_day": 5.476,
+    "peak_day": "2026-02-28",
+    "origins": {
+      "Unknown": 211,
+      "Hezbollah": 1197,
+      "Iran": 9976,
+      "Houthis": 1030
+    },
+    "peak_day_count": 10162
+  },
+  {
+    "area": "Lakhish",
+    "total": 11417,
+    "rocket": 11413,
+    "uav": 4,
+    "active_days": 160,
+    "avg_per_day": 5.036,
+    "peak_day": "2023-10-07",
+    "origins": {
+      "Unknown": 1723,
+      "Hamas": 1992,
+      "Houthis": 870,
+      "Iran": 6832
+    },
+    "peak_day_count": 4000
+  },
+  {
+    "area": "Upper Galilee",
+    "total": 9679,
+    "rocket": 8292,
+    "uav": 1387,
+    "active_days": 207,
+    "avg_per_day": 4.27,
+    "peak_day": "2026-02-28",
+    "origins": {
+      "Unknown": 35,
+      "Hezbollah": 4834,
+      "Iran": 4747,
+      "Houthis": 63
+    },
+    "peak_day_count": 10162
+  },
+  {
+    "area": "Shfelat Yehuda",
+    "total": 8014,
+    "rocket": 7992,
+    "uav": 22,
+    "active_days": 114,
+    "avg_per_day": 3.535,
+    "peak_day": "2026-03-01",
+    "origins": {
+      "Unknown": 50,
+      "Hamas": 437,
+      "Houthis": 2633,
+      "Iran": 4894
+    },
+    "peak_day_count": 6851
+  },
+  {
+    "area": "Yarkon",
+    "total": 7349,
+    "rocket": 7328,
+    "uav": 21,
+    "active_days": 132,
+    "avg_per_day": 3.242,
+    "peak_day": "2026-02-28",
+    "origins": {
+      "Unknown": 210,
+      "Hezbollah": 295,
+      "Houthis": 1699,
+      "Iran": 5145
+    },
+    "peak_day_count": 10162
+  },
+  {
+    "area": "Dan",
+    "total": 7231,
+    "rocket": 7223,
+    "uav": 8,
+    "active_days": 158,
+    "avg_per_day": 3.19,
+    "peak_day": "2026-02-28",
+    "origins": {
+      "Unknown": 430,
+      "Hezbollah": 1036,
+      "Houthis": 1230,
+      "Iran": 4535
+    },
+    "peak_day_count": 10162
+  },
+  {
+    "area": "Gaza Envelope",
+    "total": 6991,
+    "rocket": 6938,
+    "uav": 53,
+    "active_days": 460,
+    "avg_per_day": 3.084,
+    "peak_day": "2023-10-07",
+    "origins": {
+      "Unknown": 3214,
+      "Hamas": 2834,
+      "Iran": 917,
+      "Houthis": 26
+    },
+    "peak_day_count": 4000
+  },
+  {
+    "area": "Samaria",
+    "total": 6785,
+    "rocket": 6725,
+    "uav": 60,
+    "active_days": 94,
+    "avg_per_day": 2.993,
+    "peak_day": "2026-02-28",
+    "origins": {
+      "Unknown": 17,
+      "Hezbollah": 86,
+      "Iran": 6337,
+      "Houthis": 345
+    },
+    "peak_day_count": 10162
+  },
+  {
+    "area": "HaAmakim",
+    "total": 6002,
+    "rocket": 5836,
+    "uav": 166,
+    "active_days": 70,
+    "avg_per_day": 2.648,
+    "peak_day": "2026-02-28",
+    "origins": {
+      "Hezbollah": 1152,
+      "Iran": 4625,
+      "Houthis": 225
+    },
+    "peak_day_count": 10162
+  },
+  {
+    "area": "Center Galilee",
+    "total": 4412,
+    "rocket": 4308,
+    "uav": 104,
+    "active_days": 97,
+    "avg_per_day": 1.946,
+    "peak_day": "2026-02-28",
+    "origins": {
+      "Unknown": 3,
+      "Hezbollah": 1006,
+      "Iran": 3369,
+      "Houthis": 34
+    },
+    "peak_day_count": 10162
+  },
+  {
+    "area": "Judea",
+    "total": 3409,
+    "rocket": 3376,
+    "uav": 33,
+    "active_days": 90,
+    "avg_per_day": 1.504,
+    "peak_day": "2026-02-28",
+    "origins": {
+      "Unknown": 24,
+      "Hezbollah": 111,
+      "Iran": 2345,
+      "Houthis": 929
+    },
+    "peak_day_count": 10162
+  },
+  {
+    "area": "Western Lakhish",
+    "total": 2836,
+    "rocket": 2813,
+    "uav": 23,
+    "active_days": 165,
+    "avg_per_day": 1.251,
+    "peak_day": "2023-10-07",
+    "origins": {
+      "Unknown": 1070,
+      "Hamas": 1074,
+      "Iran": 671,
+      "Houthis": 21
+    },
+    "peak_day_count": 4000
+  },
+  {
+    "area": "Central Negev",
+    "total": 2608,
+    "rocket": 2608,
+    "uav": 0,
+    "active_days": 76,
+    "avg_per_day": 1.15,
+    "peak_day": "2024-04-14",
+    "origins": {
+      "Unknown": 311,
+      "Hamas": 355,
+      "Iran": 1844,
+      "Houthis": 98
+    },
+    "peak_day_count": 655
+  },
+  {
+    "area": "Menashe",
+    "total": 2332,
+    "rocket": 2222,
+    "uav": 110,
+    "active_days": 100,
+    "avg_per_day": 1.029,
+    "peak_day": "2026-02-28",
+    "origins": {
+      "Unknown": 5,
+      "Hezbollah": 640,
+      "Iran": 1639,
+      "Houthis": 48
+    },
+    "peak_day_count": 10162
+  },
+  {
+    "area": "Western Negev",
+    "total": 2106,
+    "rocket": 2103,
+    "uav": 3,
+    "active_days": 99,
+    "avg_per_day": 0.929,
+    "peak_day": "2023-10-07",
+    "origins": {
+      "Unknown": 382,
+      "Hamas": 491,
+      "Iran": 1210,
+      "Houthis": 23
+    },
+    "peak_day_count": 4000
+  },
+  {
+    "area": "HaCarmel",
+    "total": 1952,
+    "rocket": 1925,
+    "uav": 27,
+    "active_days": 72,
+    "avg_per_day": 0.861,
+    "peak_day": "2026-02-28",
+    "origins": {
+      "Hezbollah": 443,
+      "Iran": 1427,
+      "Houthis": 82
+    },
+    "peak_day_count": 10162
+  },
+  {
+    "area": "Lower Galilee",
+    "total": 1921,
+    "rocket": 1859,
+    "uav": 62,
+    "active_days": 64,
+    "avg_per_day": 0.847,
+    "peak_day": "2026-02-28",
+    "origins": {
+      "Unknown": 4,
+      "Hezbollah": 337,
+      "Iran": 1580
+    },
+    "peak_day_count": 10162
+  },
+  {
+    "area": "HaMifratz",
+    "total": 1756,
+    "rocket": 1590,
+    "uav": 166,
+    "active_days": 103,
+    "avg_per_day": 0.775,
+    "peak_day": "2026-02-28",
+    "origins": {
+      "Unknown": 6,
+      "Hezbollah": 748,
+      "Houthis": 48,
+      "Iran": 954
+    },
+    "peak_day_count": 10162
+  },
+  {
+    "area": "Wadi Ara",
+    "total": 1668,
+    "rocket": 1580,
+    "uav": 88,
+    "active_days": 64,
+    "avg_per_day": 0.736,
+    "peak_day": "2026-02-28",
+    "origins": {
+      "Unknown": 4,
+      "Hezbollah": 253,
+      "Iran": 1353,
+      "Houthis": 58
+    },
+    "peak_day_count": 10162
+  },
+  {
+    "area": "Jerusalem",
+    "total": 1658,
+    "rocket": 1641,
+    "uav": 17,
+    "active_days": 75,
+    "avg_per_day": 0.731,
+    "peak_day": "2026-03-01",
+    "origins": {
+      "Unknown": 18,
+      "Hezbollah": 122,
+      "Iran": 1146,
+      "Houthis": 372
+    },
+    "peak_day_count": 6851
+  },
+  {
+    "area": "Southern Negev",
+    "total": 1655,
+    "rocket": 1642,
+    "uav": 13,
+    "active_days": 70,
+    "avg_per_day": 0.73,
+    "peak_day": "2024-04-14",
+    "origins": {
+      "Unknown": 4,
+      "Hamas": 189,
+      "Iran": 1348,
+      "Houthis": 114
+    },
+    "peak_day_count": 655
+  },
+  {
+    "area": "Southern Golan",
+    "total": 1576,
+    "rocket": 1330,
+    "uav": 246,
+    "active_days": 110,
+    "avg_per_day": 0.695,
+    "peak_day": "2026-02-28",
+    "origins": {
+      "Unknown": 12,
+      "Hezbollah": 418,
+      "Iran": 1146
+    },
+    "peak_day_count": 10162
+  },
+  {
+    "area": "Bika'a",
+    "total": 1260,
+    "rocket": 1211,
+    "uav": 49,
+    "active_days": 40,
+    "avg_per_day": 0.556,
+    "peak_day": "2026-02-28",
+    "origins": {
+      "Iran": 1210,
+      "Hezbollah": 17,
+      "Houthis": 33
+    },
+    "peak_day_count": 10162
+  },
+  {
+    "area": "Beit Sha'an Valley",
+    "total": 1077,
+    "rocket": 870,
+    "uav": 207,
+    "active_days": 44,
+    "avg_per_day": 0.475,
+    "peak_day": "2026-02-28",
+    "origins": {
+      "Hezbollah": 119,
+      "Iran": 941,
+      "Houthis": 17
+    },
+    "peak_day_count": 10162
+  },
+  {
+    "area": "Northern Golan",
+    "total": 946,
+    "rocket": 553,
+    "uav": 393,
+    "active_days": 121,
+    "avg_per_day": 0.417,
+    "peak_day": "2026-02-28",
+    "origins": {
+      "Unknown": 2,
+      "Hezbollah": 559,
+      "Iran": 385
+    },
+    "peak_day_count": 10162
+  },
+  {
+    "area": "Dead Sea",
+    "total": 774,
+    "rocket": 738,
+    "uav": 36,
+    "active_days": 60,
+    "avg_per_day": 0.341,
+    "peak_day": "2026-03-01",
+    "origins": {
+      "Iran": 639,
+      "Hezbollah": 33,
+      "Houthis": 101,
+      "Unknown": 1
+    },
+    "peak_day_count": 6851
+  },
+  {
+    "area": "Arabah",
+    "total": 216,
+    "rocket": 136,
+    "uav": 80,
+    "active_days": 35,
+    "avg_per_day": 0.095,
+    "peak_day": "2025-06-14",
+    "origins": {
+      "Hezbollah": 29,
+      "Iran": 161,
+      "Houthis": 25,
+      "Unknown": 1
+    },
+    "peak_day_count": 2753
+  },
+  {
+    "area": "Eilat",
+    "total": 147,
+    "rocket": 81,
+    "uav": 66,
+    "active_days": 54,
+    "avg_per_day": 0.065,
+    "peak_day": "2024-04-01",
+    "origins": {
+      "Hezbollah": 98,
+      "Houthis": 16,
+      "Iran": 30,
+      "Unknown": 3
+    },
+    "peak_day_count": 29
+  }
+]

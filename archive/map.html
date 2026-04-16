@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>UNDER FIRE — Geographic Map</title>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400;1,700&family=IBM+Plex+Mono:wght@300;400;500&family=IBM+Plex+Sans:wght@300;400;500&display=swap"
+        rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.8.5/d3.min.js"></script>
+    <link rel="stylesheet" href="css/style.css">
+    <style>
+        body {
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+            padding-top: 80px;
+            overflow: hidden;
+        }
+
+        .viz-container {
+            flex: 1;
+            position: relative;
+            width: 100%;
+            height: calc(100vh - 80px);
+        }
+
+        #map-chart {
+            width: 100%;
+            height: 100%;
+            background: var(--bg);
+        }
+
+        .map-overlay {
+            position: absolute;
+            top: 2rem;
+            left: 3rem;
+            max-width: 400px;
+            pointer-events: none;
+        }
+
+        .glass-info {
+            background: rgba(15, 15, 20, 0.85);
+            backdrop-filter: blur(8px);
+            border: 1px solid var(--border);
+            padding: 2rem;
+            border-radius: 8px;
+            pointer-events: auto;
+        }
+    </style>
+</head>
+
+<body>
+
+    <nav>
+        <div class="nav-brand">Under Fire</div>
+        <div class="nav-links"><a href="index.html"
+                style="color:var(--text); text-decoration:none; font-family:'IBM Plex Mono'; font-size:0.65rem; text-transform:uppercase;">←
+                Back to Hub</a></div>
+        <div id="live-badge" class="nav-data-badge">⏳ Loading data…</div>
+    </nav>
+
+    <div class="viz-container">
+        <div id="map-chart"></div>
+
+        <div class="map-overlay">
+            <div class="glass-info">
+                <div class="section-label">Exploration 02</div>
+                <h1 class="section-title" style="font-size: 2.5rem;">Geographic Drift</h1>
+                <p class="section-desc" style="font-size: 0.85rem; margin-bottom:0;">
+                    Scroll to zoom and click to pan. The expanding envelope of rocket attacks is visible when comparing
+                    the dense southern clusters originating from Gaza (Hamas, PIJ) with the northern border clusters
+                    from Lebanon (Hezbollah).
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <div class="tooltip" id="tooltip"></div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <script src="js/app.js"></script>
+</body>
+
+</html>

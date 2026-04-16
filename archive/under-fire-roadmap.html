@@ -1,0 +1,1101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>UNDER FIRE — Project Roadmap</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400&family=IBM+Plex+Mono:wght@300;400;500&family=IBM+Plex+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0a0c;
+    --surface: #111116;
+    --surface2: #18181f;
+    --border: #2a2a35;
+    --accent: #e8b84b;
+    --accent2: #c0392b;
+    --accent3: #4a9eff;
+    --text: #d8d8e0;
+    --text-muted: #6b6b80;
+    --text-dim: #3a3a4a;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'IBM Plex Sans', sans-serif;
+    font-weight: 300;
+    line-height: 1.7;
+    overflow-x: hidden;
+  }
+
+  /* HEADER */
+  header {
+    border-bottom: 1px solid var(--border);
+    padding: 3rem 4rem 2.5rem;
+    position: relative;
+    overflow: hidden;
+  }
+
+  header::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background:
+      radial-gradient(ellipse at 80% 50%, rgba(200, 50, 40, 0.08) 0%, transparent 60%),
+      radial-gradient(ellipse at 20% 80%, rgba(74, 158, 255, 0.05) 0%, transparent 50%);
+    pointer-events: none;
+  }
+
+  .header-label {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.65rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--accent2);
+    margin-bottom: 1rem;
+  }
+
+  h1 {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(3.5rem, 8vw, 7rem);
+    font-weight: 900;
+    line-height: 0.92;
+    letter-spacing: -0.02em;
+    color: #fff;
+    margin-bottom: 0.5rem;
+  }
+
+  .subtitle {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.8rem;
+    color: var(--text-muted);
+    letter-spacing: 0.08em;
+    margin-top: 1.5rem;
+  }
+
+  .header-meta {
+    display: flex;
+    gap: 3rem;
+    margin-top: 2rem;
+    flex-wrap: wrap;
+  }
+
+  .meta-item {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+  }
+
+  .meta-label {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.6rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--text-dim);
+  }
+
+  .meta-value {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.8rem;
+    color: var(--accent);
+  }
+
+  /* LAYOUT */
+  main {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 4rem 6rem;
+  }
+
+  section {
+    padding: 4rem 0;
+    border-bottom: 1px solid var(--border);
+  }
+
+  section:last-child { border-bottom: none; }
+
+  .section-header {
+    display: flex;
+    align-items: baseline;
+    gap: 1.5rem;
+    margin-bottom: 3rem;
+  }
+
+  .section-num {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.65rem;
+    color: var(--text-dim);
+    letter-spacing: 0.1em;
+  }
+
+  h2 {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.8rem;
+    font-weight: 700;
+    color: #fff;
+    letter-spacing: -0.01em;
+  }
+
+  h3 {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.75rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 0.75rem;
+  }
+
+  p { color: var(--text); margin-bottom: 0.75rem; }
+
+  /* PHASES TIMELINE */
+  .phases {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+  }
+
+  .phase {
+    display: grid;
+    grid-template-columns: 120px 1fr;
+    gap: 0 3rem;
+    position: relative;
+    cursor: pointer;
+  }
+
+  .phase::before {
+    content: '';
+    position: absolute;
+    left: 119px;
+    top: 0;
+    bottom: 0;
+    width: 1px;
+    background: var(--border);
+  }
+
+  .phase-left {
+    padding: 2rem 0;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 0.4rem;
+  }
+
+  .phase-num {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 2rem;
+    font-weight: 500;
+    color: var(--text-dim);
+    line-height: 1;
+    transition: color 0.2s;
+  }
+
+  .phase:hover .phase-num { color: var(--accent); }
+
+  .phase-duration {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.6rem;
+    color: var(--text-dim);
+    letter-spacing: 0.08em;
+  }
+
+  .phase-right {
+    padding: 2rem 0 2rem 3rem;
+    position: relative;
+    border-top: 1px solid var(--border);
+  }
+
+  .phase:first-child .phase-right { border-top: none; }
+
+  .phase-dot {
+    position: absolute;
+    left: -4.5px;
+    top: 2.65rem;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--text-dim);
+    transition: background 0.2s;
+  }
+
+  .phase:hover .phase-dot { background: var(--accent); }
+  .phase.active .phase-dot { background: var(--accent2); }
+
+  .phase-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.25rem;
+    color: #fff;
+    margin-bottom: 0.75rem;
+  }
+
+  .phase-desc {
+    font-size: 0.875rem;
+    color: var(--text-muted);
+    line-height: 1.6;
+    margin-bottom: 1rem;
+  }
+
+  .phase-deliverables {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+
+  .deliverable {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.65rem;
+    letter-spacing: 0.06em;
+    padding: 0.3rem 0.7rem;
+    border: 1px solid var(--border);
+    color: var(--text-muted);
+    border-radius: 2px;
+  }
+
+  /* DATA SOURCES */
+  .sources-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 1.5rem;
+  }
+
+  .source-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    padding: 1.5rem;
+    border-radius: 3px;
+    transition: border-color 0.2s;
+  }
+
+  .source-card:hover { border-color: var(--accent); }
+
+  .source-name {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.8rem;
+    font-weight: 500;
+    color: var(--accent);
+    margin-bottom: 0.5rem;
+  }
+
+  .source-type {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.6rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--text-dim);
+    margin-bottom: 0.75rem;
+  }
+
+  .source-desc {
+    font-size: 0.8rem;
+    color: var(--text-muted);
+    line-height: 1.5;
+    margin-bottom: 1rem;
+  }
+
+  .source-quality {
+    display: flex;
+    gap: 0.4rem;
+    align-items: center;
+  }
+
+  .quality-label {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.6rem;
+    color: var(--text-dim);
+    letter-spacing: 0.08em;
+  }
+
+  .quality-dots {
+    display: flex;
+    gap: 3px;
+  }
+
+  .dot {
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: var(--text-dim);
+  }
+
+  .dot.filled { background: var(--accent); }
+  .dot.half { background: var(--accent3); }
+
+  /* PATTERNS */
+  .patterns-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 1.5rem;
+  }
+
+  .pattern-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--accent2);
+    padding: 1.5rem;
+    border-radius: 0 3px 3px 0;
+  }
+
+  .pattern-card.temporal { border-left-color: var(--accent); }
+  .pattern-card.spatial { border-left-color: var(--accent3); }
+  .pattern-card.actor { border-left-color: #9b59b6; }
+  .pattern-card.correlation { border-left-color: #2ecc71; }
+
+  .pattern-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 1rem;
+    color: #fff;
+    margin-bottom: 0.5rem;
+  }
+
+  .pattern-questions {
+    list-style: none;
+    margin-top: 0.75rem;
+  }
+
+  .pattern-questions li {
+    font-size: 0.78rem;
+    color: var(--text-muted);
+    padding: 0.35rem 0;
+    border-bottom: 1px solid var(--text-dim);
+    line-height: 1.4;
+  }
+
+  .pattern-questions li:last-child { border-bottom: none; }
+
+  .pattern-questions li::before {
+    content: '→ ';
+    font-family: 'IBM Plex Mono', monospace;
+    color: var(--text-dim);
+  }
+
+  /* VIZ COMPONENTS */
+  .viz-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1.5rem;
+  }
+
+  @media (max-width: 900px) { .viz-grid { grid-template-columns: 1fr 1fr; } }
+  @media (max-width: 600px) { .viz-grid { grid-template-columns: 1fr; } }
+
+  .viz-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 3px;
+    overflow: hidden;
+    transition: border-color 0.2s, transform 0.2s;
+  }
+
+  .viz-card:hover { border-color: var(--accent3); transform: translateY(-2px); }
+
+  .viz-preview {
+    height: 120px;
+    background: var(--surface2);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    overflow: hidden;
+  }
+
+  /* SVG mockup previews */
+  .viz-preview svg { width: 100%; height: 100%; }
+
+  .viz-info {
+    padding: 1rem 1.2rem;
+  }
+
+  .viz-name {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.75rem;
+    color: #fff;
+    margin-bottom: 0.3rem;
+  }
+
+  .viz-desc {
+    font-size: 0.72rem;
+    color: var(--text-muted);
+    line-height: 1.4;
+  }
+
+  /* TECH STACK */
+  .stack-cols {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 2rem;
+  }
+
+  .stack-col h3 { margin-bottom: 1rem; }
+
+  .stack-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.75rem;
+    padding: 0.75rem 0;
+    border-bottom: 1px solid var(--text-dim);
+  }
+
+  .stack-item:last-child { border-bottom: none; }
+
+  .stack-tech {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.78rem;
+    color: var(--accent3);
+    min-width: 80px;
+  }
+
+  .stack-use {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    line-height: 1.4;
+  }
+
+  /* PRINCIPLES */
+  .principles {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 1.5rem;
+  }
+
+  .principle {
+    padding: 1.5rem;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 3px;
+  }
+
+  .principle-icon {
+    font-size: 1.5rem;
+    margin-bottom: 0.75rem;
+  }
+
+  .principle h3 { color: var(--text); margin-bottom: 0.5rem; }
+
+  .principle p {
+    font-size: 0.78rem;
+    color: var(--text-muted);
+  }
+
+  /* SCROLLBAR */
+  ::-webkit-scrollbar { width: 4px; }
+  ::-webkit-scrollbar-track { background: var(--bg); }
+  ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+
+  /* ANIMATIONS */
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .animate { animation: fadeUp 0.6s ease forwards; }
+
+  .status-badge {
+    display: inline-block;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.6rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    padding: 0.25rem 0.6rem;
+    border-radius: 2px;
+    background: rgba(232, 184, 75, 0.15);
+    color: var(--accent);
+    border: 1px solid rgba(232, 184, 75, 0.3);
+    margin-left: 1rem;
+    vertical-align: middle;
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-label">▶ Project Brief &amp; Roadmap — 2026</div>
+  <h1>UNDER<br>FIRE</h1>
+  <div class="subtitle">// A DATA JOURNALISM PROJECT — PATTERNS IN MISSILE &amp; ROCKET ATTACKS ON ISRAEL</div>
+  <div class="header-meta">
+    <div class="meta-item">
+      <span class="meta-label">Data Range</span>
+      <span class="meta-value">2008 → Present</span>
+    </div>
+    <div class="meta-item">
+      <span class="meta-label">Primary Source</span>
+      <span class="meta-value">ACLED + GDELT</span>
+    </div>
+    <div class="meta-item">
+      <span class="meta-label">Output</span>
+      <span class="meta-value">Interactive Scrollytelling Site</span>
+    </div>
+    <div class="meta-item">
+      <span class="meta-label">Stack</span>
+      <span class="meta-value">Python / D3.js / Scrollama</span>
+    </div>
+    <div class="meta-item">
+      <span class="meta-label">Status</span>
+      <span class="meta-value">Phase 1 — Active</span>
+    </div>
+  </div>
+</header>
+
+<main>
+
+  <!-- SECTION: PHASES -->
+  <section>
+    <div class="section-header">
+      <span class="section-num">01</span>
+      <h2>Project Phases</h2>
+    </div>
+
+    <div class="phases">
+
+      <div class="phase active">
+        <div class="phase-left">
+          <div class="phase-num">01</div>
+          <div class="phase-duration">1–2 days</div>
+        </div>
+        <div class="phase-right">
+          <div class="phase-dot"></div>
+          <div class="phase-title">Data Sourcing &amp; Audit <span class="status-badge">Now</span></div>
+          <div class="phase-desc">Pull ACLED data via API. Understand schema, coverage gaps, event coding methodology. Supplement with GTD and GDELT. Build a clean, merged dataset covering 2008–present across all relevant actors (Hamas, Hezbollah, PIJ, Iran direct). Document what's known vs. unknown.</div>
+          <div class="phase-deliverables">
+            <span class="deliverable">acled_pull.py</span>
+            <span class="deliverable">raw_conflict.csv</span>
+            <span class="deliverable">data_audit.md</span>
+            <span class="deliverable">source_comparison.ipynb</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="phase">
+        <div class="phase-left">
+          <div class="phase-num">02</div>
+          <div class="phase-duration">2–3 days</div>
+        </div>
+        <div class="phase-right">
+          <div class="phase-dot"></div>
+          <div class="phase-title">EDA &amp; Pattern Discovery</div>
+          <div class="phase-desc">Answer the core analytical questions. Test each hypothesis against the data. Find which patterns are real, which are artifacts of reporting bias. Use rolling windows, kernel density estimates, circular statistics for time-of-day analysis. Let the data drive the narrative.</div>
+          <div class="phase-deliverables">
+            <span class="deliverable">eda_temporal.ipynb</span>
+            <span class="deliverable">eda_spatial.ipynb</span>
+            <span class="deliverable">eda_actors.ipynb</span>
+            <span class="deliverable">key_findings.md</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="phase">
+        <div class="phase-left">
+          <div class="phase-num">03</div>
+          <div class="phase-duration">1 day</div>
+        </div>
+        <div class="phase-right">
+          <div class="phase-dot"></div>
+          <div class="phase-title">Narrative Architecture</div>
+          <div class="phase-desc">Turn 3–5 genuine findings into a scroll story structure. Each scroll "chapter" should reveal one surprising insight. Write annotation copy. Define the data that each viz needs. Create the story skeleton before touching code.</div>
+          <div class="phase-deliverables">
+            <span class="deliverable">story_outline.md</span>
+            <span class="deliverable">annotation_copy.md</span>
+            <span class="deliverable">viz_specs.md</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="phase">
+        <div class="phase-left">
+          <div class="phase-num">04</div>
+          <div class="phase-duration">3–5 days</div>
+        </div>
+        <div class="phase-right">
+          <div class="phase-dot"></div>
+          <div class="phase-title">Visualization Build</div>
+          <div class="phase-desc">Build each D3.js component in isolation. Clock chart, timeline strip, animated map, escalation curve. Get them pixel-perfect before wiring them into the page. Export processed JSON data from Python pipeline.</div>
+          <div class="phase-deliverables">
+            <span class="deliverable">clock-chart.js</span>
+            <span class="deliverable">timeline.js</span>
+            <span class="deliverable">animated-map.js</span>
+            <span class="deliverable">escalation.js</span>
+            <span class="deliverable">data/*.json</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="phase">
+        <div class="phase-left">
+          <div class="phase-num">05</div>
+          <div class="phase-duration">2–3 days</div>
+        </div>
+        <div class="phase-right">
+          <div class="phase-dot"></div>
+          <div class="phase-title">Scrollytelling Integration</div>
+          <div class="phase-desc">Wire components into Scrollama. Each scroll step triggers a state change. Add actor filter, event overlay toggle, time range brush. Refine transitions. Mobile-adapt the layout. Add the methodology section.</div>
+          <div class="phase-deliverables">
+            <span class="deliverable">index.html</span>
+            <span class="deliverable">scroll-controller.js</span>
+            <span class="deliverable">filters.js</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="phase">
+        <div class="phase-left">
+          <div class="phase-num">06</div>
+          <div class="phase-duration">1–2 days</div>
+        </div>
+        <div class="phase-right">
+          <div class="phase-dot"></div>
+          <div class="phase-title">Polish, Publish &amp; Expand</div>
+          <div class="phase-desc">Performance audit, accessibility pass, cross-browser test. Write methodology note. Deploy to GitHub Pages. Consider expansion: predictive model, GDELT event correlation engine, real-time feed if data supports it.</div>
+          <div class="phase-deliverables">
+            <span class="deliverable">methodology.html</span>
+            <span class="deliverable">GitHub Pages deploy</span>
+            <span class="deliverable">README.md</span>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- SECTION: DATA SOURCES -->
+  <section>
+    <div class="section-header">
+      <span class="section-num">02</span>
+      <h2>Data Sources</h2>
+    </div>
+    <div class="sources-grid">
+
+      <div class="source-card">
+        <div class="source-name">ACLED</div>
+        <div class="source-type">Primary — Armed Conflict Location &amp; Event Data</div>
+        <div class="source-desc">Free API. Covers rocket/missile attacks with date, location, event type, and actor coding. Global coverage, rigorous methodology. Best source for granular conflict events. Requires free account registration.</div>
+        <div class="source-quality">
+          <span class="quality-label">Quality</span>
+          <div class="quality-dots">
+            <div class="dot filled"></div><div class="dot filled"></div><div class="dot filled"></div><div class="dot filled"></div><div class="dot half"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="source-card">
+        <div class="source-name">GDELT Project</div>
+        <div class="source-type">Supplementary — Global Event Language</div>
+        <div class="source-desc">Massive global news event database. Use for geopolitical context: finding which political events preceded attack spikes. Enables the "escalation trigger" analysis. BigQuery accessible, free tier sufficient.</div>
+        <div class="source-quality">
+          <span class="quality-label">Quality</span>
+          <div class="quality-dots">
+            <div class="dot filled"></div><div class="dot filled"></div><div class="dot filled"></div><div class="dot half"></div><div class="dot"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="source-card">
+        <div class="source-name">Global Terrorism DB</div>
+        <div class="source-type">Supplementary — GTD / START Maryland</div>
+        <div class="source-desc">Strong historical coverage through 2020. Good for validation and back-filling ACLED gaps in earlier years. Downloadable CSV. Different coding methodology — needs reconciliation with ACLED.</div>
+        <div class="source-quality">
+          <span class="quality-label">Quality</span>
+          <div class="quality-dots">
+            <div class="dot filled"></div><div class="dot filled"></div><div class="dot filled"></div><div class="dot filled"></div><div class="dot"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="source-card">
+        <div class="source-name">IDF Public Reports</div>
+        <div class="source-type">Validation — Official Statistics</div>
+        <div class="source-desc">Periodic aggregate counts (e.g. "X rockets fired in Y operation"). Not granular enough for time-series analysis but essential for validating totals. Scraped from IDF Spokesperson and official press releases.</div>
+        <div class="source-quality">
+          <span class="quality-label">Quality</span>
+          <div class="quality-dots">
+            <div class="dot filled"></div><div class="dot filled"></div><div class="dot half"></div><div class="dot"></div><div class="dot"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="source-card">
+        <div class="source-name">Wikipedia Timelines</div>
+        <div class="source-type">Labels — Conflict Episode Metadata</div>
+        <div class="source-desc">Well-sourced conflict episode timelines. Use for labelling the timeline (Operation Cast Lead, Pillar of Defence, Guardian of the Walls, Oct 7 war). Provides episode start/end dates and key event anchors.</div>
+        <div class="source-quality">
+          <span class="quality-label">Quality</span>
+          <div class="quality-dots">
+            <div class="dot filled"></div><div class="dot filled"></div><div class="dot filled"></div><div class="dot"></div><div class="dot"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="source-card">
+        <div class="source-name">UNOCHA</div>
+        <div class="source-type">Supplementary — Humanitarian Reports</div>
+        <div class="source-desc">UN humanitarian situation reports. Contain attack frequency data for specific conflict periods. Good for cross-referencing casualty and displacement data to contextualise attack waves.</div>
+        <div class="source-quality">
+          <span class="quality-label">Quality</span>
+          <div class="quality-dots">
+            <div class="dot filled"></div><div class="dot filled"></div><div class="dot half"></div><div class="dot"></div><div class="dot"></div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- SECTION: PATTERNS -->
+  <section>
+    <div class="section-header">
+      <span class="section-num">03</span>
+      <h2>Analytical Questions &amp; Patterns to Find</h2>
+    </div>
+    <div class="patterns-grid">
+
+      <div class="pattern-card temporal">
+        <h3>⬤ Temporal</h3>
+        <div class="pattern-title">Time Signatures</div>
+        <p style="font-size:0.78rem;color:var(--text-muted);margin-bottom:0.5rem;">Do attacks have a preferred time of day, day of week, or season?</p>
+        <ul class="pattern-questions">
+          <li>Is there a circadian rhythm to launches?</li>
+          <li>Are there day-of-week biases?</li>
+          <li>Do Ramadan periods alter attack frequency?</li>
+          <li>Do attacks cluster in escalation waves with predictable gaps?</li>
+          <li>How long does each "flare-up" cycle last on average?</li>
+        </ul>
+      </div>
+
+      <div class="pattern-card spatial">
+        <h3>⬤ Spatial</h3>
+        <div class="pattern-title">Geographic Drift</div>
+        <p style="font-size:0.78rem;color:var(--text-muted);margin-bottom:0.5rem;">Has rocket reach into Israel expanded over time? Are target patterns stable?</p>
+        <ul class="pattern-questions">
+          <li>How far north/inland have rockets reached each year?</li>
+          <li>Has the "range envelope" expanded since 2008?</li>
+          <li>Are specific cities targeted more than others?</li>
+          <li>Do northern (Hezbollah) and southern (Gaza) fronts differ spatially?</li>
+          <li>Where do rockets land vs. where are they intercepted?</li>
+        </ul>
+      </div>
+
+      <div class="pattern-card actor">
+        <h3>⬤ Actor</h3>
+        <div class="pattern-title">Signature Differences</div>
+        <p style="font-size:0.78rem;color:var(--text-muted);margin-bottom:0.5rem;">Do Hamas, Hezbollah, PIJ, and Iran direct each have recognisable patterns?</p>
+        <ul class="pattern-questions">
+          <li>Do different actors prefer different times of day?</li>
+          <li>Do attack volumes per episode differ by actor?</li>
+          <li>Has any actor's operational tempo changed over time?</li>
+          <li>How do direct Iranian ballistic strikes differ from proxy rocket attacks?</li>
+          <li>Is there evidence of coordination between simultaneous fronts?</li>
+        </ul>
+      </div>
+
+      <div class="pattern-card correlation">
+        <h3>⬤ Correlation</h3>
+        <div class="pattern-title">Escalation Triggers</div>
+        <p style="font-size:0.78rem;color:var(--text-muted);margin-bottom:0.5rem;">Can spikes be reliably predicted by geopolitical events?</p>
+        <ul class="pattern-questions">
+          <li>Do attacks spike after targeted assassinations?</li>
+          <li>Is there a ceasefire "last gasp" effect before agreements?</li>
+          <li>Do diplomatic breakdowns reliably precede attack waves?</li>
+          <li>How quickly do attacks resume after ceasefires?</li>
+          <li>Is there a "retaliation lag" — time between IDF action and response?</li>
+        </ul>
+      </div>
+
+      <div class="pattern-card" style="border-left-color:#e74c3c;">
+        <h3>⬤ Capability</h3>
+        <div class="pattern-title">Qualitative Leaps</div>
+        <p style="font-size:0.78rem;color:var(--text-muted);margin-bottom:0.5rem;">When did rocket capability step-change? Can we see it in the data?</p>
+        <ul class="pattern-questions">
+          <li>When did rockets first reach Tel Aviv? Jerusalem?</li>
+          <li>Is the first use of ballistic missiles (Iran 2024) visible as a discontinuity?</li>
+          <li>Has Iron Dome interception rate changed as volume scales?</li>
+          <li>Do saturation attacks (many simultaneous) appear in data?</li>
+        </ul>
+      </div>
+
+      <div class="pattern-card" style="border-left-color:#1abc9c;">
+        <h3>⬤ Reporting</h3>
+        <div class="pattern-title">Data Bias Checks</div>
+        <p style="font-size:0.78rem;color:var(--text-muted);margin-bottom:0.5rem;">What does the data NOT capture that must be disclosed?</p>
+        <ul class="pattern-questions">
+          <li>Are small-scale attacks systematically under-reported?</li>
+          <li>Does media access affect event counts during escalations?</li>
+          <li>Is ACLED coverage consistent across all years?</li>
+          <li>How should we handle "unknown" actor attribution?</li>
+        </ul>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- SECTION: VIZ COMPONENTS -->
+  <section>
+    <div class="section-header">
+      <span class="section-num">04</span>
+      <h2>Visualisation Components</h2>
+    </div>
+    <div class="viz-grid">
+
+      <div class="viz-card">
+        <div class="viz-preview">
+          <svg viewBox="0 0 200 120" preserveAspectRatio="xMidYMid meet">
+            <!-- Timeline strip mockup -->
+            <rect width="200" height="120" fill="#18181f"/>
+            <line x1="20" y1="60" x2="180" y2="60" stroke="#2a2a35" stroke-width="1"/>
+            <circle cx="45" cy="60" r="3" fill="#e8b84b" opacity="0.5"/>
+            <circle cx="55" cy="58" r="5" fill="#c0392b" opacity="0.7"/>
+            <circle cx="60" cy="62" r="2" fill="#e8b84b" opacity="0.4"/>
+            <circle cx="65" cy="59" r="4" fill="#c0392b" opacity="0.6"/>
+            <circle cx="70" cy="61" r="6" fill="#c0392b" opacity="0.8"/>
+            <circle cx="75" cy="58" r="3" fill="#c0392b" opacity="0.5"/>
+            <circle cx="100" cy="60" r="2" fill="#e8b84b" opacity="0.3"/>
+            <circle cx="110" cy="59" r="3" fill="#e8b84b" opacity="0.4"/>
+            <circle cx="140" cy="60" r="8" fill="#c0392b" opacity="0.9"/>
+            <circle cx="148" cy="58" r="5" fill="#c0392b" opacity="0.7"/>
+            <circle cx="155" cy="62" r="4" fill="#c0392b" opacity="0.6"/>
+            <circle cx="160" cy="59" r="7" fill="#c0392b" opacity="0.8"/>
+            <text x="20" y="90" fill="#3a3a4a" font-size="6" font-family="monospace">2008</text>
+            <text x="160" y="90" fill="#3a3a4a" font-size="6" font-family="monospace">2025</text>
+          </svg>
+        </div>
+        <div class="viz-info">
+          <div class="viz-name">Conflict Timeline Strip</div>
+          <div class="viz-desc">Zoomable dot-plot. Every event is a circle scaled by intensity. Click any cluster to zoom into that episode.</div>
+        </div>
+      </div>
+
+      <div class="viz-card">
+        <div class="viz-preview">
+          <svg viewBox="0 0 200 120" preserveAspectRatio="xMidYMid meet">
+            <!-- Clock / polar chart mockup -->
+            <rect width="200" height="120" fill="#18181f"/>
+            <circle cx="100" cy="62" r="42" fill="none" stroke="#2a2a35" stroke-width="1"/>
+            <circle cx="100" cy="62" r="28" fill="none" stroke="#2a2a35" stroke-width="0.5"/>
+            <circle cx="100" cy="62" r="14" fill="none" stroke="#2a2a35" stroke-width="0.5"/>
+            <!-- hour markers -->
+            <line x1="100" y1="20" x2="100" y2="24" stroke="#3a3a4a" stroke-width="1"/>
+            <line x1="142" y1="62" x2="138" y2="62" stroke="#3a3a4a" stroke-width="1"/>
+            <line x1="100" y1="104" x2="100" y2="100" stroke="#3a3a4a" stroke-width="1"/>
+            <line x1="58" y1="62" x2="62" y2="62" stroke="#3a3a4a" stroke-width="1"/>
+            <!-- density bars -->
+            <path d="M100,62 L118,28 A42,42 0 0,1 130,48 Z" fill="#c0392b" opacity="0.3"/>
+            <path d="M100,62 L130,48 A42,42 0 0,1 138,72 Z" fill="#c0392b" opacity="0.15"/>
+            <path d="M100,62 L100,20 A42,42 0 0,0 80,27 Z" fill="#e8b84b" opacity="0.4"/>
+            <text x="97" y="16" fill="#6b6b80" font-size="6" font-family="monospace">00</text>
+            <text x="144" y="64" fill="#6b6b80" font-size="6" font-family="monospace">06</text>
+          </svg>
+        </div>
+        <div class="viz-info">
+          <div class="viz-name">Attack Clock (Polar)</div>
+          <div class="viz-desc">24-hour radial chart. Attack density by hour of day. The key "signature" viz — instantly reveals time-of-day preferences.</div>
+        </div>
+      </div>
+
+      <div class="viz-card">
+        <div class="viz-preview">
+          <svg viewBox="0 0 200 120" preserveAspectRatio="xMidYMid meet">
+            <!-- Map mockup -->
+            <rect width="200" height="120" fill="#18181f"/>
+            <path d="M95,15 C90,20 85,35 87,55 C89,70 92,80 95,95 C98,80 103,70 108,60 C110,45 108,25 105,15 Z" fill="#2a2a35" stroke="#3a3a4a" stroke-width="1"/>
+            <circle cx="97" cy="78" r="3" fill="#e8b84b" opacity="0.8"/>
+            <circle cx="99" cy="45" r="2" fill="#4a9eff" opacity="0.6"/>
+            <circle cx="94" cy="60" r="4" fill="#c0392b" opacity="0.7"/>
+            <circle cx="101" cy="55" r="2.5" fill="#c0392b" opacity="0.5"/>
+            <circle cx="96" cy="70" r="5" fill="#c0392b" opacity="0.9"/>
+            <line x1="60" y1="85" x2="94" y2="70" stroke="#c0392b" stroke-width="0.75" stroke-dasharray="3,2" opacity="0.5"/>
+            <line x1="55" y1="40" x2="99" y2="45" stroke="#4a9eff" stroke-width="0.75" stroke-dasharray="3,2" opacity="0.5"/>
+          </svg>
+        </div>
+        <div class="viz-info">
+          <div class="viz-name">Animated Attack Map</div>
+          <div class="viz-desc">Dots appear at impact sites as time progresses. Animated arcs where origin data exists. Filterable by actor / front.</div>
+        </div>
+      </div>
+
+      <div class="viz-card">
+        <div class="viz-preview">
+          <svg viewBox="0 0 200 120" preserveAspectRatio="xMidYMid meet">
+            <!-- Escalation curve -->
+            <rect width="200" height="120" fill="#18181f"/>
+            <path d="M20,95 C30,93 40,90 50,88 C60,86 65,82 70,60 C75,38 80,20 90,15 C100,10 105,40 110,60 C115,80 120,90 130,92 C140,94 150,93 160,92 C170,91 175,90 180,89" fill="none" stroke="#c0392b" stroke-width="1.5" opacity="0.8"/>
+            <path d="M20,95 C30,93 40,90 50,88 C60,86 65,82 70,60 C75,38 80,20 90,15 C100,10 105,40 110,60 C115,80 120,90 130,92 C140,94 150,93 160,92 C170,91 175,90 180,89 L180,110 L20,110 Z" fill="#c0392b" opacity="0.07"/>
+            <line x1="70" y1="15" x2="70" y2="100" stroke="#e8b84b" stroke-width="0.75" stroke-dasharray="2,3" opacity="0.6"/>
+            <text x="55" y="13" fill="#e8b84b" font-size="5" font-family="monospace">Op. start</text>
+            <line x1="130" y1="15" x2="130" y2="100" stroke="#4a9eff" stroke-width="0.75" stroke-dasharray="2,3" opacity="0.6"/>
+            <text x="115" y="13" fill="#4a9eff" font-size="5" font-family="monospace">Ceasefire</text>
+          </svg>
+        </div>
+        <div class="viz-info">
+          <div class="viz-name">Escalation Detector</div>
+          <div class="viz-desc">Smoothed rolling-average attack frequency. Auto-highlights escalation periods. Annotated with operation starts and ceasefires.</div>
+        </div>
+      </div>
+
+      <div class="viz-card">
+        <div class="viz-preview">
+          <svg viewBox="0 0 200 120" preserveAspectRatio="xMidYMid meet">
+            <!-- Actor comparison bars -->
+            <rect width="200" height="120" fill="#18181f"/>
+            <text x="20" y="28" fill="#6b6b80" font-size="6" font-family="monospace">HAMAS</text>
+            <rect x="60" y="20" width="95" height="10" fill="#c0392b" opacity="0.7" rx="1"/>
+            <text x="20" y="50" fill="#6b6b80" font-size="6" font-family="monospace">PIJ</text>
+            <rect x="60" y="42" width="42" height="10" fill="#e8b84b" opacity="0.7" rx="1"/>
+            <text x="20" y="72" fill="#6b6b80" font-size="6" font-family="monospace">HEZBOLLAH</text>
+            <rect x="60" y="64" width="68" height="10" fill="#4a9eff" opacity="0.7" rx="1"/>
+            <text x="20" y="94" fill="#6b6b80" font-size="6" font-family="monospace">IRAN DIRECT</text>
+            <rect x="60" y="86" width="22" height="10" fill="#9b59b6" opacity="0.7" rx="1"/>
+          </svg>
+        </div>
+        <div class="viz-info">
+          <div class="viz-name">Actor Comparison Panel</div>
+          <div class="viz-desc">Side-by-side breakdown by actor. Volume, timing, and geographic signature per group. Filterable and sortable.</div>
+        </div>
+      </div>
+
+      <div class="viz-card">
+        <div class="viz-preview">
+          <svg viewBox="0 0 200 120" preserveAspectRatio="xMidYMid meet">
+            <!-- Range envelope over time -->
+            <rect width="200" height="120" fill="#18181f"/>
+            <line x1="30" y1="100" x2="30" y2="15" stroke="#2a2a35" stroke-width="1"/>
+            <line x1="30" y1="100" x2="185" y2="100" stroke="#2a2a35" stroke-width="1"/>
+            <text x="25" y="108" fill="#3a3a4a" font-size="5" font-family="monospace">2008</text>
+            <text x="170" y="108" fill="#3a3a4a" font-size="5" font-family="monospace">2024</text>
+            <text x="5" y="30" fill="#3a3a4a" font-size="5" font-family="monospace">TLV</text>
+            <text x="5" y="70" fill="#3a3a4a" font-size="5" font-family="monospace">BEV</text>
+            <text x="5" y="95" fill="#3a3a4a" font-size="5" font-family="monospace">ASH</text>
+            <path d="M30,95 C50,93 80,90 100,70 C120,50 140,35 160,28 C170,25 180,24 185,22" fill="none" stroke="#4a9eff" stroke-width="1.5"/>
+            <circle cx="100" cy="70" r="2" fill="#e8b84b"/>
+            <circle cx="160" cy="28" r="2" fill="#c0392b"/>
+          </svg>
+        </div>
+        <div class="viz-info">
+          <div class="viz-name">Range Envelope Chart</div>
+          <div class="viz-desc">How far north and inland did rockets reach each year? Shows the "capability step-change" story — a key qualitative narrative.</div>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- SECTION: TECH STACK -->
+  <section>
+    <div class="section-header">
+      <span class="section-num">05</span>
+      <h2>Tech Stack</h2>
+    </div>
+    <div class="stack-cols">
+
+      <div class="stack-col">
+        <h3>Data Pipeline</h3>
+        <div class="stack-item">
+          <span class="stack-tech">Python</span>
+          <span class="stack-use">Core data processing — pandas, geopandas, scipy for circular stats</span>
+        </div>
+        <div class="stack-item">
+          <span class="stack-tech">requests</span>
+          <span class="stack-use">ACLED API calls, GDELT fetches</span>
+        </div>
+        <div class="stack-item">
+          <span class="stack-tech">Jupyter</span>
+          <span class="stack-use">EDA notebooks — iterate fast, document findings</span>
+        </div>
+        <div class="stack-item">
+          <span class="stack-tech">GeoPandas</span>
+          <span class="stack-use">Spatial joins, map projections, distance calc</span>
+        </div>
+      </div>
+
+      <div class="stack-col">
+        <h3>Visualisation</h3>
+        <div class="stack-item">
+          <span class="stack-tech">D3.js v7</span>
+          <span class="stack-use">Clock chart, timeline strip, escalation curve — custom control required</span>
+        </div>
+        <div class="stack-item">
+          <span class="stack-tech">Leaflet.js</span>
+          <span class="stack-use">Animated attack map — tile layers, animated markers</span>
+        </div>
+        <div class="stack-item">
+          <span class="stack-tech">Scrollama</span>
+          <span class="stack-use">Scroll-triggered state transitions between story chapters</span>
+        </div>
+        <div class="stack-item">
+          <span class="stack-tech">GSAP</span>
+          <span class="stack-use">Smooth transitions, dot animations on map</span>
+        </div>
+      </div>
+
+      <div class="stack-col">
+        <h3>Site &amp; Deploy</h3>
+        <div class="stack-item">
+          <span class="stack-tech">HTML/CSS/JS</span>
+          <span class="stack-use">Single-page app — no framework overhead needed</span>
+        </div>
+        <div class="stack-item">
+          <span class="stack-tech">Vite</span>
+          <span class="stack-use">Build tool — fast HMR for development</span>
+        </div>
+        <div class="stack-item">
+          <span class="stack-tech">GitHub Pages</span>
+          <span class="stack-use">Free hosting, custom domain support, CI/CD via Actions</span>
+        </div>
+        <div class="stack-item">
+          <span class="stack-tech">JSON</span>
+          <span class="stack-use">Pre-processed data exports from Python pipeline</span>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- SECTION: GUIDING PRINCIPLES -->
+  <section>
+    <div class="section-header">
+      <span class="section-num">06</span>
+      <h2>Guiding Principles</h2>
+    </div>
+    <div class="principles">
+      <div class="principle">
+        <div class="principle-icon">◎</div>
+        <h3>Data First</h3>
+        <p>Let findings drive the narrative. Don't build a story then find data to fit it. If a pattern isn't in the data, it doesn't go in the site.</p>
+      </div>
+      <div class="principle">
+        <div class="principle-icon">◎</div>
+        <h3>Transparent Limits</h3>
+        <p>Every claim needs a source. Every gap needs to be named. A rigorous methodology note is not a weakness — it's credibility.</p>
+      </div>
+      <div class="principle">
+        <div class="principle-icon">◎</div>
+        <h3>Show, Don't List</h3>
+        <p>Every insight should be expressed visually before it's expressed in words. If you can't draw it, you don't understand it yet.</p>
+      </div>
+      <div class="principle">
+        <div class="principle-icon">◎</div>
+        <h3>Human Scale</h3>
+        <p>Numbers are abstractions. Wherever possible, connect the data to real places and real episodes that readers might remember.</p>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<script>
+  // Simple intersection observer for scroll animations
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(e => {
+      if (e.isIntersecting) {
+        e.target.style.opacity = '1';
+        e.target.style.transform = 'translateY(0)';
+      }
+    });
+  }, { threshold: 0.1 });
+
+  document.querySelectorAll('.source-card, .pattern-card, .viz-card, .principle').forEach(el => {
+    el.style.opacity = '0';
+    el.style.transform = 'translateY(16px)';
+    el.style.transition = 'opacity 0.5s ease, transform 0.5s ease';
+    observer.observe(el);
+  });
+</script>
+
+</body>
+</html>
