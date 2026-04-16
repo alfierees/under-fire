@@ -1,8 +1,5 @@
-# Large raw/analysis data files — not needed by the website
-data/raw/data2.json
-data/processed/alerts_clean.json
-data/processed/alerts_clean.csv
-data/processed/alerts_clean.xlsx
+# All alert data — keep locally, not committed to repo
+data/
 
 # Python
 __pycache__/
