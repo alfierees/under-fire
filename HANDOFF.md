@@ -1,8 +1,8 @@
 # Under Fire — Handoff
-_Last updated: 2026-04-16_
+_Last updated: 2026-04-17_
 
 ## What We're Building
-"Under Fire" is a public-interest data visualisation website tracking rocket, missile, and drone alerts across Israel from 2020 to present. Built by Alfie Rees as a data science project. Single-page scrollytelling site with 7 chapters of interactive D3.js + Leaflet visualisations, deployed on GitHub Pages.
+"Under Fire" is a public-interest data visualisation website tracking rocket, missile, and drone alerts across Israel from 2020 to present. Built by Alfie Rees as a data science project. Multi-page card hub with 7 interactive D3.js + Leaflet visualisations, deployed on GitHub Pages.
 
 ## Repository
 **GitHub:** https://github.com/alfierees/under-fire  
@@ -13,30 +13,47 @@ _Last updated: 2026-04-16_
 
 ---
 
-## Current State — LIVE BUILD
+## Current State — LIVE BUILD (v2 Card Hub)
 
-### What's complete
-- `index.html` — Full single-page scrollytelling site, ~1,300 lines, all 7 chapters built and functional
-- **Iron Dome hero animation** — Canvas-based animation of missile arcs being intercepted mid-air. Missiles (red) arc from screen edges, Iron Dome interceptors (blue) rise from city battery positions, gold/white explosions at interception points. Stars, city silhouette, and battery glow halos. Runs continuously in the hero background.
-- **Gradient hero title** — "UNDER FIRE" styled with a blue→gold→red gradient matching the interceptor/explosion/missile colour palette
-- All charts lazy-load via `IntersectionObserver` when each section scrolls into view
+### Site structure
+- `index.html` — **Hero** (Iron Dome canvas animation + "UNDER FIRE" gradient title + animated counters) + **card grid** with 4 categories. Each card has a live D3 sparkline preview and links to a dedicated page. This page is complete and considered done.
+- `timeline.html` — Six Years area chart. Has code-runner pseudo-code UI (press Enter/▶ Run to execute), actor filter (All / Hamas / Hezbollah / Houthis / Iran / Unattributed), and salvo overlay on week-click.
+- `fronts.html` — Four Fronts stacked area by actor. Has code-runner UI.
+- `oct7.html` — Oct 7 Leaflet replay map. Play/pause/reset controls.
+- `patterns.html` — 24h polar clock + day-of-week bar chart.
+- `areas.html` — Area vulnerability horizontal bar leaderboard.
+- `odds.html` — Poisson probability widget (region × activity).
 
-### The 7 Chapters
-| # | Section | Chart type | Data file |
-|---|---------|-----------|-----------|
-| 1 | Hero Counter | Animated counters | `stats_summary.json` |
-| 2 | Six Years of Alerts | D3 area chart, weekly totals | `timeline_weekly.json` |
-| 3 | October 7 Replay | Leaflet map, animated 4,000 alerts | `oct7_replay.json` |
-| 4 | The Four Fronts | D3 stacked area by actor | `actors_monthly.json` |
-| 5 | Patterns | D3 24h polar clock + day-of-week bars | `hourly_dow.json` |
-| 6 | Area Vulnerability | D3 horizontal bar leaderboard | `areas_summary.json` |
-| 7 | What Are the Odds? | Poisson probability widget | `shower_probs.json` |
+### Shared files
+| File | Purpose |
+|------|---------|
+| `src/css/shared.css` | Design tokens, nav, tooltip, footer, code-runner styles, filter bar |
+| `src/css/hub.css` | Hero + card grid (index.html only) |
+| `src/js/shared.js` | `fetchData()`, tooltip helpers, nav-badge boot |
+| `src/js/iron-dome.js` | Hero canvas animation (index.html only) |
+| `src/js/hub.js` | Hero counters + card sparkline preview renderers |
+| `src/js/code-runner.js` | `mountCodeRunner({ mount, file, lines, onRun })` |
+| `src/js/salvo.js` | `mountSalvo({ mount }).fire({ count, label })` |
+
+### What's complete and working
+- Iron Dome hero animation on landing page — **done, do not touch**
+- "UNDER FIRE" gradient title — done
+- Card hub with 4 categories (Graphs / Maps / Patterns / Stats) and sparkline previews
+- Timeline page: 10s left-to-right reveal, actor filter, salvo overlay on click
+- Fronts page: 10s stacked-area reveal via code-runner
+- All other chart pages: oct7 replay, patterns, areas, odds
+- Nav bar linking all pages
+- Sync workflow: `scripts/sync.sh` + SessionStart hook + `CLAUDE.md`
 
 ### Data files in repo (small processed aggregates only)
-The 7 JSON files in `data/processed/` that the website uses are committed (~440KB total). Raw alert records and full dataset are **gitignored** and stored locally only:
-- `data/raw/` — original JSON from RocketAlert.live (gitignored)
-- `data/processed/alerts_clean.json` — full 54MB flat file (gitignored, for EDA only)
-- `data/processed/alerts_clean.csv/.xlsx` — same, gitignored
+The 7 JSON files in `data/processed/` (~440KB total). Raw data is **gitignored**.
+- `stats_summary.json` — totals & origin breakdown
+- `timeline_weekly.json` — weekly totals with per-actor columns (Hamas, Hezbollah, Houthis, Iran, Unknown, total, week)
+- `actors_monthly.json` — monthly per-actor totals
+- `oct7_replay.json` — every Oct 7 alert with `{ ts, lat, lon }`
+- `hourly_dow.json` — `{ hourly: [...], day_of_week: [...] }`
+- `areas_summary.json` — per-region totals
+- `shower_probs.json` — precomputed Poisson probabilities per region × activity
 
 ---
 
@@ -45,22 +62,37 @@ The 7 JSON files in `data/processed/` that the website uses are committed (~440K
 - **Accent gold:** `#e8b84b` · **Red:** `#d63031` · **Blue:** `#4a9eff` · **Purple:** `#c678dd`
 - **Fonts:** Playfair Display (headings, weight 900), IBM Plex Mono (labels/data), IBM Plex Sans (body weight 300)
 - **Actor colours:** Iran `#c678dd` · Hezbollah `#f39c12` · Houthis `#4a9eff` · Hamas `#d63031`
-- **Iron Dome palette:** Interceptors `#4a9eff` (blue) · Missiles `#d63031` (red) · Explosions `#e8b84b` (gold) → white core
+- **Iron Dome palette:** Interceptors `#4a9eff` · Missiles `#d63031` · Explosions `#e8b84b` → white core
 
 ## Decisions Made
-- **Single scrollytelling page** — not multi-page hub. Better narrative flow.
-- **Pre-computed data files** — 7 small JSON files loaded lazily per section. The 54MB full dataset never loads in browser.
-- **Canvas-based Iron Dome animation** — uses `requestAnimationFrame` + quadratic Bezier curves. No external animation library needed beyond GSAP (already loaded for scroll entrances).
-- **IntersectionObserver lazy loading** — all charts use `threshold: 0.05, rootMargin: '0px 0px -80px 0px'` to trigger just before section enters view.
+- **Multi-page card hub** — index is hero + cards, each chart has its own page with nav. Better for adding new charts independently.
+- **Code-runner UI** — pseudo-code "terminal" on timeline and fronts pages. User presses Enter/Run; lines type out, then 10s reveal animation plays. Non-technical readable language.
+- **Salvo cap at 80 missiles** — raw alert count is scaled via `sqrt * 1.8`, capped at 80. Label shows raw count and displayed count. Oct 7-sized spikes stay readable.
+- **Actor filter re-renders at 2s** — first reveal is 10s (the wow moment), filter changes use 2s (snappy response).
+- **Pre-computed data files** — 7 small JSON files. The 54MB full dataset never loads in browser.
 - **Neutral framing** — purely data-driven, no political commentary.
-- **RocketAlert.live data** — used instead of OREF scraper (complete, clean, with origin attribution).
+- **RocketAlert.live data** — complete, clean, with origin attribution.
+
+---
+
+## Git Workflow
+This project is edited both locally and in the cloud. **Always sync before editing.**
+
+```bash
+./scripts/sync.sh          # pull + rebase current branch, auto-stash dirty changes
+./scripts/sync.sh main     # switch to main first, then sync
+```
+
+A SessionStart hook in `.claude/settings.json` auto-fetches and warns if the branch is behind origin.
+
+**Version tags (local):**
+- `v1-scrollytelling` → commit `53d18d1` — original single-page scrollytelling build
+- `v2-card-hub` → current HEAD — multi-page card hub refactor
 
 ---
 
 ## Data Notes
 - **Total alerts:** 142,837 (Jan 2020 – Mar 2026)
-- **data1.json:** 8,329 alerts, Jan 2020–Jul 2023, no origin attribution
-- **data2.json:** 134,508 alerts, Oct 2023–Mar 2026, with origin attribution
 - **Origin breakdown:** Iran 82,288 / Hezbollah 29,950 / Houthis 13,022 / Hamas 8,981 / Unknown 8,596
 - Origin field is an *estimated* attribution based on location + timestamp
 - **Credit required:** Data from RocketAlert.live — credited in site footer
@@ -71,70 +103,54 @@ The 7 JSON files in `data/processed/` that the website uses are committed (~440K
 
 ### 🎯 More Iron Dome-style interactive animations
 
-These follow the same approach as the hero animation — Canvas/SVG with `requestAnimationFrame`, matching the existing colour palette.
+**Live interception counter** — A running tally in the corner of the hero that counts how many "interceptions" the animation has performed since page load.
 
-**Salvo visualiser** — When a user clicks on a spike in the timeline chart, instead of just a tooltip, trigger a short animation: missiles arc across the canvas representing the alerts from that week, with Iron Dome interceptors rising to meet them. The number of arcs scales with the alert count (e.g. Oct 7 would fire hundreds).
+**Threat direction compass** — An animated radar-style circle showing which cardinal directions alerts originated from (North = Hezbollah/Lebanon, South = Hamas/Gaza, East = Iran ballistic, West = Houthis/sea).
 
-**Live interception counter** — A running tally in the corner of the hero that counts how many "interceptions" the animation has performed since page load. Ties the visual metaphor to the real data.
-
-**Threat direction compass** — An animated radar-style circle showing which cardinal directions alerts originated from (North = Hezbollah/Lebanon, South = Hamas/Gaza, East = Iran ballistic, West = Houthis/sea). Arcs radiate outward from the compass as you scroll through the timeline.
-
-**Iron Dome battery map** — A small schematic map of Israel with the real Iron Dome battery positions shown as glowing blue dots. When the Oct 7 replay is playing, show interception arcs firing from the nearest battery to each incoming alert.
+**Iron Dome battery map** — A schematic map of Israel with the real Iron Dome battery positions as glowing blue dots. When the Oct 7 replay plays, show interception arcs firing from the nearest battery.
 
 ---
 
 ### 📊 Chart enhancements
 
-**Actor filter on timeline** — Add toggle buttons (Hamas / Hezbollah / Houthis / Iran / All) above the Six Years chart to isolate each actor's contribution. The area fill updates with a smooth D3 transition. The archive `timeline.html` had a UI sketch for this.
-
 **Zoomable timeline** — Click-drag to zoom into any time window on the Six Years chart. Useful for isolating specific operations (e.g. Guardian of the Walls, May 2021).
 
-**Animated area chart entrance** — When the Four Fronts chart scrolls into view, have each actor's layer grow from zero rather than appearing instantly. Uses D3's `transition().attrTween`.
+**Heatmap calendar** — A GitHub-contributions-style calendar heatmap of alert density by day. Each cell is one day, colour intensity = alert count.
 
-**Heatmap calendar** — A GitHub-contributions-style calendar heatmap of alert density by day. Each cell is one day, colour intensity = alert count. Makes the episodic clustering very visible.
+**Region comparison** — Select two regions from the Area Vulnerability chart and see a side-by-side breakdown of their alert profiles.
 
-**Region comparison** — Allow the user to select two regions from the Area Vulnerability chart and see a side-by-side breakdown of their alert profiles by actor and time of day.
+**Code-runner on remaining pages** — Extend the pseudo-code execution UI to oct7, patterns, areas, and odds pages.
 
 ---
 
 ### 🗺️ Map features
 
-**Persistent dot map** — A static Leaflet layer showing all 142,837 alerts as tiny dots, coloured by actor. Render at low opacity so clusters emerge. Add a time slider to filter by year.
+**Persistent dot map** — A static Leaflet layer showing all 142,837 alerts as tiny dots coloured by actor. Add a time slider to filter by year.
 
-**Animated "spread" replay** — Show how the geographic envelope of attacks expanded over time — starting from Gaza in 2020, then northern border in 2023, then national coverage post-Oct 7. Animate the frontier outward.
-
-**3D trajectory arcs** — Use Deck.gl (a WebGL layer on top of Leaflet/Mapbox) to draw actual 3D arc trajectories between estimated launch points and impact areas. The arcs arc over the terrain.
+**Animated "spread" replay** — Show how the geographic envelope of attacks expanded over time — starting from Gaza in 2020, then northern border in 2023, then national coverage post-Oct 7.
 
 ---
 
 ### 🔢 Data & interactivity
 
-**Live data toggle** — Connect `oref_scraper.py` to a GitHub Actions schedule (the workflow file is already in `.github/workflows/`). Show a "last updated" badge and a pulse indicator when new alerts have been added since the last visit.
+**Live data toggle** — Connect `oref_scraper.py` to a GitHub Actions schedule. Show a "last updated" badge.
 
-**Personal risk calculator expansion** — Beyond Poisson probability, add a "blast radius" widget: given a region, show a map inset of which Iron Dome batteries would respond and the expected response time based on historical data.
-
-**Comparative country scale** — The "What Are the Odds?" section could include a comparison: *"142,837 alerts is equivalent to every person in [City X] receiving one alert."* Dynamic based on selected region population.
-
-**Download / share** — Let users download the current chart view as a PNG (using `canvas.toBlob()` or `html2canvas`) or copy a shareable link that pre-scrolls to a specific section with a specific filter active.
+**Download / share** — Let users download the current chart view as a PNG or copy a shareable link.
 
 ---
 
 ### ✨ Polish & UX
 
-**Scroll progress bar** — A thin gold line at the top of the page that fills as you read through all 7 chapters.
+**Mobile-first pass** — Proper mobile layout: stack patterns grid, enlarge map touch targets, reduce Iron Dome particle count on low-powered devices.
 
-**Chapter transition sounds** — Very subtle, optional audio: a short radar ping when a new section loads, a soft explosion sound when the Oct 7 map starts playing. Toggle with a speaker icon. Use the Web Audio API.
-
-**Dark/light mode** — The design system is dark-first but a light mode with the same typography and data colours could look striking — pale cream background, charcoal text, same gold/red/blue accents.
-
-**Mobile-first pass** — The site is readable on mobile but the charts are compressed. A proper mobile layout would stack the patterns grid, enlarge touch targets on the map controls, and simplify the Iron Dome animation particle count for lower-powered devices.
+**Dark/light mode** — Light mode with pale cream background, same typography and data colours.
 
 ---
 
 ## Starting a New Session
 When picking this up in Claude Code:
-1. Open the repo folder (or clone: `git clone https://github.com/alfierees/under-fire`)
-2. Claude will read this file and the code and be up to speed immediately
-3. Run `python3 -m http.server 8000` to preview locally while editing
-4. All charts and the Iron Dome animation will work without any extra setup
+1. Run `./scripts/sync.sh` to pull latest before touching anything
+2. Run `python3 -m http.server 8000` and open `http://localhost:8000`
+3. Click through `index.html` → each card → each chart to verify nothing is broken
+4. Read `CLAUDE.md` for the condensed working notes
 5. Commit and push when done — GitHub Pages auto-deploys on push to `main`
