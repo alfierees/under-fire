@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Under Fire — Timeline</title>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400;1,700&family=IBM+Plex+Mono:wght@300;400;500&family=IBM+Plex+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.8.5/d3.min.js"></script>
+  <link rel="stylesheet" href="src/css/shared.css">
+  <style>
+    #timeline-chart { width:100%; position:relative; min-height:300px; }
+    #timeline-chart svg { display:block; overflow:visible; }
+    .tl-annotation { font-family:'IBM Plex Mono',monospace; font-size:.6rem; fill:var(--accent); letter-spacing:.06em; }
+    .chart-hint {
+      font-family:'IBM Plex Mono',monospace; font-size:.6rem;
+      letter-spacing:.1em; color:var(--muted); margin-top:.8rem;
+    }
+    .chart-hint b { color:var(--accent); }
+  </style>
+</head>
+<body>
+
+<div id="file-protocol-warning">
+  <strong>⚠ CHARTS WON'T LOAD VIA FILE://</strong>
+  Run a local server: <code>python3 -m http.server 8000</code>
+  <span class="close-x" onclick="this.parentElement.style.display='none'">✕</span>
+</div>
+
+<nav>
+  <a href="index.html" class="nav-brand">Under Fire</a>
+  <div class="nav-links">
+    <a href="timeline.html" class="active">Timeline</a>
+    <a href="oct7.html">Oct 7</a>
+    <a href="fronts.html">Fronts</a>
+    <a href="patterns.html">Patterns</a>
+    <a href="areas.html">By Area</a>
+    <a href="odds.html">Odds</a>
+  </div>
+  <div class="nav-badge" id="nav-badge">🔔 Loading…</div>
+</nav>
+
+<div id="tooltip"></div>
+
+<div class="chart-page">
+  <div class="section-wrapper">
+    <a href="index.html" class="back-link">← Back to all charts</a>
+    <div class="section-label">01 — Timeline</div>
+    <h1 class="section-title">Six Years of Alerts</h1>
+    <p class="section-desc">Weekly alert totals from January 2020 to March 2026. Each bar is one week. The scale of October 7, 2023 is not a typo.</p>
+
+    <div class="finding-row">
+      <div class="finding-card">
+        <div class="finding-head">Pre-Oct 7 (Jan 2020–Oct 2023)</div>
+        <div class="finding-stat" id="stat-pre-oct7">—</div>
+        <div class="finding-text">alerts over 3+ years</div>
+      </div>
+      <div class="finding-card blue">
+        <div class="finding-head">Post-Oct 7 (Oct 2023–Mar 2026)</div>
+        <div class="finding-stat" id="stat-post-oct7">—</div>
+        <div class="finding-text">alerts in under 2.5 years</div>
+      </div>
+      <div class="finding-card gold">
+        <div class="finding-head">Single Busiest Day</div>
+        <div class="finding-stat">4,000</div>
+        <div class="finding-text">alerts on Oct 7, 2023</div>
+      </div>
+    </div>
+
+    <div id="runner"></div>
+
+    <div class="filter-bar" id="actor-filter" style="display:none;">
+      <span class="filter-label">Filter by origin:</span>
+      <button class="filter-btn active" data-actor="all" style="color:#fff;">All</button>
+      <button class="filter-btn" data-actor="Hamas" style="color:var(--hamas);">Hamas</button>
+      <button class="filter-btn" data-actor="Hezbollah" style="color:var(--hezbollah);">Hezbollah</button>
+      <button class="filter-btn" data-actor="Houthis" style="color:var(--houthis);">Houthis</button>
+      <button class="filter-btn" data-actor="Iran" style="color:var(--iran);">Iran</button>
+      <button class="filter-btn" data-actor="Unknown" style="color:var(--muted);">Unattributed</button>
+    </div>
+
+    <div id="timeline-chart"></div>
+    <p class="chart-hint" id="click-hint" style="display:none;">
+      <b>Tip:</b> click any week to launch a salvo animation scaled to that week's alert count.
+    </p>
+    <p class="chart-note">Weekly alert counts. Vertical line marks October 7, 2023. Source: RocketAlert.live</p>
+  </div>
+</div>
+
+<footer>
+  <div class="footer-left">Under Fire — Data Visualisation Project — 2026</div>
+  <div class="footer-credit">
+    Alert data from <a href="https://rocketalert.live" target="_blank">RocketAlert.live</a>.
+  </div>
+</footer>
+
+<script src="src/js/shared.js"></script>
+<script src="src/js/code-runner.js"></script>
+<script src="src/js/salvo.js"></script>
+<script>
+// ── Timeline page ─────────────────────────────────────────────────────────
+let timelineData = null;
+let activeActor = 'all';
+let currentClipRect = null;
+let salvo = null;
+
+async function loadStats() {
+  try {
+    const s = await fetchData('stats_summary.json');
+    document.getElementById('stat-pre-oct7').textContent = fmtNum(s.origins['Unknown'] || 8596);
+    const post = (s.origins['Hamas']||0) + (s.origins['Hezbollah']||0) + (s.origins['Houthis']||0) + (s.origins['Iran']||0);
+    document.getElementById('stat-post-oct7').textContent = fmtNum(post);
+  } catch(e) {
+    document.getElementById('stat-pre-oct7').textContent = '8,596';
+    document.getElementById('stat-post-oct7').textContent = '134,241';
+  }
+}
+
+function drawTimeline(data, actor, revealMs = 10000) {
+  const container = document.getElementById('timeline-chart');
+  container.innerHTML = '';
+  const W = container.clientWidth || 1000;
+  const H = 340;
+  const M = { top: 20, right: 20, bottom: 40, left: 50 };
+  const w = W - M.left - M.right;
+  const h = H - M.top - M.bottom;
+
+  const svg = d3.select('#timeline-chart').append('svg').attr('width', W).attr('height', H);
+  const g = svg.append('g').attr('transform', `translate(${M.left},${M.top})`);
+
+  const parseWeek = d3.timeParse('%Y-%m-%d');
+  const oct7 = new Date('2023-10-07');
+
+  const val = (d) => actor === 'all' ? d.total : (d[actor] || 0);
+
+  const x = d3.scaleTime().domain(d3.extent(data, d => parseWeek(d.week))).range([0, w]);
+  const y = d3.scaleLinear().domain([0, d3.max(data, val) || 1]).range([h, 0]).nice();
+
+  // Grid
+  g.append('g').attr('class','grid')
+    .call(d3.axisLeft(y).ticks(5).tickSize(-w).tickFormat(''))
+    .call(g => g.select('.domain').remove())
+    .call(g => g.selectAll('line').attr('stroke', 'rgba(255,255,255,0.04)'));
+
+  const areaGen = d3.area()
+    .x(d => x(parseWeek(d.week))).y0(h).y1(d => y(val(d)))
+    .curve(d3.curveMonotoneX);
+
+  // Gradients
+  const defs = svg.append('defs');
+  const actorColor = { all:'rgba(214,48,49,', Hamas:'rgba(214,48,49,', Hezbollah:'rgba(243,156,18,', Houthis:'rgba(74,158,255,', Iran:'rgba(198,120,221,', Unknown:'rgba(200,200,216,' }[actor] || 'rgba(214,48,49,';
+  const gradId = 'grad-' + actor;
+  const grad = defs.append('linearGradient').attr('id', gradId).attr('x1',0).attr('y1',0).attr('x2',0).attr('y2',1);
+  grad.append('stop').attr('offset','0%').attr('stop-color', actorColor + '0.55)');
+  grad.append('stop').attr('offset','100%').attr('stop-color', actorColor + '0.02)');
+
+  const clipId = 'tl-clip-' + Date.now();
+  const clip = defs.append('clipPath').attr('id', clipId);
+  const clipRect = clip.append('rect').attr('x', 0).attr('y', -M.top).attr('width', 0).attr('height', H);
+  currentClipRect = clipRect;
+
+  if (actor === 'all') {
+    const pre  = data.filter(d => parseWeek(d.week) < oct7);
+    const post = data.filter(d => parseWeek(d.week) >= oct7);
+    const gradPre = defs.append('linearGradient').attr('id','grad-pre').attr('x1',0).attr('y1',0).attr('x2',0).attr('y2',1);
+    gradPre.append('stop').attr('offset','0%').attr('stop-color','rgba(200,200,216,0.4)');
+    gradPre.append('stop').attr('offset','100%').attr('stop-color','rgba(200,200,216,0.02)');
+    g.append('path').datum(pre).attr('fill','url(#grad-pre)').attr('stroke','rgba(200,200,216,0.5)').attr('stroke-width',1).attr('clip-path',`url(#${clipId})`).attr('d', areaGen);
+    g.append('path').datum(post).attr('fill', `url(#${gradId})`).attr('stroke', actorColor + '0.8)').attr('stroke-width',1).attr('clip-path',`url(#${clipId})`).attr('d', areaGen);
+  } else {
+    g.append('path').datum(data).attr('fill', `url(#${gradId})`).attr('stroke', actorColor + '0.8)').attr('stroke-width',1).attr('clip-path',`url(#${clipId})`).attr('d', areaGen);
+  }
+
+  // Oct 7 line
+  const oct7x = x(oct7);
+  g.append('line').attr('x1', oct7x).attr('x2', oct7x).attr('y1', 0).attr('y2', h)
+    .attr('stroke', '#e8b84b').attr('stroke-width', 1.5).attr('stroke-dasharray', '4,3');
+  g.append('text').attr('x', oct7x + 6).attr('y', 14).attr('class', 'tl-annotation').text('Oct 7, 2023');
+
+  // Axes
+  g.append('g').attr('transform', `translate(0,${h})`)
+    .call(d3.axisBottom(x).ticks(8).tickFormat(d3.timeFormat('%Y')))
+    .call(g => {
+      g.select('.domain').attr('stroke', 'var(--border)');
+      g.selectAll('text').attr('fill','var(--muted)').attr('font-family','IBM Plex Mono').attr('font-size','10px');
+      g.selectAll('line').attr('stroke','var(--border)');
+    });
+  g.append('g').call(d3.axisLeft(y).ticks(5).tickFormat(d => d >= 1000 ? (d/1000)+'k' : d))
+    .call(g => {
+      g.select('.domain').remove();
+      g.selectAll('text').attr('fill','var(--muted)').attr('font-family','IBM Plex Mono').attr('font-size','10px');
+      g.selectAll('line').remove();
+    });
+
+  // Hover + click
+  const bisect = d3.bisector(d => parseWeek(d.week)).left;
+  const hoverLine = g.append('line').attr('y1',0).attr('y2',h).attr('stroke','rgba(255,255,255,0.2)').attr('stroke-width',1).attr('opacity',0);
+
+  svg.append('rect')
+    .attr('transform', `translate(${M.left},${M.top})`)
+    .attr('width', w).attr('height', h).attr('fill', 'transparent')
+    .style('cursor', 'crosshair')
+    .on('mousemove', function(event) {
+      const [mx] = d3.pointer(event);
+      const date = x.invert(mx);
+      const idx = Math.min(bisect(data, date), data.length - 1);
+      const d = data[idx];
+      if (!d) return;
+      hoverLine.attr('x1', mx).attr('x2', mx).attr('opacity', 1);
+      const count = val(d);
+      showTip(`<b>${d.week}</b><br>Alerts: ${fmtNum(count)}<br><span style="color:var(--accent)">click to launch salvo</span>`, event);
+    })
+    .on('mouseleave', () => { hoverLine.attr('opacity', 0); hideTip(); })
+    .on('click', function(event) {
+      const [mx] = d3.pointer(event);
+      const date = x.invert(mx);
+      const idx = Math.min(bisect(data, date), data.length - 1);
+      const d = data[idx];
+      if (!d || !salvo) return;
+      const count = val(d);
+      if (count < 1) return;
+      salvo.fire({ count, label: `Week of ${d.week}` });
+    });
+
+  // Kick off the left-to-right reveal
+  clipRect.transition().duration(revealMs).ease(d3.easeCubicInOut).attr('width', w);
+}
+
+async function init() {
+  await loadStats();
+  timelineData = await fetchData('timeline_weekly.json');
+
+  mountCodeRunner({
+    mount: '#runner',
+    file: 'build_timeline.js',
+    lines: [
+      { text: '// Six years of weekly alert totals (Jan 2020 – Mar 2026)', kind: 'cm' },
+      { text: 'const data = load("timeline_weekly.json")' },
+      { text: 'const x = scale.time(data.week)' },
+      { text: 'const y = scale.linear(data.total)' },
+      { text: 'const area = d3.area().curve(monotone)' },
+      { text: '// Split at Oct 7, 2023 — grey before, red after' },
+      { text: 'draw(area, pre_oct7, color: "grey")' },
+      { text: 'draw(area, post_oct7, color: "red")' },
+      { text: 'reveal(duration: 10_000) // left → right' },
+    ],
+    onRun: () => {
+      drawTimeline(timelineData, 'all', 10000);
+      document.getElementById('actor-filter').style.display = 'flex';
+      document.getElementById('click-hint').style.display = 'block';
+      salvo = mountSalvo({ mount: '#timeline-chart' });
+    }
+  });
+
+  // Actor filter — redraws with a shorter 2s transition since user already saw the 10s reveal once
+  document.getElementById('actor-filter').addEventListener('click', (e) => {
+    const btn = e.target.closest('.filter-btn');
+    if (!btn) return;
+    document.querySelectorAll('#actor-filter .filter-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    activeActor = btn.dataset.actor;
+    drawTimeline(timelineData, activeActor, 2000);
+    salvo = mountSalvo({ mount: '#timeline-chart' });
+  });
+}
+
+init();
+</script>
+</body>
+</html>

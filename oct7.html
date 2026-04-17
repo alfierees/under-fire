@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Under Fire — October 7 Replay</title>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400;1,700&family=IBM+Plex+Mono:wght@300;400;500&family=IBM+Plex+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.8.5/d3.min.js"></script>
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <link rel="stylesheet" href="src/css/shared.css">
+  <style>
+    #map-container { position:relative; width:100%; height:72vh; min-height:480px; margin-top:2rem; border:1px solid var(--border); border-radius:4px; overflow:hidden; }
+    #oct7-map { width:100%; height:100%; }
+    .map-overlay { position:absolute; z-index:1000; bottom:2rem; left:2rem; background:rgba(7,7,10,.88); backdrop-filter:blur(10px); border:1px solid var(--border); padding:1.5rem 2rem; border-radius:4px; min-width:220px; }
+    .map-clock { font-family:'Playfair Display',serif; font-size:2.4rem; font-weight:700; color:#fff; line-height:1; margin-bottom:.4rem; }
+    .map-clock-label { font-family:'IBM Plex Mono',monospace; font-size:.55rem; letter-spacing:.14em; text-transform:uppercase; color:var(--muted); margin-bottom:1.2rem; }
+    .map-counter { font-family:'Playfair Display',serif; font-size:1.4rem; font-weight:700; color:var(--red); }
+    .map-counter-label { font-family:'IBM Plex Mono',monospace; font-size:.55rem; letter-spacing:.1em; text-transform:uppercase; color:var(--muted); margin-top:.2rem; }
+    .map-controls { position:absolute; z-index:1000; bottom:2rem; right:2rem; display:flex; gap:.6rem; }
+    .map-btn { font-family:'IBM Plex Mono',monospace; font-size:.62rem; letter-spacing:.1em; text-transform:uppercase; padding:.5rem 1.2rem; border:1px solid var(--border); background:rgba(7,7,10,.85); color:var(--text); cursor:pointer; border-radius:2px; transition:all .2s; }
+    .map-btn:hover, .map-btn.active { border-color:var(--accent); color:var(--accent); }
+    .map-btn.play-btn { border-color:var(--red); color:var(--red); }
+    .map-btn.play-btn:hover { background:var(--red); color:#fff; }
+    .map-legend { position:absolute; z-index:1000; top:1.5rem; right:1.5rem; background:rgba(7,7,10,.85); border:1px solid var(--border); padding:1rem; border-radius:4px; }
+    .legend-item { display:flex; align-items:center; gap:.5rem; font-family:'IBM Plex Mono',monospace; font-size:.55rem; letter-spacing:.06em; color:var(--muted); margin-bottom:.4rem; }
+    .legend-dot { width:8px; height:8px; border-radius:50%; flex-shrink:0; }
+  </style>
+</head>
+<body>
+
+<div id="file-protocol-warning">
+  <strong>⚠ CHARTS WON'T LOAD VIA FILE://</strong>
+  Run: <code>python3 -m http.server 8000</code>
+  <span class="close-x" onclick="this.parentElement.style.display='none'">✕</span>
+</div>
+
+<nav>
+  <a href="index.html" class="nav-brand">Under Fire</a>
+  <div class="nav-links">
+    <a href="timeline.html">Timeline</a>
+    <a href="oct7.html" class="active">Oct 7</a>
+    <a href="fronts.html">Fronts</a>
+    <a href="patterns.html">Patterns</a>
+    <a href="areas.html">By Area</a>
+    <a href="odds.html">Odds</a>
+  </div>
+  <div class="nav-badge" id="nav-badge">🔔 Loading…</div>
+</nav>
+
+<div id="tooltip"></div>
+
+<div class="chart-page">
+  <div class="section-wrapper">
+    <a href="index.html" class="back-link">← Back to all charts</a>
+    <div class="section-label">03 — October 7, 2023</div>
+    <h1 class="section-title">The Day It Changed</h1>
+    <p class="section-desc">4,000 individual alerts fired across Israel on October 7, 2023 — from 06:29 in the morning to 23:13 at night. Press play to watch it unfold.</p>
+  </div>
+
+  <div id="map-container">
+    <div id="oct7-map"></div>
+    <div class="map-overlay">
+      <div class="map-clock" id="map-clock">06:29</div>
+      <div class="map-clock-label">Time of day</div>
+      <div class="map-counter" id="map-counter">0</div>
+      <div class="map-counter-label">Alerts so far</div>
+    </div>
+    <div class="map-controls">
+      <button class="map-btn" id="reset-btn">↺ Reset</button>
+      <button class="map-btn play-btn" id="play-btn">▶ Play</button>
+    </div>
+    <div class="map-legend">
+      <div class="legend-item"><div class="legend-dot" style="background:#4a9eff"></div>Early morning</div>
+      <div class="legend-item"><div class="legend-dot" style="background:#e8b84b"></div>Midday</div>
+      <div class="legend-item"><div class="legend-dot" style="background:#d63031"></div>Evening</div>
+    </div>
+  </div>
+</div>
+
+<footer style="margin-top:3rem;">
+  <div class="footer-left">Under Fire — 2026</div>
+  <div class="footer-credit">Alert data from <a href="https://rocketalert.live" target="_blank">RocketAlert.live</a>.</div>
+</footer>
+
+<script src="src/js/shared.js"></script>
+<script>
+let oct7Map = null, oct7Data = [], alertIdx = 0, isPlaying = false;
+let rAFId = null, lastRafTime = null, simMinutes = 0;
+const OCT7_START_MINS = 6 * 60 + 29;
+const OCT7_END_MINS = 23 * 60 + 13;
+const OCT7_TOTAL_MINS = OCT7_END_MINS - OCT7_START_MINS;
+const PLAYBACK_SECS = 90;
+const SPEED = OCT7_TOTAL_MINS / PLAYBACK_SECS;
+
+const colorScale = d3.scaleSequential()
+  .domain([OCT7_START_MINS, OCT7_END_MINS])
+  .interpolator(t => t < 0.5
+    ? d3.interpolateRgb('#4a9eff', '#e8b84b')(t * 2)
+    : d3.interpolateRgb('#e8b84b', '#d63031')((t - 0.5) * 2));
+
+oct7Map = L.map('oct7-map', { center: [31.5, 35.0], zoom: 7 });
+L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+  attribution: '&copy; OpenStreetMap &copy; CARTO', subdomains: 'abcd', maxZoom: 19
+}).addTo(oct7Map);
+
+(async () => {
+  try { oct7Data = await fetchData('oct7_replay.json'); }
+  catch (e) { console.warn('oct7 load', e); }
+})();
+
+const canvasRenderer = L.canvas ? L.canvas({ padding: 0.5 }) : null;
+function addAlertMarker(a) {
+  const [H, M] = a.ts.split(' ')[1].split(':');
+  const color = colorScale(+H * 60 + +M);
+  const opts = { radius: 4, color, fillColor: color, fillOpacity: 0.75, weight: 0 };
+  if (canvasRenderer) opts.renderer = canvasRenderer;
+  L.circleMarker([a.lat, a.lon], opts).addTo(oct7Map);
+}
+
+function updateUI() {
+  const tm = OCT7_START_MINS + simMinutes;
+  document.getElementById('map-clock').textContent =
+    String(Math.floor(tm/60)).padStart(2,'0') + ':' + String(Math.floor(tm%60)).padStart(2,'0');
+  document.getElementById('map-counter').textContent = fmtNum(alertIdx);
+}
+
+function animate(ts) {
+  if (lastRafTime === null) lastRafTime = ts;
+  const dt = Math.min((ts - lastRafTime) / 1000, 0.1);
+  lastRafTime = ts;
+  simMinutes += dt * SPEED;
+  const cur = OCT7_START_MINS + simMinutes;
+  while (alertIdx < oct7Data.length) {
+    const a = oct7Data[alertIdx];
+    const [hh, mm, ss] = a.ts.split(' ')[1].split(':');
+    const aM = +hh * 60 + +mm + (+ss || 0) / 60;
+    if (aM <= cur) { addAlertMarker(a); alertIdx++; } else break;
+  }
+  updateUI();
+  if (simMinutes < OCT7_TOTAL_MINS && alertIdx < oct7Data.length) {
+    rAFId = requestAnimationFrame(animate);
+  } else {
+    isPlaying = false;
+    document.getElementById('play-btn').textContent = '✓ Done';
+  }
+}
+
+document.getElementById('play-btn').onclick = () => {
+  if (!oct7Data.length) return;
+  if (isPlaying) {
+    isPlaying = false;
+    if (rAFId) cancelAnimationFrame(rAFId);
+    rAFId = null; lastRafTime = null;
+    document.getElementById('play-btn').textContent = '▶ Play';
+  } else {
+    isPlaying = true;
+    lastRafTime = null;
+    document.getElementById('play-btn').textContent = '⏸ Pause';
+    rAFId = requestAnimationFrame(animate);
+  }
+};
+document.getElementById('reset-btn').onclick = () => {
+  isPlaying = false;
+  if (rAFId) cancelAnimationFrame(rAFId);
+  rAFId = null; lastRafTime = null; simMinutes = 0; alertIdx = 0;
+  document.getElementById('play-btn').textContent = '▶ Play';
+  document.getElementById('map-clock').textContent = '06:29';
+  document.getElementById('map-counter').textContent = '0';
+  oct7Map.eachLayer(l => { if (l instanceof L.CircleMarker) oct7Map.removeLayer(l); });
+};
+</script>
+</body>
+</html>

@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Under Fire — Patterns</title>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400;1,700&family=IBM+Plex+Mono:wght@300;400;500&family=IBM+Plex+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.8.5/d3.min.js"></script>
+  <link rel="stylesheet" href="src/css/shared.css">
+  <style>
+    .patterns-grid { display:grid; grid-template-columns:1fr 1fr; gap:4rem; align-items:start; }
+    #clock-chart, #dow-chart { width:100%; }
+    #clock-chart svg, #dow-chart svg { display:block; overflow:visible; }
+    .chart-title { font-family:'IBM Plex Mono',monospace; font-size:.62rem; letter-spacing:.14em; text-transform:uppercase; color:var(--text); margin-bottom:1.5rem; }
+    @media (max-width:900px) { .patterns-grid { grid-template-columns:1fr; gap:2.5rem; } }
+  </style>
+</head>
+<body>
+
+<div id="file-protocol-warning">
+  <strong>⚠ CHARTS WON'T LOAD VIA FILE://</strong>
+  Run: <code>python3 -m http.server 8000</code>
+  <span class="close-x" onclick="this.parentElement.style.display='none'">✕</span>
+</div>
+
+<nav>
+  <a href="index.html" class="nav-brand">Under Fire</a>
+  <div class="nav-links">
+    <a href="timeline.html">Timeline</a>
+    <a href="oct7.html">Oct 7</a>
+    <a href="fronts.html">Fronts</a>
+    <a href="patterns.html" class="active">Patterns</a>
+    <a href="areas.html">By Area</a>
+    <a href="odds.html">Odds</a>
+  </div>
+  <div class="nav-badge" id="nav-badge">🔔 Loading…</div>
+</nav>
+
+<div id="tooltip"></div>
+
+<div class="chart-page">
+  <div class="section-wrapper">
+    <a href="index.html" class="back-link">← Back to all charts</a>
+    <div class="section-label">04 — Patterns</div>
+    <h1 class="section-title">When Do They Strike?</h1>
+    <p class="section-desc">Alerts happen around the clock — there is no safe hour. But the data reveals clear patterns: a 10am peak, and Saturday as the single most targeted day of the week.</p>
+
+    <div class="patterns-grid">
+      <div>
+        <div class="chart-title">Alerts by Hour of Day</div>
+        <div id="clock-chart"></div>
+      </div>
+      <div id="dow">
+        <div class="chart-title">Alerts by Day of Week</div>
+        <div id="dow-chart"></div>
+      </div>
+    </div>
+    <p class="chart-note">All 142,837 alerts, 2020–2026. Source: RocketAlert.live</p>
+  </div>
+</div>
+
+<footer>
+  <div class="footer-left">Under Fire — 2026</div>
+  <div class="footer-credit">Alert data from <a href="https://rocketalert.live" target="_blank">RocketAlert.live</a>.</div>
+</footer>
+
+<script src="src/js/shared.js"></script>
+<script>
+function drawClock(data) {
+  const c = document.getElementById('clock-chart');
+  const size = Math.min(c.clientWidth || 360, 380);
+  const cx = size/2, cy = size/2;
+  const innerR = 40, outerMaxR = size/2 - 30;
+  const maxVal = d3.max(data, d => d.count);
+  const rS = d3.scaleLinear().domain([0, maxVal]).range([innerR, outerMaxR]);
+  const svg = d3.select('#clock-chart').append('svg').attr('width', size).attr('height', size);
+  const g = svg.append('g').attr('transform', `translate(${cx},${cy})`);
+  const tau = 2*Math.PI, sA = tau/24;
+  data.forEach(d => {
+    const startA = (d.hour/24)*tau - Math.PI/2;
+    const arc = d3.arc().innerRadius(innerR).outerRadius(rS(d.count)).startAngle(startA).endAngle(startA + sA - 0.01);
+    const isNight = d.hour < 6 || d.hour >= 22;
+    const isPeak = d.hour === 10;
+    g.append('path').attr('d', arc)
+      .attr('fill', isPeak ? 'var(--red)' : isNight ? 'rgba(74,158,255,0.5)' : 'rgba(232,184,75,0.6)')
+      .attr('stroke', 'var(--bg)').attr('stroke-width', 0.5)
+      .on('mouseover', e => showTip(`${String(d.hour).padStart(2,'0')}:00 — ${fmtNum(d.count)} alerts`, e))
+      .on('mousemove', moveTip).on('mouseleave', hideTip);
+  });
+  [0, 6, 12, 18].forEach(h => {
+    const angle = (h/24)*tau - Math.PI/2;
+    const r = outerMaxR + 16;
+    g.append('text').attr('x', Math.cos(angle)*r).attr('y', Math.sin(angle)*r + 4)
+      .attr('text-anchor','middle').attr('fill','var(--muted)')
+      .attr('font-family','IBM Plex Mono').attr('font-size','10px')
+      .text(String(h).padStart(2,'0') + ':00');
+  });
+  g.append('text').attr('text-anchor','middle').attr('dy','0.35em')
+    .attr('fill','var(--muted)').attr('font-family','IBM Plex Mono').attr('font-size','9px').text('24h');
+}
+
+function drawDoW(data) {
+  const c = document.getElementById('dow-chart');
+  const W = c.clientWidth || 380, H = 280;
+  const M = { top:10, right:20, bottom:10, left:110 };
+  const w = W - M.left - M.right, h = H - M.top - M.bottom;
+  const svg = d3.select('#dow-chart').append('svg').attr('width', W).attr('height', H);
+  const g = svg.append('g').attr('transform', `translate(${M.left},${M.top})`);
+  const maxVal = d3.max(data, d => d.count);
+  const x = d3.scaleLinear().domain([0, maxVal]).range([0, w]);
+  const y = d3.scaleBand().domain(data.map(d => d.day)).range([0, h]).padding(0.25);
+  const col = { Saturday:'var(--red)', Sunday:'rgba(214,48,49,0.6)' };
+  data.forEach(d => {
+    const isWknd = d.day === 'Saturday' || d.day === 'Sunday';
+    g.append('rect').attr('x',0).attr('y', y(d.day)).attr('width', x(d.count)).attr('height', y.bandwidth())
+      .attr('fill', col[d.day] || 'rgba(232,184,75,0.5)').attr('rx', 2);
+    g.append('text').attr('x', x(d.count)+8).attr('y', y(d.day)+y.bandwidth()/2+4)
+      .attr('font-family','IBM Plex Mono').attr('font-size','10px')
+      .attr('fill', isWknd ? '#fff' : 'var(--muted)').text(fmtNum(d.count));
+  });
+  g.append('g').call(d3.axisLeft(y).tickSize(0)).call(g => {
+    g.select('.domain').remove();
+    g.selectAll('text').attr('fill','var(--muted)').attr('font-family','IBM Plex Mono').attr('font-size','11px').attr('dx','-6px');
+  });
+}
+
+(async () => {
+  const d = await fetchData('hourly_dow.json');
+  drawClock(d.hourly);
+  drawDoW(d.day_of_week);
+})();
+</script>
+</body>
+</html>
