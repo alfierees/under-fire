@@ -7,15 +7,15 @@
 }
 .hero-bg {
   position:absolute; inset:0; z-index:0;
-  background-image: url('images/hero-bg.jpg');
+  background-image: url('../../images/hero-bg.jpg');
   background-size: cover; background-position: center 40%;
   background-repeat: no-repeat;
 }
 .hero-bg::before {
   content:''; position:absolute; inset:0;
   background:
-    linear-gradient(to right, rgba(7,7,10,.94) 0%, rgba(7,7,10,.78) 48%, rgba(7,7,10,.40) 100%),
-    linear-gradient(to top,   rgba(7,7,10,1.0) 0%, transparent 38%);
+    linear-gradient(to right, rgba(7,7,10,.88) 0%, rgba(7,7,10,.60) 48%, rgba(7,7,10,.10) 100%),
+    linear-gradient(to top,   rgba(7,7,10,1.0) 0%, transparent 22%);
 }
 .hero-bg::after {
   content:''; position:absolute; inset:0;

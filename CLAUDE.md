@@ -3,11 +3,15 @@
 ## Project overview
 Data-vis site about rocket/missile/drone alerts over Israel (2020–2026). Static — no build step. Python (offline EDA) → JSON in `data/processed/` → HTML pages using D3 + Leaflet.
 
-## Site structure (as of v2 "card hub" refactor)
-- `index.html` — hero (Iron Dome canvas + "UNDER FIRE" title) + card grid, grouped into four categories: **Graphs**, **Maps**, **Patterns**, **Stats**.
-- `timeline.html` — Six Years area chart. Has code-runner UI, actor filter, salvo overlay on click.
-- `fronts.html` — Four Fronts stacked area. Has code-runner UI.
-- `oct7.html`, `patterns.html`, `areas.html`, `odds.html` — individual chart pages.
+## Site structure (as of v3 overhaul — 2026-04-17)
+- `index.html` — hero (Iron Dome canvas + hero-bg.jpg + "UNDER FIRE" title) + card grid: **Graphs** (3), **Maps** (2), **Patterns** (2), **Stats** (1).
+- `timeline.html` — Six Years area chart. Code-runner UI, actor filter, salvo overlay on click.
+- `fronts.html` — Four Fronts **stacked monthly bars**, each actor layer grows from zero (attrTween). Code-runner UI, auto-plays on scroll-into-view.
+- `calendar.html` — Daily heatmap (GitHub-contributions style). One cell = one day 2020–present.
+- `oct7.html`, `patterns.html`, `areas.html` — individual chart pages.
+- `patterns.html` — 24h polar clock (concentric actor rings + sweep reveal), weekday bar, actor×hour heatmap, code-runner UI.
+- `arcs.html` — Schematic arcs from Gaza/Lebanon/Iran/Yemen into Israel. Width = attributed share. Toggle all-time/Oct 7.
+- `records.html` — Records & extremes: busiest day/hour, longest quiet streak, biggest area spike, Oct 7 minute-by-minute bars.
 - `src/css/shared.css` — tokens, nav, tooltip, footer, code-runner, filter bar.
 - `src/css/hub.css` — hero + card grid (index only).
 - `src/js/shared.js` — `fetchData`, tooltip helpers, nav-badge boot.
@@ -37,19 +41,23 @@ A SessionStart hook in `.claude/settings.json` runs `git fetch` automatically an
 Before pushing: run the local server and click through `index.html` → each card → each chart at least once. Pushes to any branch on `origin` are live on GitHub immediately; the `main` branch auto-deploys to GitHub Pages.
 
 ## Animation decisions
-- Timeline/Fronts reveal: **10s** left-to-right clip-rect sweep, triggered by the code-runner's `onRun` callback.
-- Re-drawing (e.g. actor filter change) uses a shorter 2s reveal.
-- Salvo animation cap: **80 missiles max** regardless of raw alert count; label shows both raw count and shown count.
+- Timeline reveal: **10s** left-to-right clip-rect sweep via code-runner `onRun`.
+- Fronts reveal: per-actor stacked bars grow from zero, **1200ms each, staggered 450ms**. Auto-plays on IntersectionObserver.
+- Patterns clock: sweep hand **2.2s**, wedges fade in as hand passes. 10am flare.
+- Salvo animation cap: **80 missiles max**; label shows raw count only (no "N shown").
+- Hero background: `images/hero-bg.jpg` — CSS path is `url('../../images/hero-bg.jpg')` (relative to `src/css/hub.css`).
 
 ## Data files (small aggregates, committed)
-Files in `data/processed/`. Large raw data is gitignored.
+Files in `data/processed/`. Large raw data is gitignored. Regenerate with `python3 scripts/generate_extra_aggregates.py`.
 - `stats_summary.json` — totals & origin breakdown.
-- `timeline_weekly.json` — weekly totals with per-actor breakdown (columns: Hamas, Hezbollah, Houthis, Iran, Unknown, total, week).
+- `timeline_weekly.json` — weekly totals (Hamas, Hezbollah, Houthis, Iran, Unknown, total, week).
 - `actors_monthly.json` — monthly per-actor totals.
+- `daily_counts.json` — per-day counts derived from weekly × day-of-week distribution.
 - `oct7_replay.json` — every Oct 7 alert with `{ ts, lat, lon }`.
-- `hourly_dow.json` — { hourly: [...], day_of_week: [...] }.
+- `hourly_dow.json` — `{ hourly: [...], day_of_week: [...] }` with per-actor hourly counts.
+- `actor_hour.json` — flat `{ actor, hour, count }` for patterns heatmap.
 - `areas_summary.json` — per-region totals.
-- `shower_probs.json` — precomputed Poisson probabilities per region × activity.
+- `records.json` — precomputed extremes (busiest day/hour, longest quiet, biggest area spike).
 
 ## Not yet done (future work)
-See `HANDOFF.md` for the full list. Next candidates: zoomable timeline, actor filter memorising selection across pages, mobile particle-count tweak for the hero animation.
+See `HANDOFF.md`. Next candidates: zoomable timeline, code-runner on oct7/areas, mobile particle-count tweak.

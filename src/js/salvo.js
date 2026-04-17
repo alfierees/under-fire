@@ -224,7 +224,7 @@
       resize();
 
       canvas.style.opacity = '1';
-      label.textContent = `${opts.label || ''} — ${rawCount.toLocaleString()} alerts (${count} shown)`;
+      label.textContent = `${opts.label || ''} — ${rawCount.toLocaleString()} alerts`;
       label.style.opacity = '1';
 
       // Stagger missiles over the first 2.5s

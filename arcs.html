@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Under Fire — Threat-Origin Arcs</title>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400;1,700&family=IBM+Plex+Mono:wght@300;400;500&family=IBM+Plex+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.8.5/d3.min.js"></script>
+  <link rel="stylesheet" href="src/css/shared.css">
+  <style>
+    #arcs-wrap { position:relative; width:100%; min-height:560px; margin-top:2rem; border:1px solid var(--border); border-radius:4px; overflow:hidden; background:radial-gradient(ellipse at center, #0c0c12 0%, #07070a 80%); }
+    #arcs-chart { width:100%; height:100%; }
+    #arcs-chart svg { display:block; width:100%; height:100%; }
+    .arcs-controls { position:absolute; z-index:20; top:1rem; right:1rem; display:flex; gap:.5rem; }
+    .arcs-btn { font-family:'IBM Plex Mono',monospace; font-size:.58rem; letter-spacing:.12em; text-transform:uppercase; padding:.45rem 1rem; border:1px solid var(--border); background:rgba(7,7,10,.85); color:var(--muted); cursor:pointer; border-radius:2px; transition:all .2s; }
+    .arcs-btn:hover { color:var(--text); border-color:var(--text); }
+    .arcs-btn.active { color:var(--accent); border-color:var(--accent); background:rgba(232,184,75,0.08); }
+    .arcs-legend { position:absolute; z-index:20; bottom:1rem; left:1rem; background:rgba(7,7,10,.80); border:1px solid var(--border); padding:1rem 1.2rem; border-radius:4px; }
+    .arcs-legend h4 { font-family:'IBM Plex Mono',monospace; font-size:.55rem; letter-spacing:.18em; text-transform:uppercase; color:var(--muted); margin-bottom:.7rem; }
+    .arc-legend-row { display:flex; align-items:center; gap:.6rem; margin-bottom:.35rem; font-family:'IBM Plex Mono',monospace; font-size:.62rem; color:var(--text); }
+    .arc-swatch { width:18px; height:3px; border-radius:1px; flex-shrink:0; }
+    .arc-count { color:var(--muted); margin-left:auto; padding-left:1rem; }
+    .pulse-dot { animation: pulseDot 2.4s ease-in-out infinite; }
+    @keyframes pulseDot {
+      0%, 100% { opacity: .35; r: 8; }
+      50%      { opacity: 1;   r: 12; }
+    }
+  </style>
+</head>
+<body>
+
+<div id="file-protocol-warning">
+  <strong>⚠ CHARTS WON'T LOAD VIA FILE://</strong>
+  Run: <code>python3 -m http.server 8000</code>
+  <span class="close-x" onclick="this.parentElement.style.display='none'">✕</span>
+</div>
+
+<nav>
+  <a href="index.html" class="nav-brand">Under Fire</a>
+  <div class="nav-links">
+    <a href="timeline.html">Timeline</a>
+    <a href="oct7.html">Oct 7</a>
+    <a href="fronts.html">Fronts</a>
+    <a href="calendar.html">Calendar</a>
+    <a href="patterns.html">Patterns</a>
+    <a href="areas.html">By Area</a>
+    <a href="arcs.html" class="active">Arcs</a>
+    <a href="records.html">Records</a>
+  </div>
+  <div class="nav-badge" id="nav-badge">🔔 Loading…</div>
+</nav>
+
+<div id="tooltip"></div>
+
+<div class="chart-page">
+  <div class="section-wrapper">
+    <a href="index.html" class="back-link">← Back to all charts</a>
+    <div class="section-label">02b — Threat Origins</div>
+    <h1 class="section-title">Four Sources, One Target</h1>
+    <p class="section-desc">A schematic of where alerts originate. Arc width is the share of total attributed alerts; each source pulses until its arc reaches the focal point. Toggle between the full six-year period and the post-October-7 era.</p>
+
+    <div id="arcs-wrap">
+      <div id="arcs-chart"></div>
+      <div class="arcs-controls">
+        <button class="arcs-btn active" data-mode="all">All-time</button>
+        <button class="arcs-btn" data-mode="oct7">Since Oct 7</button>
+      </div>
+      <div class="arcs-legend" id="arcs-legend">
+        <h4>By Actor</h4>
+      </div>
+    </div>
+
+    <p class="chart-note" style="margin-top:2.5rem;">Origins are estimated attributions. Gaza, Lebanon, Iran, and Yemen are stylised points — not precise launch sites. Source: RocketAlert.live</p>
+  </div>
+</div>
+
+<footer>
+  <div class="footer-left">Under Fire — 2026</div>
+  <div class="footer-credit">Alert data from <a href="https://rocketalert.live" target="_blank">RocketAlert.live</a>.</div>
+</footer>
+
+<script src="src/js/shared.js"></script>
+<script>
+// Schematic positions (in a 1200x600 viewBox). Target is approx central Israel.
+const VIEW_W = 1200, VIEW_H = 600;
+const TARGET = { x: 560, y: 340 };
+
+const SOURCES = [
+  { actor: 'Hamas',     label: 'Gaza',    x: 470, y: 420, color: 'var(--hamas)',     hex: '#d63031' },
+  { actor: 'Hezbollah', label: 'Lebanon', x: 620, y: 120, color: 'var(--hezbollah)', hex: '#f39c12' },
+  { actor: 'Houthis',   label: 'Yemen',   x: 780, y: 560, color: 'var(--houthis)',   hex: '#4a9eff' },
+  { actor: 'Iran',      label: 'Iran',    x:1100, y: 250, color: 'var(--iran)',      hex: '#c678dd' },
+];
+
+// Since-Oct-7 counts approximated: all attributed alerts were recorded after
+// Oct 7 (origin attribution is only reliable post-Oct-7), so the subset is
+// equal to the full attributed totals for Hamas/Hezbollah/Houthis/Iran.
+// For the "All-time" view we add the Unknown bucket as a translucent grey arc
+// originating from the sea (west of Israel) — visually represents the
+// unattributed share that predates the Oct 7 breakout.
+
+(async () => {
+  const stats = await fetchData('stats_summary.json');
+  const counts = stats.origins;
+
+  const svg = d3.select('#arcs-chart').append('svg')
+    .attr('viewBox', `0 0 ${VIEW_W} ${VIEW_H}`)
+    .attr('preserveAspectRatio', 'xMidYMid meet');
+
+  // Country outline: highly simplified Israel silhouette (schematic).
+  const israelPath = 'M 520 170 L 560 150 L 610 180 L 605 240 L 585 290 L 575 350 L 560 420 L 550 480 L 520 520 L 510 470 L 495 410 L 500 360 L 510 300 L 512 240 Z';
+  svg.append('path').attr('d', israelPath)
+    .attr('fill', 'rgba(232,184,75,0.04)')
+    .attr('stroke', 'rgba(232,184,75,0.25)')
+    .attr('stroke-width', 1.2);
+  svg.append('text').attr('x', TARGET.x - 30).attr('y', TARGET.y - 10)
+    .attr('fill', 'var(--accent)').attr('font-family','IBM Plex Mono')
+    .attr('font-size', '10px').attr('letter-spacing', '.14em')
+    .text('ISRAEL');
+
+  // Target dot
+  svg.append('circle').attr('cx', TARGET.x).attr('cy', TARGET.y).attr('r', 5)
+    .attr('fill', 'var(--accent)').attr('opacity', 0.9);
+
+  const g = svg.append('g').attr('class','arcs-layer');
+
+  function render(mode) {
+    g.selectAll('*').remove();
+
+    // Choose dataset.
+    const sourceCounts = SOURCES.map(s => ({ ...s, count: counts[s.actor] || 0 }));
+    const maxCount = d3.max(sourceCounts, d => d.count);
+
+    // Draw arcs as quadratic curves with a control point shifted toward the
+    // target side, giving a gentle missile-trajectory shape.
+    sourceCounts.forEach((s, i) => {
+      const width = 2 + (s.count / maxCount) * 24;
+      const midX = (s.x + TARGET.x) / 2;
+      const midY = (s.y + TARGET.y) / 2;
+      // Bow the curve outward by rotating the midpoint 90° from the source→target vector.
+      const dx = TARGET.x - s.x, dy = TARGET.y - s.y;
+      const len = Math.sqrt(dx*dx + dy*dy);
+      const nx = -dy / len, ny = dx / len;
+      const bow = Math.min(120, len * 0.2);
+      const cx = midX + nx * bow;
+      const cy = midY + ny * bow;
+      const pathD = `M ${s.x} ${s.y} Q ${cx} ${cy} ${TARGET.x} ${TARGET.y}`;
+
+      const arc = g.append('path')
+        .attr('d', pathD)
+        .attr('fill', 'none')
+        .attr('stroke', s.hex)
+        .attr('stroke-width', width)
+        .attr('stroke-linecap', 'round')
+        .attr('opacity', 0.65)
+        .attr('stroke-dasharray', function() {
+          const len = this.getTotalLength();
+          return `${len} ${len}`;
+        })
+        .attr('stroke-dashoffset', function() { return this.getTotalLength(); });
+
+      arc.transition()
+        .delay(i * 250)
+        .duration(1800)
+        .ease(d3.easeCubicInOut)
+        .attr('stroke-dashoffset', 0);
+
+      // Source dot + label
+      g.append('circle')
+        .attr('class', 'pulse-dot')
+        .attr('cx', s.x).attr('cy', s.y).attr('r', 8)
+        .attr('fill', s.hex);
+      g.append('text')
+        .attr('x', s.x).attr('y', s.y - 18)
+        .attr('text-anchor', 'middle')
+        .attr('fill', s.hex)
+        .attr('font-family', 'IBM Plex Mono')
+        .attr('font-size', '12px')
+        .attr('letter-spacing', '.1em')
+        .text(s.label.toUpperCase());
+      g.append('text')
+        .attr('x', s.x).attr('y', s.y + 32)
+        .attr('text-anchor', 'middle')
+        .attr('fill', 'var(--muted)')
+        .attr('font-family', 'IBM Plex Mono')
+        .attr('font-size', '10px')
+        .text(fmtNum(s.count) + ' alerts');
+
+      // Tooltip target
+      g.append('path')
+        .attr('d', pathD)
+        .attr('fill', 'none')
+        .attr('stroke', 'transparent')
+        .attr('stroke-width', Math.max(18, width + 6))
+        .style('cursor', 'pointer')
+        .on('mouseover', e => showTip(
+          `<b>${s.actor} · ${s.label}</b><br>${fmtNum(s.count)} attributed alerts`, e))
+        .on('mousemove', moveTip).on('mouseleave', hideTip);
+    });
+
+    // Unknown sliver from the sea for all-time view.
+    if (mode === 'all' && counts.Unknown) {
+      const sx = 330, sy = 340;
+      const width = 2 + (counts.Unknown / maxCount) * 24;
+      const midX = (sx + TARGET.x) / 2, midY = (sy + TARGET.y) / 2 - 80;
+      const pathD = `M ${sx} ${sy} Q ${midX} ${midY} ${TARGET.x} ${TARGET.y}`;
+      const arc = g.append('path').attr('d', pathD)
+        .attr('fill','none').attr('stroke', '#6b6b80')
+        .attr('stroke-width', width).attr('stroke-linecap','round')
+        .attr('opacity', 0.35)
+        .attr('stroke-dasharray', function() { const l = this.getTotalLength(); return `${l} ${l}`; })
+        .attr('stroke-dashoffset', function() { return this.getTotalLength(); });
+      arc.transition().delay(900).duration(1600).ease(d3.easeCubicInOut)
+        .attr('stroke-dashoffset', 0);
+      g.append('text').attr('x', sx).attr('y', sy - 10)
+        .attr('text-anchor','middle').attr('fill','#6b6b80')
+        .attr('font-family','IBM Plex Mono').attr('font-size','10px')
+        .text('UNATTRIBUTED');
+    }
+
+    updateLegend(sourceCounts);
+  }
+
+  function updateLegend(items) {
+    const el = document.getElementById('arcs-legend');
+    el.innerHTML = '<h4>By Actor</h4>';
+    items.forEach(s => {
+      const row = document.createElement('div');
+      row.className = 'arc-legend-row';
+      row.innerHTML = `
+        <div class="arc-swatch" style="background:${s.hex}"></div>
+        <span>${s.actor}</span>
+        <span class="arc-count">${fmtNum(s.count)}</span>
+      `;
+      el.appendChild(row);
+    });
+  }
+
+  render('all');
+
+  document.querySelectorAll('.arcs-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.arcs-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      render(btn.dataset.mode);
+    });
+  });
+})();
+</script>
+</body>
+</html>

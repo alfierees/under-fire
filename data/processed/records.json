@@ -1,0 +1,26 @@
+{
+  "total_alerts": 142837,
+  "busiest_day": {
+    "date": "2026-02-28",
+    "count": 10162
+  },
+  "busiest_hour": {
+    "hour": 10,
+    "count": 10302
+  },
+  "longest_quiet_streak": {
+    "weeks": 6,
+    "start_week": "2023-01-30",
+    "end_week": "2023-03-13",
+    "threshold": 5
+  },
+  "biggest_area_spike": {
+    "area": "Confrontation Line",
+    "date": "2026-02-28",
+    "count": 10162
+  },
+  "busiest_weekday": {
+    "day": "Saturday",
+    "count": 29033
+  }
+}

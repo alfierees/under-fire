@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Under Fire — Calendar Heatmap</title>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400;1,700&family=IBM+Plex+Mono:wght@300;400;500&family=IBM+Plex+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.8.5/d3.min.js"></script>
+  <link rel="stylesheet" href="src/css/shared.css">
+  <style>
+    #cal-wrap { overflow-x:auto; margin-top:1.5rem; padding-bottom:1rem; }
+    #cal-chart svg { display:block; }
+    .cal-legend { display:flex; align-items:center; gap:.8rem; margin-top:1.5rem; font-family:'IBM Plex Mono',monospace; font-size:.58rem; color:var(--muted); letter-spacing:.08em; }
+    .cal-legend .scale-strip { display:flex; gap:2px; }
+    .cal-legend .scale-strip span { width:14px; height:14px; border-radius:2px; }
+  </style>
+</head>
+<body>
+
+<div id="file-protocol-warning">
+  <strong>⚠ CHARTS WON'T LOAD VIA FILE://</strong>
+  Run: <code>python3 -m http.server 8000</code>
+  <span class="close-x" onclick="this.parentElement.style.display='none'">✕</span>
+</div>
+
+<nav>
+  <a href="index.html" class="nav-brand">Under Fire</a>
+  <div class="nav-links">
+    <a href="timeline.html">Timeline</a>
+    <a href="oct7.html">Oct 7</a>
+    <a href="fronts.html">Fronts</a>
+    <a href="calendar.html" class="active">Calendar</a>
+    <a href="patterns.html">Patterns</a>
+    <a href="areas.html">By Area</a>
+    <a href="arcs.html">Arcs</a>
+    <a href="records.html">Records</a>
+  </div>
+  <div class="nav-badge" id="nav-badge">🔔 Loading…</div>
+</nav>
+
+<div id="tooltip"></div>
+
+<div class="chart-page">
+  <div class="section-wrapper">
+    <a href="index.html" class="back-link">← Back to all charts</a>
+    <div class="section-label">01c — Calendar Heatmap</div>
+    <h1 class="section-title">Every Day, Six Years</h1>
+    <p class="section-desc">A GitHub-contributions-style view: each cell is one day from January 2020 to the present. Darker red means more alerts. The Oct 7 week bleeds off the scale; the post-Oct-7 era shows as a near-continuous red band.</p>
+
+    <div id="cal-wrap">
+      <div id="cal-chart"></div>
+    </div>
+
+    <div class="cal-legend">
+      <span>Less</span>
+      <div class="scale-strip" id="cal-legend-strip"></div>
+      <span>More</span>
+      <span style="margin-left:auto;">Hover a day for the count.</span>
+    </div>
+
+    <p class="chart-note" style="margin-top:2.5rem;">Daily totals derived from weekly aggregates, weighted by the global day-of-week distribution (Saturday heaviest). Source: RocketAlert.live</p>
+  </div>
+</div>
+
+<footer>
+  <div class="footer-left">Under Fire — 2026</div>
+  <div class="footer-credit">Alert data from <a href="https://rocketalert.live" target="_blank">RocketAlert.live</a>.</div>
+</footer>
+
+<script src="src/js/shared.js"></script>
+<script>
+(async () => {
+  const data = await fetchData('daily_counts.json');
+  data.forEach(d => { d.dateObj = new Date(d.date + 'T00:00:00'); });
+
+  const cell = 12, pad = 2;
+  const weekW = cell + pad;
+  const rowH = cell + pad;
+  const monthGap = 6;
+
+  // Group by ISO-week columns. Column = weeks since the first Monday in the data.
+  const first = data[0].dateObj;
+  const mondayOf = d => {
+    const x = new Date(d);
+    const dow = (x.getDay() + 6) % 7; // Mon=0..Sun=6
+    x.setDate(x.getDate() - dow);
+    x.setHours(0,0,0,0);
+    return x;
+  };
+  const startMon = mondayOf(first);
+  const weekIndex = d => Math.floor((mondayOf(d) - startMon) / (7 * 86400000));
+  const dayRow = d => (d.getDay() + 6) % 7; // Mon=0..Sun=6
+
+  data.forEach(d => {
+    d.col = weekIndex(d.dateObj);
+    d.row = dayRow(d.dateObj);
+  });
+
+  const totalWeeks = d3.max(data, d => d.col) + 1;
+  const svgW = totalWeeks * weekW + 60;
+  const svgH = 7 * rowH + 50;
+
+  const svg = d3.select('#cal-chart').append('svg')
+    .attr('width', svgW).attr('height', svgH);
+  const g = svg.append('g').attr('transform', 'translate(40, 32)');
+
+  // Colour scale: log-ish for wide dynamic range (0 → ~10k).
+  const maxC = d3.max(data, d => d.count);
+  const scale = d3.scaleSequential(
+    t => d3.interpolateRgb('#15151c', '#d63031')(t)
+  ).domain([0, Math.log10(maxC + 1)]);
+  const cellFill = v => v === 0 ? '#0f0f14' : scale(Math.log10(v + 1));
+
+  // Day-of-week labels (show Mon, Wed, Fri, Sun)
+  const dayLabels = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
+  dayLabels.forEach((d, i) => {
+    if (i % 2 === 0 || i === 5) {
+      g.append('text').attr('x', -8).attr('y', i * rowH + cell - 2)
+        .attr('text-anchor','end').attr('fill','var(--muted)')
+        .attr('font-family','IBM Plex Mono').attr('font-size','9px').text(d);
+    }
+  });
+
+  // Month labels along the top — print at the first week of each month.
+  const monthSeen = new Set();
+  data.forEach(d => {
+    const key = d.dateObj.getFullYear() + '-' + d.dateObj.getMonth();
+    if (!monthSeen.has(key) && d.dateObj.getDate() <= 7 && d.row === 0) {
+      monthSeen.add(key);
+      const label = d.dateObj.getMonth() === 0
+        ? d.dateObj.getFullYear().toString()
+        : d3.timeFormat('%b')(d.dateObj);
+      g.append('text').attr('x', d.col * weekW).attr('y', -8)
+        .attr('fill', d.dateObj.getMonth() === 0 ? 'var(--accent)' : 'var(--muted)')
+        .attr('font-family','IBM Plex Mono').attr('font-size','9px')
+        .attr('font-weight', d.dateObj.getMonth() === 0 ? '500' : '300')
+        .text(label);
+    }
+  });
+
+  g.selectAll('rect.day').data(data).enter().append('rect')
+    .attr('class', 'day')
+    .attr('x', d => d.col * weekW)
+    .attr('y', d => d.row * rowH)
+    .attr('width', cell).attr('height', cell).attr('rx', 2)
+    .attr('fill', '#0f0f14')
+    .on('mouseover', (e, d) => {
+      const fmt = d3.timeFormat('%a %d %b %Y');
+      showTip(`<b>${fmt(d.dateObj)}</b><br>${fmtNum(d.count)} alerts`, e);
+    })
+    .on('mousemove', moveTip).on('mouseleave', hideTip)
+    .transition().duration(900).delay((d, i) => (d.col / totalWeeks) * 1500)
+    .attr('fill', d => cellFill(d.count));
+
+  // Legend strip
+  const strip = document.getElementById('cal-legend-strip');
+  [0, 0.2, 0.4, 0.6, 0.8, 1].forEach(t => {
+    const s = document.createElement('span');
+    s.style.background = t === 0
+      ? '#0f0f14'
+      : d3.interpolateRgb('#15151c', '#d63031')(t);
+    strip.appendChild(s);
+  });
+})();
+</script>
+</body>
+</html>
