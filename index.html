@@ -716,11 +716,14 @@ function drawTimeline(data) {
   gradPost.append('stop').attr('offset','0%').attr('stop-color','rgba(214,48,49,0.55)');
   gradPost.append('stop').attr('offset','100%').attr('stop-color','rgba(214,48,49,0.02)');
 
+  const tlClip = defs.append('clipPath').attr('id', 'tl-clip');
+  const tlClipRect = tlClip.append('rect').attr('x', 0).attr('y', -M.top).attr('width', 0).attr('height', H);
+
   if (pre.length > 1) {
-    g.append('path').datum(pre).attr('fill','url(#grad-pre)').attr('stroke','rgba(200,200,216,0.5)').attr('stroke-width',1).attr('d', areaGen);
+    g.append('path').datum(pre).attr('fill','url(#grad-pre)').attr('stroke','rgba(200,200,216,0.5)').attr('stroke-width',1).attr('clip-path','url(#tl-clip)').attr('d', areaGen);
   }
   if (post.length > 1) {
-    g.append('path').datum(post).attr('fill','url(#grad-post)').attr('stroke','rgba(214,48,49,0.7)').attr('stroke-width',1).attr('d', areaGen);
+    g.append('path').datum(post).attr('fill','url(#grad-post)').attr('stroke','rgba(214,48,49,0.7)').attr('stroke-width',1).attr('clip-path','url(#tl-clip)').attr('d', areaGen);
   }
 
   // Oct 7 line
@@ -769,6 +772,8 @@ function drawTimeline(data) {
       showTip(`<b>${d.week}</b><br>Alerts: ${fmtNum(d.total)}`, event);
     })
     .on('mouseleave', () => { hoverLine.attr('opacity', 0); hideTip(); });
+
+  tlClipRect.transition().duration(7000).ease(d3.easeCubicInOut).attr('width', w);
 }
 
 // ══════════════════════════════════════════════════════════════════════════
@@ -938,6 +943,10 @@ function drawFronts(raw) {
   const svg = d3.select('#fronts-chart').append('svg').attr('width', W).attr('height', H);
   const g = svg.append('g').attr('transform', `translate(${M.left},${M.top})`);
 
+  const frontsDefs = svg.append('defs');
+  const frontsClipRect = frontsDefs.append('clipPath').attr('id', 'fronts-clip')
+    .append('rect').attr('x', 0).attr('y', -M.top).attr('width', 0).attr('height', H);
+
   const parseMonth = d3.timeParse('%Y-%m');
   const x = d3.scaleTime().domain(d3.extent(data, d => parseMonth(d.month))).range([0, w]);
   const stack = d3.stack().keys(actors);
@@ -959,6 +968,7 @@ function drawFronts(raw) {
     g.append('path').datum(layer)
       .attr('fill', colors[actors[i]])
       .attr('opacity', 0.82)
+      .attr('clip-path', 'url(#fronts-clip)')
       .attr('d', area);
   });
 
@@ -1000,6 +1010,8 @@ function drawFronts(raw) {
       showTip(`<b>${d.month}</b><br>` + actors.filter(a => d[a] > 0).map(a => `${a}: ${fmtNum(d[a])}`).join('<br>') + `<br><b>Total: ${fmtNum(total)}</b>`, event);
     })
     .on('mouseleave', () => { vLine.attr('opacity',0); hideTip(); });
+
+  frontsClipRect.transition().duration(7000).ease(d3.easeLinear).attr('width', w);
 }
 
 // ══════════════════════════════════════════════════════════════════════════
