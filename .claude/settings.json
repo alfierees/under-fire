@@ -1,0 +1,15 @@
+{
+  "hooks": {
+    "SessionStart": [
+      {
+        "matcher": "startup|resume|clear",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash -c 'cd \"$(git rev-parse --show-toplevel 2>/dev/null)\" 2>/dev/null && git fetch origin --prune 2>/dev/null && { behind=$(git rev-list --count HEAD..@{u} 2>/dev/null || echo 0); ahead=$(git rev-list --count @{u}..HEAD 2>/dev/null || echo 0); branch=$(git branch --show-current); if [ \"$behind\" -gt 0 ]; then echo \"⚠ Branch $branch is $behind commit(s) behind origin. Run ./scripts/sync.sh to pull latest before editing.\"; elif [ \"$ahead\" -gt 0 ]; then echo \"ℹ Branch $branch is $ahead commit(s) ahead of origin (local work not yet pushed).\"; else echo \"✓ Branch $branch is in sync with origin.\"; fi; } || true'"
+          }
+        ]
+      }
+    ]
+  }
+}
