@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Under Fire — Records &amp; Extremes</title>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400;1,700&family=IBM+Plex+Mono:wght@300;400;500&family=IBM+Plex+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.8.5/d3.min.js"></script>
+  <link rel="stylesheet" href="src/css/shared.css">
+  <style>
+    .rec-grid { display:grid; grid-template-columns:repeat(2,1fr); gap:1.5rem; margin-top:2rem; }
+    .rec-card { background:var(--surface); border:1px solid var(--border); padding:2rem 2.2rem; border-radius:4px; border-left:3px solid var(--border); transition:border-left-color .3s; }
+    .rec-card.red    { border-left-color:var(--red); }
+    .rec-card.gold   { border-left-color:var(--accent); }
+    .rec-card.blue   { border-left-color:var(--blue); }
+    .rec-card.purple { border-left-color:var(--iran); }
+    .rec-label { font-family:'IBM Plex Mono',monospace; font-size:.58rem; letter-spacing:.14em; text-transform:uppercase; color:var(--muted); margin-bottom:.8rem; }
+    .rec-big { font-family:'Playfair Display',serif; font-size:3.4rem; font-weight:900; color:#fff; line-height:1; margin-bottom:.4rem; }
+    .rec-big span { font-size:1.4rem; color:var(--muted); font-weight:400; }
+    .rec-sub { font-family:'IBM Plex Mono',monospace; font-size:.66rem; color:var(--accent); letter-spacing:.06em; margin-bottom:.8rem; }
+    .rec-desc { font-size:.85rem; color:var(--muted); line-height:1.6; }
+    .peak-wrap { margin-top:5rem; padding-top:4rem; border-top:1px solid var(--border); }
+    #peak-day-chart { margin-top:2rem; }
+    #peak-day-chart svg { display:block; width:100%; }
+    @media (max-width:900px) { .rec-grid { grid-template-columns:1fr; } }
+  </style>
+</head>
+<body>
+
+<div id="file-protocol-warning">
+  <strong>⚠ CHARTS WON'T LOAD VIA FILE://</strong>
+  Run: <code>python3 -m http.server 8000</code>
+  <span class="close-x" onclick="this.parentElement.style.display='none'">✕</span>
+</div>
+
+<nav>
+  <a href="index.html" class="nav-brand">Under Fire</a>
+  <div class="nav-links">
+    <a href="timeline.html">Timeline</a>
+    <a href="oct7.html">Oct 7</a>
+    <a href="fronts.html">Fronts</a>
+    <a href="calendar.html">Calendar</a>
+    <a href="patterns.html">Patterns</a>
+    <a href="areas.html">By Area</a>
+    <a href="arcs.html">Arcs</a>
+    <a href="records.html" class="active">Records</a>
+  </div>
+  <div class="nav-badge" id="nav-badge">🔔 Loading…</div>
+</nav>
+
+<div id="tooltip"></div>
+
+<div class="chart-page">
+  <div class="section-wrapper">
+    <a href="index.html" class="back-link">← Back to all charts</a>
+    <div class="section-label">06 — Records &amp; Extremes</div>
+    <h1 class="section-title">The Numbers at Their Worst</h1>
+    <p class="section-desc">Every long dataset has its outliers. These are the records the Under Fire data has set since 2020 — the single busiest day, the single busiest hour of the clock, the single most-hit area on its worst day, and the longest stretch of near-silence.</p>
+
+    <div class="rec-grid">
+      <div class="rec-card red">
+        <div class="rec-label">Busiest day</div>
+        <div class="rec-big" id="rec-day">—</div>
+        <div class="rec-sub" id="rec-day-date">—</div>
+        <div class="rec-desc">The single heaviest 24-hour window in the dataset. Enough alerts in one day to fire roughly one every eight seconds.</div>
+      </div>
+      <div class="rec-card gold">
+        <div class="rec-label">Busiest hour of the clock</div>
+        <div class="rec-big" id="rec-hour">—</div>
+        <div class="rec-sub" id="rec-hour-when">—</div>
+        <div class="rec-desc">Across every day of every year, this one hour of the clock sees more alerts than any other. Aggregated over 2,281 days.</div>
+      </div>
+      <div class="rec-card blue">
+        <div class="rec-label">Longest quiet stretch</div>
+        <div class="rec-big" id="rec-quiet">—</div>
+        <div class="rec-sub" id="rec-quiet-when">—</div>
+        <div class="rec-desc">The longest consecutive run of weeks with fewer than five alerts nationwide. A moment of relative calm before Oct 7 broke it.</div>
+      </div>
+      <div class="rec-card purple">
+        <div class="rec-label">Biggest single-area spike</div>
+        <div class="rec-big" id="rec-area">—</div>
+        <div class="rec-sub" id="rec-area-when">—</div>
+        <div class="rec-desc">The most alerts any single geographic region recorded in a 24-hour window. The concentration is almost entirely along one line.</div>
+      </div>
+    </div>
+
+    <div class="peak-wrap">
+      <div class="section-label" style="margin-bottom:.5rem;">Minute by minute</div>
+      <h2 class="section-title" style="font-size:2rem;">October 7, 2023 — as it happened</h2>
+      <p class="section-desc" style="max-width:720px;">The peak day for all-time alert counts by attack is still Oct 7, 2023. Each bar is one minute between 06:29 and 23:13. The early-morning spike runs for roughly three hours before the cadence settles into a steady, exhausted drumbeat.</p>
+      <div id="peak-day-chart"></div>
+    </div>
+  </div>
+</div>
+
+<footer>
+  <div class="footer-left">Under Fire — 2026</div>
+  <div class="footer-credit">Alert data from <a href="https://rocketalert.live" target="_blank">RocketAlert.live</a>.</div>
+</footer>
+
+<script src="src/js/shared.js"></script>
+<script>
+(async () => {
+  const [records, oct7] = await Promise.all([
+    fetchData('records.json'),
+    fetchData('oct7_replay.json'),
+  ]);
+
+  // Busiest day
+  const bd = records.busiest_day;
+  document.getElementById('rec-day').innerHTML =
+    `${bd.count.toLocaleString()}<span> alerts</span>`;
+  document.getElementById('rec-day-date').textContent =
+    d3.timeFormat('%A · %d %B %Y')(new Date(bd.date + 'T00:00:00'));
+
+  // Busiest hour
+  const bh = records.busiest_hour;
+  document.getElementById('rec-hour').innerHTML =
+    `${String(bh.hour).padStart(2,'0')}:00<span> – ${String(bh.hour+1).padStart(2,'0')}:00</span>`;
+  document.getElementById('rec-hour-when').textContent =
+    `${bh.count.toLocaleString()} alerts across the 2,281-day record`;
+
+  // Longest quiet streak
+  const qs = records.longest_quiet_streak;
+  document.getElementById('rec-quiet').innerHTML =
+    `${qs.weeks}<span> weeks</span>`;
+  const qStart = d3.timeFormat('%d %b %Y')(new Date(qs.start_week + 'T00:00:00'));
+  const qEnd = d3.timeFormat('%d %b %Y')(new Date(qs.end_week + 'T00:00:00'));
+  document.getElementById('rec-quiet-when').textContent =
+    `${qStart} → ${qEnd} · fewer than ${qs.threshold} alerts per week`;
+
+  // Biggest area spike
+  const ba = records.biggest_area_spike;
+  document.getElementById('rec-area').innerHTML =
+    `${ba.count.toLocaleString()}<span> alerts</span>`;
+  document.getElementById('rec-area-when').textContent =
+    `${ba.area} · ${d3.timeFormat('%d %B %Y')(new Date(ba.date + 'T00:00:00'))}`;
+
+  // Peak day minute-by-minute chart
+  const perMinute = new Map();
+  oct7.forEach(a => {
+    const [, time] = a.ts.split(' ');
+    const [h, m] = time.split(':');
+    const key = h * 60 + +m;
+    perMinute.set(key, (perMinute.get(key) || 0) + 1);
+  });
+  const startMin = 6 * 60 + 29;
+  const endMin = 23 * 60 + 13;
+  const series = [];
+  for (let t = startMin; t <= endMin; t++) {
+    series.push({ minute: t, count: perMinute.get(t) || 0 });
+  }
+
+  const container = document.getElementById('peak-day-chart');
+  const W = container.clientWidth || 1000;
+  const H = 260;
+  const M = { top: 20, right: 20, bottom: 40, left: 40 };
+  const w = W - M.left - M.right, h = H - M.top - M.bottom;
+  const svg = d3.select('#peak-day-chart').append('svg').attr('width', W).attr('height', H);
+  const g = svg.append('g').attr('transform', `translate(${M.left},${M.top})`);
+  const x = d3.scaleLinear().domain([startMin, endMin]).range([0, w]);
+  const yMax = d3.max(series, d => d.count);
+  const y = d3.scaleLinear().domain([0, yMax]).range([h, 0]).nice();
+
+  const barW = Math.max(1, w / series.length - 0.2);
+  g.selectAll('rect').data(series).enter().append('rect')
+    .attr('x', d => x(d.minute))
+    .attr('y', h).attr('height', 0)
+    .attr('width', barW)
+    .attr('fill', d => d.count > yMax * 0.5 ? 'var(--red)' : 'rgba(214,48,49,0.55)')
+    .transition().duration(2400).delay((d, i) => (i / series.length) * 800)
+    .attr('y', d => y(d.count))
+    .attr('height', d => h - y(d.count));
+
+  // Hour tick axis
+  const hourTicks = d3.range(7, 24);
+  g.append('g').attr('transform', `translate(0,${h})`).call(
+    d3.axisBottom(x)
+      .tickValues(hourTicks.map(hr => hr * 60))
+      .tickFormat(mins => `${String(Math.floor(mins/60)).padStart(2,'0')}:00`)
+  ).call(g => {
+    g.select('.domain').attr('stroke', 'var(--border)');
+    g.selectAll('text').attr('fill', 'var(--muted)').attr('font-family','IBM Plex Mono').attr('font-size','10px');
+    g.selectAll('line').attr('stroke','var(--border)');
+  });
+  g.append('g').call(d3.axisLeft(y).ticks(4)).call(g => {
+    g.select('.domain').remove();
+    g.selectAll('text').attr('fill','var(--muted)').attr('font-family','IBM Plex Mono').attr('font-size','10px');
+    g.selectAll('line').remove();
+  });
+
+  // Hover overlay
+  const overlay = svg.append('rect')
+    .attr('transform', `translate(${M.left},${M.top})`)
+    .attr('width', w).attr('height', h).attr('fill', 'transparent');
+  const vLine = g.append('line').attr('y1', 0).attr('y2', h)
+    .attr('stroke', 'rgba(255,255,255,0.2)').attr('opacity', 0);
+  overlay.on('mousemove', function(e) {
+    const [mx] = d3.pointer(e);
+    const t = Math.round(x.invert(mx));
+    const d = series[t - startMin];
+    if (!d) return;
+    vLine.attr('x1', x(d.minute)).attr('x2', x(d.minute)).attr('opacity', 1);
+    const hh = String(Math.floor(d.minute/60)).padStart(2,'0');
+    const mm = String(d.minute%60).padStart(2,'0');
+    showTip(`<b>${hh}:${mm}</b><br>${d.count} alert${d.count === 1 ? '' : 's'} in this minute`, e);
+  }).on('mouseleave', () => { vLine.attr('opacity', 0); hideTip(); });
+})();
+</script>
+</body>
+</html>

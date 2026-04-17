@@ -24,9 +24,11 @@
     <a href="timeline.html">Timeline</a>
     <a href="oct7.html">Oct 7</a>
     <a href="fronts.html">Fronts</a>
+    <a href="calendar.html">Calendar</a>
     <a href="patterns.html">Patterns</a>
     <a href="areas.html">By Area</a>
-    <a href="odds.html">Odds</a>
+    <a href="arcs.html">Arcs</a>
+    <a href="records.html">Records</a>
   </div>
   <div class="nav-badge" id="nav-badge">🔔 Loading…</div>
 </nav>
@@ -75,7 +77,7 @@
     <div class="category-header">
       <span class="category-label">01</span>
       <span class="category-title">Graphs</span>
-      <span class="category-count">2 visualisations</span>
+      <span class="category-count">3 visualisations</span>
     </div>
     <div class="card-grid">
       <a href="timeline.html" class="card red">
@@ -86,11 +88,18 @@
         <div class="card-cta"><span>Explore timeline</span><span class="arrow">→</span></div>
       </a>
       <a href="fronts.html" class="card purple">
-        <div class="card-eyebrow">Stacked Area · Monthly</div>
+        <div class="card-eyebrow">Stacked Bars · Monthly</div>
         <div class="card-title">The Four Fronts</div>
-        <div class="card-desc">From one enemy to four — Hamas, Hezbollah, Houthis, and Iran, broken out month by month.</div>
+        <div class="card-desc">From one enemy to four — Hamas, Hezbollah, Houthis, and Iran, stacked month by month. Each layer grows in sequence.</div>
         <div class="card-preview"><svg data-preview="fronts"></svg></div>
         <div class="card-cta"><span>Explore fronts</span><span class="arrow">→</span></div>
+      </a>
+      <a href="calendar.html" class="card red">
+        <div class="card-eyebrow">Heatmap · Daily</div>
+        <div class="card-title">Every Day, Six Years</div>
+        <div class="card-desc">A GitHub-contributions-style grid — each cell is one day. The post-Oct-7 era shows as a near-continuous red band.</div>
+        <div class="card-preview"><svg data-preview="calendar"></svg></div>
+        <div class="card-cta"><span>See the calendar</span><span class="arrow">→</span></div>
       </a>
     </div>
   </div>
@@ -100,7 +109,7 @@
     <div class="category-header">
       <span class="category-label">02</span>
       <span class="category-title">Maps</span>
-      <span class="category-count">1 visualisation</span>
+      <span class="category-count">2 visualisations</span>
     </div>
     <div class="card-grid">
       <a href="oct7.html" class="card red">
@@ -110,6 +119,13 @@
         <div class="card-preview"><svg data-preview="oct7"></svg></div>
         <div class="card-cta"><span>Play the replay</span><span class="arrow">→</span></div>
       </a>
+      <a href="arcs.html" class="card purple">
+        <div class="card-eyebrow">Schematic · Origins</div>
+        <div class="card-title">Four Sources, One Target</div>
+        <div class="card-desc">Animated arcs from Gaza, Lebanon, Iran, and Yemen — each source's arc weighted by its share of attributed alerts.</div>
+        <div class="card-preview"><svg data-preview="arcs"></svg></div>
+        <div class="card-cta"><span>Trace the arcs</span><span class="arrow">→</span></div>
+      </a>
     </div>
   </div>
 
@@ -118,22 +134,15 @@
     <div class="category-header">
       <span class="category-label">03</span>
       <span class="category-title">Patterns</span>
-      <span class="category-count">3 visualisations</span>
+      <span class="category-count">2 visualisations</span>
     </div>
     <div class="card-grid">
       <a href="patterns.html" class="card gold">
-        <div class="card-eyebrow">Polar Clock · 24h</div>
+        <div class="card-eyebrow">Polar Clock · Weekday Bar · Actor Heatmap</div>
         <div class="card-title">When Do They Strike?</div>
-        <div class="card-desc">A 24-hour polar clock showing alert density by hour. A clear 10am peak.</div>
+        <div class="card-desc">A 24-hour polar clock with per-actor rings, a weekday bar (Saturday leads), and a "who attacks when" actor × hour heatmap.</div>
         <div class="card-preview" style="min-height:110px;"><svg data-preview="clock"></svg></div>
-        <div class="card-cta"><span>See the clock</span><span class="arrow">→</span></div>
-      </a>
-      <a href="patterns.html#dow" class="card red">
-        <div class="card-eyebrow">Bar Chart · Day-of-week</div>
-        <div class="card-title">Saturday Is the Target</div>
-        <div class="card-desc">Alerts by day of week — Saturday stands out as the single most targeted day.</div>
-        <div class="card-preview"><svg data-preview="dow"></svg></div>
-        <div class="card-cta"><span>See the pattern</span><span class="arrow">→</span></div>
+        <div class="card-cta"><span>See the patterns</span><span class="arrow">→</span></div>
       </a>
       <a href="areas.html" class="card blue">
         <div class="card-eyebrow">Leaderboard · All-time</div>
@@ -153,12 +162,12 @@
       <span class="category-count">1 visualisation</span>
     </div>
     <div class="card-grid">
-      <a href="odds.html" class="card gold">
-        <div class="card-eyebrow">Interactive · Poisson</div>
-        <div class="card-title">What Are the Odds?</div>
-        <div class="card-desc">Pick a region and an everyday activity. Get the statistical chance of an alert firing mid-activity.</div>
-        <div class="card-preview"><svg data-preview="odds"></svg></div>
-        <div class="card-cta"><span>Calculate odds</span><span class="arrow">→</span></div>
+      <a href="records.html" class="card gold">
+        <div class="card-eyebrow">Records · Extremes</div>
+        <div class="card-title">The Numbers at Their Worst</div>
+        <div class="card-desc">Busiest day, busiest hour, longest quiet stretch, biggest single-area spike — and the peak day plotted minute by minute.</div>
+        <div class="card-preview"><svg data-preview="records"></svg></div>
+        <div class="card-cta"><span>See the records</span><span class="arrow">→</span></div>
       </a>
     </div>
   </div>

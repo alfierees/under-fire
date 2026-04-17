@@ -1,8 +1,8 @@
 # Under Fire — Handoff
-_Last updated: 2026-04-17_
+_Last updated: 2026-04-17 (late session — graphs/maps/patterns/stats overhaul)_
 
 ## What We're Building
-"Under Fire" is a public-interest data visualisation website tracking rocket, missile, and drone alerts across Israel from 2020 to present. Built by Alfie Rees as a data science project. Multi-page card hub with 7 interactive D3.js + Leaflet visualisations, deployed on GitHub Pages.
+"Under Fire" is a public-interest data visualisation website tracking rocket, missile, and drone alerts across Israel from 2020 to present. Built by Alfie Rees as a data science project. Multi-page card hub with 9 interactive D3.js + Leaflet visualisations, deployed on GitHub Pages.
 
 ## Repository
 **GitHub:** https://github.com/alfierees/under-fire  
@@ -16,13 +16,15 @@ _Last updated: 2026-04-17_
 ## Current State — LIVE BUILD (v2 Card Hub)
 
 ### Site structure
-- `index.html` — **Hero** (Iron Dome canvas animation + "UNDER FIRE" gradient title + animated counters) + **card grid** with 4 categories. Each card has a live D3 sparkline preview and links to a dedicated page. This page is complete and considered done.
+- `index.html` — **Hero** (Iron Dome canvas animation over `images/hero-bg.jpg` + "UNDER FIRE" gradient title + animated counters) + **card grid** with 4 categories. Each card has a live D3 sparkline preview and links to a dedicated page.
 - `timeline.html` — Six Years area chart. Has code-runner pseudo-code UI (press Enter/▶ Run to execute), actor filter (All / Hamas / Hezbollah / Houthis / Iran / Unattributed), and salvo overlay on week-click.
-- `fronts.html` — Four Fronts stacked area by actor. Has code-runner UI.
+- `fronts.html` — Four Fronts **stacked monthly bars** by actor. Each actor layer grows from zero (staggered attrTween). Code-runner UI; auto-plays on scroll-into-view.
+- `calendar.html` — GitHub-contributions-style daily heatmap. One cell per day, Jan 2020 → present. Log-scale colour ramp black → red.
 - `oct7.html` — Oct 7 Leaflet replay map. Play/pause/reset controls.
-- `patterns.html` — 24h polar clock + day-of-week bar chart.
+- `patterns.html` — 24h polar clock (per-actor concentric rings + animated sweep reveal + 10am flare), day-of-week bar chart, and a 4×24 "who attacks when" actor × hour heatmap. Code-runner UI.
 - `areas.html` — Area vulnerability horizontal bar leaderboard.
-- `odds.html` — Poisson probability widget (region × activity).
+- `arcs.html` — Schematic "Four Sources, One Target" map. Animated arcs from Gaza, Lebanon, Iran, Yemen into a central target, widths scaled by attributed alert totals. Toggle between all-time / since Oct 7.
+- `records.html` — Records & extremes board: busiest day, busiest hour, longest quiet streak, biggest single-area spike, plus the Oct 7 peak day plotted minute by minute.
 
 ### Shared files
 | File | Purpose |
@@ -36,24 +38,33 @@ _Last updated: 2026-04-17_
 | `src/js/salvo.js` | `mountSalvo({ mount }).fire({ count, label })` |
 
 ### What's complete and working
-- Iron Dome hero animation on landing page — **done, do not touch**
-- "UNDER FIRE" gradient title — done
-- Card hub with 4 categories (Graphs / Maps / Patterns / Stats) and sparkline previews
+- Iron Dome hero animation on landing page with photo background (`images/hero-bg.jpg` — path is relative to the CSS file, so `url('../../images/hero-bg.jpg')`)
+- "UNDER FIRE" gradient title
+- Card hub with 4 categories (Graphs ×3 / Maps ×2 / Patterns ×2 / Stats ×1) and sparkline previews
 - Timeline page: 10s left-to-right reveal, actor filter, salvo overlay on click
-- Fronts page: 10s stacked-area reveal via code-runner
-- All other chart pages: oct7 replay, patterns, areas, odds
-- Nav bar linking all pages
+- Fronts page: per-actor stacked bars, each layer grows from zero, staggered by actor; auto-plays on scroll-into-view and re-runnable via the code-runner
+- Calendar heatmap: daily grid 2020 → present, derived from weekly totals × day-of-week distribution
+- Patterns page: clock 00:00 now correctly at 12 o'clock; concentric actor rings; sweep-hand reveal with 10am flare; weekday bar with grow-from-zero; 4×24 actor × hour heatmap
+- Arcs page: schematic SVG of Israel with four animated origin arcs (dash-offset draw-in) pulsing source dots, toggle all-time/Oct 7
+- Records page: four record cards + Oct 7 minute-by-minute bars
+- Salvo label reads "N alerts" (no more "(M shown)" parenthetical)
+- Nav bar across all pages (Timeline / Oct 7 / Fronts / Calendar / Patterns / By Area / Arcs / Records)
 - Sync workflow: `scripts/sync.sh` + SessionStart hook + `CLAUDE.md`
 
 ### Data files in repo (small processed aggregates only)
-The 7 JSON files in `data/processed/` (~440KB total). Raw data is **gitignored**.
+The 9 JSON files in `data/processed/` (~500KB total). Raw data is **gitignored**.
 - `stats_summary.json` — totals & origin breakdown
 - `timeline_weekly.json` — weekly totals with per-actor columns (Hamas, Hezbollah, Houthis, Iran, Unknown, total, week)
 - `actors_monthly.json` — monthly per-actor totals
+- `daily_counts.json` — per-day alert counts 2020-01-06 → 2026-03-29 (derived: weekly total × day-of-week distribution)
 - `oct7_replay.json` — every Oct 7 alert with `{ ts, lat, lon }`
 - `hourly_dow.json` — `{ hourly: [...], day_of_week: [...] }`
+- `actor_hour.json` — flattened `{ actor, hour, count }` for the patterns heatmap
 - `areas_summary.json` — per-region totals
-- `shower_probs.json` — precomputed Poisson probabilities per region × activity
+- `records.json` — precomputed extremes (busiest day/hour, longest quiet streak, biggest single-area spike)
+- `shower_probs.json` — legacy Poisson probabilities (page retired; file kept for archival)
+
+Regenerate aggregates with `python3 scripts/generate_extra_aggregates.py`.
 
 ---
 
@@ -115,17 +126,15 @@ A SessionStart hook in `.claude/settings.json` auto-fetches and warns if the bra
 
 **Zoomable timeline** — Click-drag to zoom into any time window on the Six Years chart. Useful for isolating specific operations (e.g. Guardian of the Walls, May 2021).
 
-**Heatmap calendar** — A GitHub-contributions-style calendar heatmap of alert density by day. Each cell is one day, colour intensity = alert count.
-
 **Region comparison** — Select two regions from the Area Vulnerability chart and see a side-by-side breakdown of their alert profiles.
 
-**Code-runner on remaining pages** — Extend the pseudo-code execution UI to oct7, patterns, areas, and odds pages.
+**Code-runner on remaining pages** — Extend the pseudo-code execution UI to `oct7.html` and `areas.html`. (Patterns and Fronts now have it.)
 
 ---
 
 ### 🗺️ Map features
 
-**Persistent dot map** — A static Leaflet layer showing all 142,837 alerts as tiny dots coloured by actor. Add a time slider to filter by year.
+**Persistent dot map** — A static Leaflet layer showing all 142,837 alerts as tiny dots coloured by actor. Add a time slider to filter by year. (Threat-origin arcs landed instead this session; dot map still open.)
 
 **Animated "spread" replay** — Show how the geographic envelope of attacks expanded over time — starting from Gaza in 2020, then northern border in 2023, then national coverage post-Oct 7.
 

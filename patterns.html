@@ -9,9 +9,14 @@
   <link rel="stylesheet" href="src/css/shared.css">
   <style>
     .patterns-grid { display:grid; grid-template-columns:1fr 1fr; gap:4rem; align-items:start; }
-    #clock-chart, #dow-chart { width:100%; }
-    #clock-chart svg, #dow-chart svg { display:block; overflow:visible; }
+    #clock-chart, #dow-chart, #actor-hour-chart { width:100%; }
+    #clock-chart svg, #dow-chart svg, #actor-hour-chart svg { display:block; overflow:visible; }
     .chart-title { font-family:'IBM Plex Mono',monospace; font-size:.62rem; letter-spacing:.14em; text-transform:uppercase; color:var(--text); margin-bottom:1.5rem; }
+    .chart-sub { font-family:'IBM Plex Mono',monospace; font-size:.58rem; letter-spacing:.08em; color:var(--muted); margin-bottom:2rem; }
+    .actor-legend { display:flex; gap:1.2rem; flex-wrap:wrap; margin:1.5rem 0 2rem; }
+    .actor-tag { display:flex; align-items:center; gap:.5rem; font-family:'IBM Plex Mono',monospace; font-size:.6rem; letter-spacing:.08em; color:var(--muted); }
+    .actor-swatch { width:10px; height:10px; border-radius:2px; flex-shrink:0; }
+    .pattern-section { margin-top:5rem; padding-top:4rem; border-top:1px solid var(--border); }
     @media (max-width:900px) { .patterns-grid { grid-template-columns:1fr; gap:2.5rem; } }
   </style>
 </head>
@@ -29,9 +34,11 @@
     <a href="timeline.html">Timeline</a>
     <a href="oct7.html">Oct 7</a>
     <a href="fronts.html">Fronts</a>
+    <a href="calendar.html">Calendar</a>
     <a href="patterns.html" class="active">Patterns</a>
     <a href="areas.html">By Area</a>
-    <a href="odds.html">Odds</a>
+    <a href="arcs.html">Arcs</a>
+    <a href="records.html">Records</a>
   </div>
   <div class="nav-badge" id="nav-badge">🔔 Loading…</div>
 </nav>
@@ -43,19 +50,38 @@
     <a href="index.html" class="back-link">← Back to all charts</a>
     <div class="section-label">04 — Patterns</div>
     <h1 class="section-title">When Do They Strike?</h1>
-    <p class="section-desc">Alerts happen around the clock — there is no safe hour. But the data reveals clear patterns: a 10am peak, and Saturday as the single most targeted day of the week.</p>
+    <p class="section-desc">Alerts happen around the clock — there is no safe hour. But the data reveals clear patterns: a 10am peak, and Saturday as the single most targeted day of the week. Press Run to watch the hour-by-hour breakdown reveal itself.</p>
+
+    <div class="actor-legend">
+      <div class="actor-tag"><div class="actor-swatch" style="background:var(--hamas)"></div>Hamas</div>
+      <div class="actor-tag"><div class="actor-swatch" style="background:var(--hezbollah)"></div>Hezbollah</div>
+      <div class="actor-tag"><div class="actor-swatch" style="background:var(--houthis)"></div>Houthis</div>
+      <div class="actor-tag"><div class="actor-swatch" style="background:var(--iran)"></div>Iran</div>
+    </div>
+
+    <div id="runner"></div>
 
     <div class="patterns-grid">
       <div>
-        <div class="chart-title">Alerts by Hour of Day</div>
+        <div class="chart-title">Alerts by Hour of Day — per actor</div>
+        <div class="chart-sub">Concentric rings: inner = Hamas, outer = Iran. Radius = count.</div>
         <div id="clock-chart"></div>
       </div>
       <div id="dow">
         <div class="chart-title">Alerts by Day of Week</div>
+        <div class="chart-sub">Saturday is the single busiest day by a wide margin.</div>
         <div id="dow-chart"></div>
       </div>
     </div>
     <p class="chart-note">All 142,837 alerts, 2020–2026. Source: RocketAlert.live</p>
+
+    <div class="pattern-section">
+      <div class="section-label" style="margin-bottom:.5rem;">04b — Attribution × Time</div>
+      <h2 class="section-title" style="font-size:2rem;">Who Attacks When</h2>
+      <p class="section-desc" style="max-width:720px;">Each actor has a signature time-of-day pattern. Iran clusters heavily around 10am strikes. Hezbollah runs from mid-morning into evening. Houthis operate disproportionately through the small hours of the night.</p>
+      <div id="actor-hour-chart"></div>
+      <p class="chart-note">4 actors × 24 hours, coloured by that actor's alert count at that hour. Source: RocketAlert.live</p>
+    </div>
   </div>
 </div>
 
@@ -65,42 +91,119 @@
 </footer>
 
 <script src="src/js/shared.js"></script>
+<script src="src/js/code-runner.js"></script>
 <script>
+const ACTORS = ['Hamas', 'Hezbollah', 'Houthis', 'Iran'];
+const ACTOR_COLORS = {
+  Hamas: 'var(--hamas)', Hezbollah: 'var(--hezbollah)',
+  Houthis: 'var(--houthis)', Iran: 'var(--iran)'
+};
+
 function drawClock(data) {
   const c = document.getElementById('clock-chart');
-  const size = Math.min(c.clientWidth || 360, 380);
+  c.innerHTML = '';
+  const size = Math.min(c.clientWidth || 380, 420);
   const cx = size/2, cy = size/2;
-  const innerR = 40, outerMaxR = size/2 - 30;
-  const maxVal = d3.max(data, d => d.count);
-  const rS = d3.scaleLinear().domain([0, maxVal]).range([innerR, outerMaxR]);
+  const innerR = 44;
+  const outerMaxR = size/2 - 34;
+  const bandSpace = outerMaxR - innerR;
+  const bandW = bandSpace / ACTORS.length;
+
+  const maxByActor = {};
+  ACTORS.forEach(a => { maxByActor[a] = d3.max(data, d => d[a] || 0); });
+
   const svg = d3.select('#clock-chart').append('svg').attr('width', size).attr('height', size);
   const g = svg.append('g').attr('transform', `translate(${cx},${cy})`);
-  const tau = 2*Math.PI, sA = tau/24;
+  const tau = 2 * Math.PI;
+  const sA = tau / 24;
+
+  const wedges = g.append('g').attr('class', 'clock-wedges');
+
+  // For each hour, draw 4 concentric rings (one per actor) stacked outward.
+  // Wedge angles use the d3.arc SVG convention (0 at 12 o'clock, clockwise).
   data.forEach(d => {
-    const startA = (d.hour/24)*tau - Math.PI/2;
-    const arc = d3.arc().innerRadius(innerR).outerRadius(rS(d.count)).startAngle(startA).endAngle(startA + sA - 0.01);
-    const isNight = d.hour < 6 || d.hour >= 22;
-    const isPeak = d.hour === 10;
-    g.append('path').attr('d', arc)
-      .attr('fill', isPeak ? 'var(--red)' : isNight ? 'rgba(74,158,255,0.5)' : 'rgba(232,184,75,0.6)')
-      .attr('stroke', 'var(--bg)').attr('stroke-width', 0.5)
-      .on('mouseover', e => showTip(`${String(d.hour).padStart(2,'0')}:00 — ${fmtNum(d.count)} alerts`, e))
+    const startA = (d.hour / 24) * tau;
+    const hourGroup = wedges.append('g')
+      .attr('class', 'hour-group')
+      .attr('data-hour', d.hour)
+      .attr('opacity', 0);
+    ACTORS.forEach((actor, i) => {
+      const val = d[actor] || 0;
+      const maxA = maxByActor[actor] || 1;
+      const r0 = innerR + i * bandW;
+      const ringR = r0 + bandW - 1;
+      const fillR = r0 + (val / maxA) * (bandW - 1);
+      const bgArc = d3.arc()
+        .innerRadius(r0).outerRadius(ringR)
+        .startAngle(startA).endAngle(startA + sA - 0.01);
+      const fillArc = d3.arc()
+        .innerRadius(r0).outerRadius(fillR)
+        .startAngle(startA).endAngle(startA + sA - 0.01);
+      hourGroup.append('path').attr('d', bgArc)
+        .attr('fill', ACTOR_COLORS[actor])
+        .attr('opacity', 0.08);
+      hourGroup.append('path').attr('d', fillArc)
+        .attr('fill', ACTOR_COLORS[actor])
+        .attr('opacity', d.hour === 10 ? 0.92 : 0.72)
+        .attr('stroke', 'var(--bg)')
+        .attr('stroke-width', 0.4);
+    });
+    // Tooltip target over the whole hour wedge
+    const hitArc = d3.arc()
+      .innerRadius(innerR).outerRadius(outerMaxR)
+      .startAngle(startA).endAngle(startA + sA);
+    hourGroup.append('path').attr('d', hitArc)
+      .attr('fill', 'transparent').style('cursor', 'pointer')
+      .on('mouseover', e => {
+        const parts = ACTORS.filter(a => (d[a] || 0) > 0)
+          .map(a => `${a}: ${fmtNum(d[a])}`).join('<br>');
+        showTip(`<b>${String(d.hour).padStart(2,'0')}:00</b> — ${fmtNum(d.count)} total<br>${parts}`, e);
+      })
       .on('mousemove', moveTip).on('mouseleave', hideTip);
   });
+
+  // Hour labels at 0, 6, 12, 18 — cos/sin with -π/2 offset puts 0 at top.
   [0, 6, 12, 18].forEach(h => {
-    const angle = (h/24)*tau - Math.PI/2;
+    const angle = (h/24) * tau - Math.PI/2;
     const r = outerMaxR + 16;
     g.append('text').attr('x', Math.cos(angle)*r).attr('y', Math.sin(angle)*r + 4)
       .attr('text-anchor','middle').attr('fill','var(--muted)')
       .attr('font-family','IBM Plex Mono').attr('font-size','10px')
       .text(String(h).padStart(2,'0') + ':00');
   });
+
   g.append('text').attr('text-anchor','middle').attr('dy','0.35em')
     .attr('fill','var(--muted)').attr('font-family','IBM Plex Mono').attr('font-size','9px').text('24h');
+
+  // Animated sweep: a clock hand rotates 0 → 2π over 2.2s. Each hour's wedge
+  // fades in when the hand passes it. 10am flares briefly.
+  const hand = g.append('line')
+    .attr('x1', 0).attr('y1', 0)
+    .attr('x2', 0).attr('y2', -outerMaxR - 6)
+    .attr('stroke', 'var(--accent)').attr('stroke-width', 1.4)
+    .attr('opacity', 0.7);
+
+  const duration = 2200;
+  hand.transition().duration(duration).ease(d3.easeCubicInOut)
+    .attrTween('transform', () => t => `rotate(${t * 360})`)
+    .on('end', () => hand.transition().duration(300).attr('opacity', 0).remove());
+
+  data.forEach(d => {
+    const hg = wedges.select(`[data-hour='${d.hour}']`);
+    const delay = (d.hour / 24) * duration;
+    hg.transition().delay(delay).duration(240).attr('opacity', 1);
+    if (d.hour === 10) {
+      hg.transition().delay(delay).duration(240)
+        .style('filter', 'drop-shadow(0 0 10px rgba(214,48,49,0.85))')
+        .transition().duration(900)
+        .style('filter', 'drop-shadow(0 0 0 rgba(214,48,49,0))');
+    }
+  });
 }
 
 function drawDoW(data) {
   const c = document.getElementById('dow-chart');
+  c.innerHTML = '';
   const W = c.clientWidth || 380, H = 280;
   const M = { top:10, right:20, bottom:10, left:110 };
   const w = W - M.left - M.right, h = H - M.top - M.bottom;
@@ -112,11 +215,15 @@ function drawDoW(data) {
   const col = { Saturday:'var(--red)', Sunday:'rgba(214,48,49,0.6)' };
   data.forEach(d => {
     const isWknd = d.day === 'Saturday' || d.day === 'Sunday';
-    g.append('rect').attr('x',0).attr('y', y(d.day)).attr('width', x(d.count)).attr('height', y.bandwidth())
-      .attr('fill', col[d.day] || 'rgba(232,184,75,0.5)').attr('rx', 2);
+    g.append('rect').attr('x',0).attr('y', y(d.day)).attr('width', 0).attr('height', y.bandwidth())
+      .attr('fill', col[d.day] || 'rgba(232,184,75,0.5)').attr('rx', 2)
+      .transition().duration(1200).delay(400).ease(d3.easeCubicOut)
+      .attr('width', x(d.count));
     g.append('text').attr('x', x(d.count)+8).attr('y', y(d.day)+y.bandwidth()/2+4)
       .attr('font-family','IBM Plex Mono').attr('font-size','10px')
-      .attr('fill', isWknd ? '#fff' : 'var(--muted)').text(fmtNum(d.count));
+      .attr('fill', isWknd ? '#fff' : 'var(--muted)').attr('opacity', 0)
+      .text(fmtNum(d.count))
+      .transition().duration(300).delay(1400).attr('opacity', 1);
   });
   g.append('g').call(d3.axisLeft(y).tickSize(0)).call(g => {
     g.select('.domain').remove();
@@ -124,10 +231,95 @@ function drawDoW(data) {
   });
 }
 
+function drawActorHour(cells) {
+  const c = document.getElementById('actor-hour-chart');
+  c.innerHTML = '';
+  const W = c.clientWidth || 960, H = 240;
+  const M = { top:30, right:20, bottom:30, left:110 };
+  const w = W - M.left - M.right, h = H - M.top - M.bottom;
+  const svg = d3.select('#actor-hour-chart').append('svg').attr('width', W).attr('height', H);
+  const g = svg.append('g').attr('transform', `translate(${M.left},${M.top})`);
+
+  const x = d3.scaleBand().domain(d3.range(24)).range([0, w]).padding(0.06);
+  const y = d3.scaleBand().domain(ACTORS).range([0, h]).padding(0.1);
+
+  const maxByActor = {};
+  ACTORS.forEach(a => {
+    maxByActor[a] = d3.max(cells.filter(c => c.actor === a), c => c.count);
+  });
+
+  // Hour labels
+  d3.range(24).forEach(h => {
+    g.append('text').attr('x', x(h) + x.bandwidth()/2).attr('y', -10)
+      .attr('text-anchor','middle').attr('fill','var(--muted)')
+      .attr('font-family','IBM Plex Mono').attr('font-size','9px')
+      .text(String(h).padStart(2,'0'));
+  });
+
+  // Actor labels
+  ACTORS.forEach(a => {
+    g.append('text').attr('x', -8).attr('y', y(a) + y.bandwidth()/2 + 4)
+      .attr('text-anchor','end').attr('fill','var(--muted)')
+      .attr('font-family','IBM Plex Mono').attr('font-size','10px')
+      .text(a);
+  });
+
+  cells.forEach(cell => {
+    const intensity = (cell.count / (maxByActor[cell.actor] || 1));
+    g.append('rect')
+      .attr('x', x(cell.hour)).attr('y', y(cell.actor))
+      .attr('width', x.bandwidth()).attr('height', y.bandwidth())
+      .attr('fill', ACTOR_COLORS[cell.actor])
+      .attr('opacity', 0)
+      .on('mouseover', e => showTip(
+        `<b>${cell.actor} · ${String(cell.hour).padStart(2,'0')}:00</b><br>${fmtNum(cell.count)} alerts`, e))
+      .on('mousemove', moveTip).on('mouseleave', hideTip)
+      .transition().delay(cell.hour * 30).duration(500)
+      .attr('opacity', 0.08 + intensity * 0.88);
+  });
+}
+
 (async () => {
-  const d = await fetchData('hourly_dow.json');
-  drawClock(d.hourly);
-  drawDoW(d.day_of_week);
+  const [dow, actorHour] = await Promise.all([
+    fetchData('hourly_dow.json'),
+    fetchData('actor_hour.json'),
+  ]);
+
+  function renderAll() {
+    drawClock(dow.hourly);
+    drawDoW(dow.day_of_week);
+    drawActorHour(actorHour);
+  }
+
+  // First reveal via code-runner; also auto-play when scrolled into view.
+  let played = false;
+  const target = document.getElementById('clock-chart');
+  const io = new IntersectionObserver(entries => {
+    if (played) return;
+    if (entries.some(e => e.isIntersecting)) {
+      played = true;
+      renderAll();
+      io.disconnect();
+    }
+  }, { threshold: 0.4 });
+  io.observe(target);
+
+  mountCodeRunner({
+    mount: '#runner',
+    file: 'build_patterns.js',
+    lines: [
+      { text: '// 24h polar clock + weekday bar + actor signature heatmap', kind: 'cm' },
+      { text: 'const dow = load("hourly_dow.json")' },
+      { text: 'const ah  = load("actor_hour.json")' },
+      { text: 'const actors = ["Hamas","Hezbollah","Houthis","Iran"]' },
+      { text: '// Clock: 4 concentric rings, one per actor' },
+      { text: 'sweep(duration: 2200).onPass(hour => fadeIn(hour))' },
+      { text: 'flare(10, color: red) // 10am is the global peak' },
+      { text: 'bars(dow.day_of_week).growFromZero(1200)' },
+      { text: 'heatmap(ah, rows: actors, cols: 24).fade(30ms stagger)' },
+    ],
+    onRun: () => { played = true; renderAll(); }
+  });
 })();
 </script>
 </body>
