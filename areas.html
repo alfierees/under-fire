@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Under Fire — Area Vulnerability</title>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400;1,700&family=IBM+Plex+Mono:wght@300;400;500&family=IBM+Plex+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.8.5/d3.min.js"></script>
+  <link rel="stylesheet" href="src/css/shared.css">
+  <style>
+    #area-chart { width:100%; overflow-x:auto; }
+    #area-chart svg { display:block; }
+  </style>
+</head>
+<body>
+
+<div id="file-protocol-warning">
+  <strong>⚠ CHARTS WON'T LOAD VIA FILE://</strong>
+  Run: <code>python3 -m http.server 8000</code>
+  <span class="close-x" onclick="this.parentElement.style.display='none'">✕</span>
+</div>
+
+<nav>
+  <a href="index.html" class="nav-brand">Under Fire</a>
+  <div class="nav-links">
+    <a href="timeline.html">Timeline</a>
+    <a href="oct7.html">Oct 7</a>
+    <a href="fronts.html">Fronts</a>
+    <a href="patterns.html">Patterns</a>
+    <a href="areas.html" class="active">By Area</a>
+    <a href="odds.html">Odds</a>
+  </div>
+  <div class="nav-badge" id="nav-badge">🔔 Loading…</div>
+</nav>
+
+<div id="tooltip"></div>
+
+<div class="chart-page">
+  <div class="section-wrapper">
+    <a href="index.html" class="back-link">← Back to all charts</a>
+    <div class="section-label">05 — By Region</div>
+    <h1 class="section-title">Area Vulnerability</h1>
+    <p class="section-desc">Total alerts received by each region of Israel, ranked. Every part of the country has been targeted. Some more than others.</p>
+
+    <div id="area-chart"></div>
+    <p class="chart-note">Total alerts per region, 2020–2026. Source: RocketAlert.live</p>
+  </div>
+</div>
+
+<footer>
+  <div class="footer-left">Under Fire — 2026</div>
+  <div class="footer-credit">Alert data from <a href="https://rocketalert.live" target="_blank">RocketAlert.live</a>.</div>
+</footer>
+
+<script src="src/js/shared.js"></script>
+<script>
+function drawAreas(data) {
+  const c = document.getElementById('area-chart');
+  const W = c.clientWidth || 900;
+  const barH = 26, barPad = 6;
+  const M = { top:10, right:120, bottom:30, left:160 };
+  const H = data.length * (barH + barPad) + M.top + M.bottom;
+  const w = W - M.left - M.right;
+  const svg = d3.select('#area-chart').append('svg').attr('width', W).attr('height', H);
+  const g = svg.append('g').attr('transform', `translate(${M.left},${M.top})`);
+  const maxVal = d3.max(data, d => d.total);
+  const x = d3.scaleLinear().domain([0, maxVal]).range([0, w]);
+  data.forEach((d, i) => {
+    const y = i * (barH + barPad);
+    const isTop3 = i < 3;
+    const col = isTop3 ? 'var(--red)' : i < 10 ? 'rgba(232,184,75,0.55)' : 'rgba(74,158,255,0.4)';
+    g.append('rect').attr('x',0).attr('y',y).attr('width', x(d.total)).attr('height', barH)
+      .attr('fill', col).attr('rx',2)
+      .on('mouseover', e => showTip(`<b>${d.area}</b><br>Total: ${fmtNum(d.total)}<br>Avg/day: ${d.avg_per_day.toFixed(2)}<br>Active days: ${fmtNum(d.active_days)}`, e))
+      .on('mousemove', moveTip).on('mouseleave', hideTip);
+    g.append('text').attr('x',-8).attr('y', y+barH/2+4)
+      .attr('text-anchor','end').attr('font-family','IBM Plex Mono').attr('font-size','11px')
+      .attr('fill', isTop3 ? '#fff' : 'var(--muted)').text(d.area);
+    g.append('text').attr('x', x(d.total)+8).attr('y', y+barH/2+4)
+      .attr('font-family','IBM Plex Mono').attr('font-size','10px').attr('fill','var(--muted)').text(fmtNum(d.total));
+  });
+  g.append('g').attr('transform', `translate(0,${H - M.top - M.bottom})`)
+    .call(d3.axisBottom(x).ticks(5).tickFormat(d => d >= 1000 ? (d/1000).toFixed(0)+'k' : d))
+    .call(g => {
+      g.select('.domain').attr('stroke','var(--border)');
+      g.selectAll('text').attr('fill','var(--muted)').attr('font-family','IBM Plex Mono').attr('font-size','10px');
+      g.selectAll('line').attr('stroke','var(--border)');
+    });
+}
+(async () => drawAreas(await fetchData('areas_summary.json')))();
+</script>
+</body>
+</html>
