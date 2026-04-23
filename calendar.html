@@ -79,17 +79,17 @@
   const monthGap = 6;
 
   // Group by ISO-week columns. Column = weeks since the first Monday in the data.
+  // Use UTC arithmetic so DST transitions (which can make a Monday→Monday span
+  // 6d23h or 7d1h in local time) do not corrupt week indices.
   const first = data[0].dateObj;
   const mondayOf = d => {
-    const x = new Date(d);
-    const dow = (x.getDay() + 6) % 7; // Mon=0..Sun=6
-    x.setDate(x.getDate() - dow);
-    x.setHours(0,0,0,0);
-    return x;
+    const utcMs = Date.UTC(d.getFullYear(), d.getMonth(), d.getDate());
+    const dow = (new Date(utcMs).getUTCDay() + 6) % 7; // Mon=0..Sun=6
+    return utcMs - dow * 86400000;
   };
   const startMon = mondayOf(first);
-  const weekIndex = d => Math.floor((mondayOf(d) - startMon) / (7 * 86400000));
-  const dayRow = d => (d.getDay() + 6) % 7; // Mon=0..Sun=6
+  const weekIndex = d => Math.round((mondayOf(d) - startMon) / (7 * 86400000));
+  const dayRow = d => (d.getDay() + 6) % 7; // local day-of-week for display rows
 
   data.forEach(d => {
     d.col = weekIndex(d.dateObj);

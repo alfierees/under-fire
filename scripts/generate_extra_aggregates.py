@@ -30,10 +30,16 @@ def build_daily(weekly, hourly_dow):
     for wk in weekly:
         monday = date.fromisoformat(wk["week"])
         wk_total = wk["total"]
+        # Largest-remainder method: ensures the 7 daily counts sum exactly to wk_total.
+        raw = [wk_total * f for f in frac]
+        floored = [int(x) for x in raw]
+        remainder = wk_total - sum(floored)
+        indices = sorted(range(7), key=lambda i: -(raw[i] - floored[i]))
+        for i in indices[:remainder]:
+            floored[i] += 1
         for i in range(7):
             d = monday + timedelta(days=i)
-            count = int(round(wk_total * frac[i]))
-            daily.append({"date": d.isoformat(), "count": count})
+            daily.append({"date": d.isoformat(), "count": floored[i]})
     return daily
 
 
