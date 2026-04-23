@@ -1,0 +1,546 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Under Fire — The War, Chapter by Chapter</title>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400;1,700&family=IBM+Plex+Mono:wght@300;400;500&family=IBM+Plex+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+  <link rel="stylesheet" href="src/css/shared.css">
+  <style>
+    body { overflow-x: hidden; }
+
+    /* ── Two-panel story layout ── */
+    #story-wrap {
+      display: flex;
+      position: relative;
+      padding-top: 52px;
+    }
+
+    #narrative {
+      width: 40%;
+      min-width: 320px;
+      max-width: 500px;
+      position: relative;
+      z-index: 10;
+      background: linear-gradient(90deg, rgba(7,7,10,0.98) 0%, rgba(7,7,10,0.94) 80%, rgba(7,7,10,0) 100%);
+    }
+
+    #story-map {
+      flex: 1;
+      position: sticky;
+      top: 52px;
+      height: calc(100vh - 52px);
+    }
+
+    /* ── Hero panel ── */
+    .story-hero {
+      min-height: calc(100vh - 52px);
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      padding: 64px 44px 80px;
+      border-bottom: 1px solid var(--border);
+    }
+    .story-hero .hero-eyebrow {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: .6rem;
+      letter-spacing: .22em;
+      text-transform: uppercase;
+      color: var(--red);
+      margin-bottom: 1.2rem;
+      display: flex;
+      align-items: center;
+      gap: .8rem;
+    }
+    .story-hero .hero-eyebrow::before {
+      content: '';
+      display: block;
+      width: 28px;
+      height: 1px;
+      background: var(--red);
+      flex-shrink: 0;
+    }
+    .story-hero h1 {
+      font-family: 'Playfair Display', serif;
+      font-size: clamp(2rem, 4vw, 3rem);
+      font-weight: 900;
+      color: #fff;
+      line-height: 1.08;
+      letter-spacing: -.02em;
+      margin-bottom: 1.2rem;
+    }
+    .story-hero .hero-sub {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: .72rem;
+      color: var(--muted);
+      line-height: 1.85;
+      max-width: 380px;
+      margin-bottom: 2.4rem;
+    }
+    .hero-meta {
+      display: flex;
+      gap: 2rem;
+      flex-wrap: wrap;
+      margin-bottom: 2.8rem;
+    }
+    .hero-meta-item {
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+    }
+    .hero-meta-val {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.9rem;
+      font-weight: 900;
+      color: var(--accent);
+      line-height: 1;
+    }
+    .hero-meta-label {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: .52rem;
+      letter-spacing: .14em;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+    .scroll-cue {
+      display: flex;
+      align-items: center;
+      gap: .8rem;
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: .6rem;
+      letter-spacing: .14em;
+      text-transform: uppercase;
+      color: rgba(200,200,216,.5);
+      animation: pulse-cue 2.4s ease-in-out infinite;
+    }
+    .scroll-cue .arrow { animation: bounce-arr 1.6s ease-in-out infinite; display: inline-block; }
+    @keyframes pulse-cue { 0%,100%{opacity:.5} 50%{opacity:1} }
+    @keyframes bounce-arr { 0%,100%{transform:translateY(0)} 50%{transform:translateY(5px)} }
+
+    /* ── Chapter cards ── */
+    .chapter {
+      min-height: 85vh;
+      padding: 64px 44px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      opacity: 0.22;
+      transition: opacity 0.45s ease;
+    }
+    .chapter.active { opacity: 1; }
+
+    .ch-eyebrow {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: .58rem;
+      letter-spacing: .16em;
+      text-transform: uppercase;
+      margin-bottom: .5rem;
+    }
+    .ch-title {
+      font-family: 'Playfair Display', serif;
+      font-size: clamp(1.5rem, 2.4vw, 2.1rem);
+      font-weight: 700;
+      color: #fff;
+      line-height: 1.12;
+      letter-spacing: -.01em;
+      margin-bottom: .3rem;
+    }
+    .ch-date {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: .58rem;
+      color: var(--muted);
+      margin-bottom: 1.2rem;
+    }
+    .ch-desc {
+      font-size: .82rem;
+      color: #c8c8d8;
+      line-height: 1.8;
+      max-width: 390px;
+      margin-bottom: 1.4rem;
+    }
+    .ch-stats {
+      display: flex;
+      flex-direction: column;
+      gap: .55rem;
+    }
+    .ch-stat-row {
+      display: flex;
+      align-items: baseline;
+      gap: .8rem;
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: .6rem;
+    }
+    .ch-stat-val {
+      font-weight: 500;
+      font-size: .82rem;
+      color: #fff;
+      min-width: 5rem;
+    }
+    .ch-stat-label {
+      color: var(--muted);
+      letter-spacing: .06em;
+      text-transform: uppercase;
+    }
+    .ch-actor-bar {
+      margin-top: 1.6rem;
+      height: 2px;
+      border-radius: 1px;
+      width: 48px;
+      opacity: .7;
+    }
+
+    /* ── Outro ── */
+    .story-outro {
+      min-height: 50vh;
+      padding: 64px 44px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
+    .story-outro h2 {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.4rem;
+      font-weight: 700;
+      color: #fff;
+      margin-bottom: 1rem;
+    }
+    .story-outro p {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: .65rem;
+      color: var(--muted);
+      line-height: 1.8;
+      max-width: 380px;
+      margin-bottom: .7rem;
+    }
+    .story-outro a {
+      color: var(--accent);
+      text-decoration: none;
+    }
+    .story-outro a:hover { text-decoration: underline; }
+
+    /* ── Map note overlay ── */
+    #map-note {
+      position: absolute;
+      bottom: 1.2rem;
+      left: 1.2rem;
+      z-index: 1000;
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: .52rem;
+      letter-spacing: .05em;
+      color: rgba(200,200,216,.35);
+      pointer-events: none;
+      max-width: 260px;
+      line-height: 1.5;
+    }
+
+    /* ── Chapter counter pill ── */
+    #chapter-counter {
+      position: absolute;
+      top: 1rem;
+      left: 1rem;
+      z-index: 1000;
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: .58rem;
+      letter-spacing: .12em;
+      text-transform: uppercase;
+      color: rgba(200,200,216,.5);
+      background: rgba(7,7,10,.7);
+      border: 1px solid var(--border);
+      padding: .35rem .7rem;
+      border-radius: 3px;
+      pointer-events: none;
+      transition: color .3s;
+    }
+
+    /* ── Mobile ── */
+    @media (max-width: 860px) {
+      #story-wrap { flex-direction: column-reverse; }
+      #narrative {
+        width: 100%;
+        max-width: 100%;
+        min-width: unset;
+        background: rgba(7,7,10,0.98);
+      }
+      #story-map {
+        width: 100%;
+        height: 46vh;
+        position: sticky;
+        top: 52px;
+      }
+      .story-hero { min-height: 70vh; padding: 44px 24px 56px; }
+      .chapter { min-height: auto; padding: 48px 24px; }
+      .story-outro { padding: 48px 24px; }
+      #chapter-counter { display: none; }
+    }
+  </style>
+</head>
+<body>
+
+<div id="file-protocol-warning">
+  <strong>⚠ CHARTS WON'T LOAD VIA FILE://</strong>
+  Run: <code>python3 -m http.server 8000</code>
+  <span class="close-x" onclick="this.parentElement.style.display='none'">✕</span>
+</div>
+
+<nav>
+  <a href="index.html" class="nav-brand">Under Fire</a>
+  <div class="nav-links">
+    <a href="timeline.html">Timeline</a>
+    <a href="oct7.html">Oct 7</a>
+    <a href="fronts.html">Fronts</a>
+    <a href="calendar.html">Calendar</a>
+    <a href="patterns.html">Patterns</a>
+    <a href="areas.html">By Area</a>
+    <a href="story.html" class="active">Story</a>
+    <a href="records.html">Records</a>
+  </div>
+  <div class="nav-badge" id="nav-badge">🔔 Loading…</div>
+</nav>
+
+<div id="tooltip"></div>
+
+<div id="story-wrap">
+
+  <!-- ── Left: scrollable narrative ── -->
+  <div id="narrative">
+
+    <div class="story-hero" id="hero-section">
+      <div class="hero-eyebrow">Data Narrative</div>
+      <h1>The War,<br>Chapter by Chapter</h1>
+      <p class="hero-sub">
+        From the first rockets of October 7 to the largest barrage in recorded history —
+        six chapters, six fronts, 142,000 alerts.
+      </p>
+      <div class="hero-meta">
+        <div class="hero-meta-item">
+          <span class="hero-meta-val">6</span>
+          <span class="hero-meta-label">Chapters</span>
+        </div>
+        <div class="hero-meta-item">
+          <span class="hero-meta-val" id="hero-total">142k+</span>
+          <span class="hero-meta-label">Total alerts</span>
+        </div>
+        <div class="hero-meta-item">
+          <span class="hero-meta-val">4</span>
+          <span class="hero-meta-label">Actors</span>
+        </div>
+      </div>
+      <div class="scroll-cue">Scroll to begin <span class="arrow">↓</span></div>
+    </div>
+
+    <div id="chapters-container"></div>
+
+    <div class="story-outro">
+      <h2>Six years of data</h2>
+      <p>Every dot on this map represents real alerts recorded by RocketAlert.live. Approximate positions are distributed within documented alert areas; counts are exact.</p>
+      <p><a href="timeline.html">Six-year timeline →</a></p>
+      <p><a href="oct7.html">October 7 replay →</a></p>
+      <p><a href="records.html">Records & extremes →</a></p>
+    </div>
+
+  </div>
+
+  <!-- ── Right: sticky map ── -->
+  <div id="story-map">
+    <div id="chapter-counter">— / 6</div>
+    <div id="map-note"></div>
+  </div>
+
+</div>
+
+<footer>
+  <div class="footer-left">Under Fire — 2026</div>
+  <div class="footer-credit">Alert data from <a href="https://rocketalert.live" target="_blank">RocketAlert.live</a>. Dot positions within alert areas are approximate.</div>
+</footer>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="src/js/shared.js"></script>
+<script>
+(function () {
+  /* ── Map init ── */
+  const storyMap = L.map('story-map', {
+    center: [33.0, 36.5],
+    zoom: 5.8,
+    zoomControl: false,
+    attributionControl: false,
+  });
+
+  L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+    subdomains: 'abcd',
+    maxZoom: 19,
+  }).addTo(storyMap);
+
+  L.control.attribution({ prefix: false, position: 'bottomright' })
+    .addAttribution('© OpenStreetMap © CARTO')
+    .addTo(storyMap);
+
+  const canvasRenderer = L.canvas({ padding: 0.5 });
+
+  /* ── State ── */
+  let chaptersData = [];
+  let dotLayer = null;
+  let scatterTimer = null;
+  let activeChapterIdx = -1;
+
+  /* ── Clear dots ── */
+  function clearDots() {
+    if (scatterTimer !== null) {
+      clearInterval(scatterTimer);
+      scatterTimer = null;
+    }
+    if (dotLayer) {
+      storyMap.removeLayer(dotLayer);
+      dotLayer = null;
+    }
+  }
+
+  /* ── Scatter dots with rain effect ── */
+  function scatterDots(points, color) {
+    clearDots();
+    dotLayer = L.layerGroup().addTo(storyMap);
+    const BATCH = 18;
+    const INTERVAL = 40;
+    let idx = 0;
+
+    scatterTimer = setInterval(() => {
+      const end = Math.min(idx + BATCH, points.length);
+      for (let i = idx; i < end; i++) {
+        L.circleMarker([points[i][0], points[i][1]], {
+          renderer: canvasRenderer,
+          radius: 3.2,
+          color: color,
+          fillColor: color,
+          fillOpacity: 0.65,
+          weight: 0,
+        }).addTo(dotLayer);
+      }
+      idx = end;
+      if (idx >= points.length) {
+        clearInterval(scatterTimer);
+        scatterTimer = null;
+      }
+    }, INTERVAL);
+  }
+
+  /* ── Fly to chapter ── */
+  function activateChapter(idx) {
+    if (idx === activeChapterIdx) return;
+    activeChapterIdx = idx;
+
+    const ch = chaptersData[idx];
+    const counter = document.getElementById('chapter-counter');
+    const note = document.getElementById('map-note');
+
+    counter.textContent = `Chapter ${ch.chapter} / 6`;
+    counter.style.color = ch.color;
+    note.textContent = ch.points_note;
+
+    storyMap.flyTo([ch.map.center[1], ch.map.center[0]], ch.map.zoom, {
+      duration: 1.8,
+      easeLinearity: 0.35,
+    });
+
+    // Scatter dots after fly starts (600ms delay)
+    clearDots();
+    setTimeout(() => scatterDots(ch.points, ch.color), 650);
+  }
+
+  /* ── Reset to overview ── */
+  function resetMap() {
+    activeChapterIdx = -1;
+    clearDots();
+    const counter = document.getElementById('chapter-counter');
+    counter.textContent = '— / 6';
+    counter.style.color = '';
+    document.getElementById('map-note').textContent = '';
+    storyMap.flyTo([33.0, 36.5], 5.8, { duration: 1.5 });
+  }
+
+  /* ── Build chapter DOM ── */
+  function buildChapters(chapters) {
+    const container = document.getElementById('chapters-container');
+
+    chapters.forEach((ch, i) => {
+      const div = document.createElement('div');
+      div.className = 'chapter';
+      div.dataset.idx = i;
+
+      const statsHtml = ch.stats.map(s => `
+        <div class="ch-stat-row">
+          <span class="ch-stat-val">${s.value}</span>
+          <span class="ch-stat-label">${s.label}</span>
+        </div>`).join('');
+
+      div.innerHTML = `
+        <div class="ch-eyebrow" style="color:${ch.color}">${ch.eyebrow}</div>
+        <div class="ch-title">${ch.title}</div>
+        <div class="ch-date">${ch.date}</div>
+        <p class="ch-desc">${ch.description}</p>
+        <div class="ch-stats">${statsHtml}</div>
+        <div class="ch-actor-bar" style="background:${ch.color}"></div>
+      `;
+
+      container.appendChild(div);
+    });
+  }
+
+  /* ── Intersection observer ── */
+  function setupObserver(chapters) {
+    const chapterEls = document.querySelectorAll('.chapter');
+
+    const chapterObs = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          chapterEls.forEach(el => el.classList.remove('active'));
+          entry.target.classList.add('active');
+          activateChapter(+entry.target.dataset.idx);
+        }
+      });
+    }, {
+      root: null,
+      rootMargin: '-28% 0px -28% 0px',
+      threshold: 0.08,
+    });
+
+    chapterEls.forEach(el => chapterObs.observe(el));
+
+    // Hero observer — resets map when scrolled back to top
+    const heroObs = new IntersectionObserver((entries) => {
+      if (entries[0].isIntersecting) {
+        chapterEls.forEach(el => el.classList.remove('active'));
+        resetMap();
+      }
+    }, { threshold: 0.25 });
+
+    heroObs.observe(document.getElementById('hero-section'));
+  }
+
+  /* ── Load data and boot ── */
+  (async () => {
+    try {
+      const [story, stats] = await Promise.all([
+        fetchData('story_chapters.json'),
+        fetchData('stats_summary.json'),
+      ]);
+
+      chaptersData = story.chapters;
+
+      // Update hero total
+      const heroTotal = document.getElementById('hero-total');
+      if (heroTotal && stats.total_alerts) {
+        heroTotal.textContent = (stats.total_alerts / 1000).toFixed(0) + 'k+';
+      }
+
+      buildChapters(chaptersData);
+      setupObserver(chaptersData);
+
+    } catch (e) {
+      console.warn('story load error', e);
+    }
+  })();
+})();
+</script>
+</body>
+</html>
