@@ -227,13 +227,23 @@
       left: 1.2rem;
       z-index: 1000;
       font-family: 'IBM Plex Mono', monospace;
-      font-size: .52rem;
+      font-size: .58rem;
       letter-spacing: .05em;
-      color: rgba(200,200,216,.35);
+      color: rgba(236,238,246,.6);
       pointer-events: none;
       max-width: 260px;
       line-height: 1.5;
     }
+
+    /* ── Arc overlay above Leaflet tiles ── */
+    #arc-overlay {
+      position: absolute; inset: 0;
+      pointer-events: none;
+      z-index: 500;
+    }
+    #arc-overlay svg { width: 100%; height: 100%; display: block; }
+    #arc-overlay .arc-path { fill: none; stroke-linecap: round; }
+    #arc-overlay .origin-dot { filter: drop-shadow(0 0 6px currentColor); }
 
     /* ── Chapter counter pill ── */
     #chapter-counter {
@@ -287,14 +297,35 @@
 <nav>
   <a href="index.html" class="nav-brand">Under Fire</a>
   <div class="nav-links">
-    <a href="timeline.html">Timeline</a>
-    <a href="oct7.html">Oct 7</a>
-    <a href="fronts.html">Fronts</a>
-    <a href="calendar.html">Calendar</a>
-    <a href="patterns.html">Patterns</a>
-    <a href="areas.html">By Area</a>
-    <a href="story.html" class="active">Story</a>
-    <a href="records.html">Records</a>
+    <div class="nav-group">
+      <button class="nav-group-btn" type="button">Charts<span class="caret">▾</span></button>
+      <div class="nav-dropdown">
+        <a href="timeline.html">Timeline</a>
+        <a href="fronts.html">Fronts</a>
+        <a href="calendar.html">Calendar</a>
+      </div>
+    </div>
+    <div class="nav-group">
+      <button class="nav-group-btn" type="button">Maps<span class="caret">▾</span></button>
+      <div class="nav-dropdown">
+        <a href="oct7.html">Oct 7</a>
+        <a href="story.html">Story</a>
+      </div>
+    </div>
+    <div class="nav-group">
+      <button class="nav-group-btn" type="button">Patterns<span class="caret">▾</span></button>
+      <div class="nav-dropdown">
+        <a href="patterns.html">Patterns</a>
+        <a href="areas.html">By Area</a>
+      </div>
+    </div>
+    <div class="nav-group">
+      <button class="nav-group-btn" type="button">More<span class="caret">▾</span></button>
+      <div class="nav-dropdown">
+        <a href="records.html">Records &amp; Stats</a>
+        <a href="mission.html">Mission</a>
+      </div>
+    </div>
   </div>
   <div class="nav-badge" id="nav-badge">🔔 Loading…</div>
 </nav>
@@ -344,6 +375,7 @@
 
   <!-- ── Right: sticky map ── -->
   <div id="story-map">
+    <div id="arc-overlay"></div>
     <div id="chapter-counter">— / 6</div>
     <div id="map-note"></div>
   </div>
@@ -356,13 +388,14 @@
 </footer>
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.8.5/d3.min.js"></script>
 <script src="src/js/shared.js"></script>
 <script>
 (function () {
   /* ── Map init ── */
   const storyMap = L.map('story-map', {
-    center: [33.0, 36.5],
-    zoom: 5.8,
+    center: [31.7, 35.2],
+    zoom: 6,
     zoomControl: false,
     attributionControl: false,
   });
@@ -376,86 +409,214 @@
     .addAttribution('© OpenStreetMap © CARTO')
     .addTo(storyMap);
 
-  const canvasRenderer = L.canvas({ padding: 0.5 });
+  /* ── Origin coordinates per actor (rough approximations) ── */
+  const ORIGINS = {
+    Hamas:     { lat: 31.43, lon: 34.38, label: 'Gaza' },
+    Hezbollah: { lat: 33.40, lon: 35.48, label: 'S. Lebanon' },
+    Houthis:   { lat: 15.37, lon: 44.20, label: 'Sana’a, Yemen' },
+    Iran:      { lat: 35.70, lon: 51.42, label: 'Tehran' },
+  };
 
   /* ── State ── */
   let chaptersData = [];
-  let dotLayer = null;
-  let scatterTimer = null;
   let activeChapterIdx = -1;
+  let currentChapter = null;
 
-  /* ── Clear dots ── */
-  function clearDots() {
-    if (scatterTimer !== null) {
-      clearInterval(scatterTimer);
-      scatterTimer = null;
-    }
-    if (dotLayer) {
-      storyMap.removeLayer(dotLayer);
-      dotLayer = null;
-    }
+  /* ── Arc overlay (D3) ── */
+  const overlayDiv = document.getElementById('arc-overlay');
+  const overlay = d3.select(overlayDiv).append('svg');
+  overlay.attr('preserveAspectRatio', 'none');
+
+  function sizeOverlay() {
+    const rect = overlayDiv.getBoundingClientRect();
+    overlay.attr('width', rect.width).attr('height', rect.height);
+  }
+  sizeOverlay();
+  window.addEventListener('resize', sizeOverlay);
+
+  function project(lat, lon) {
+    const p = storyMap.latLngToContainerPoint([lat, lon]);
+    return [p.x, p.y];
   }
 
-  /* ── Scatter dots with rain effect ── */
-  function scatterDots(points, color) {
-    clearDots();
-    dotLayer = L.layerGroup().addTo(storyMap);
-    const BATCH = 18;
-    const INTERVAL = 40;
-    let idx = 0;
-
-    scatterTimer = setInterval(() => {
-      const end = Math.min(idx + BATCH, points.length);
-      for (let i = idx; i < end; i++) {
-        L.circleMarker([points[i][0], points[i][1]], {
-          renderer: canvasRenderer,
-          radius: 3.2,
-          color: color,
-          fillColor: color,
-          fillOpacity: 0.65,
-          weight: 0,
-        }).addTo(dotLayer);
-      }
-      idx = end;
-      if (idx >= points.length) {
-        clearInterval(scatterTimer);
-        scatterTimer = null;
-      }
-    }, INTERVAL);
+  function arcPathD(originLL, targetLL, bow = 0.28) {
+    const [x1, y1] = project(originLL.lat, originLL.lon);
+    const [x2, y2] = project(targetLL.lat, targetLL.lon);
+    const dx = x2 - x1, dy = y2 - y1;
+    const dist = Math.hypot(dx, dy) || 1;
+    const nx = -dy / dist, ny = dx / dist;
+    const mx = (x1 + x2) / 2 + nx * dist * bow;
+    const my = (y1 + y2) / 2 + ny * dist * bow;
+    return `M ${x1} ${y1} Q ${mx} ${my} ${x2} ${y2}`;
   }
 
-  /* ── Fly to chapter ── */
+  function clearOverlay() {
+    overlay.selectAll('*').remove();
+  }
+
+  /* ── Cluster impact points to a handful of main areas ── */
+  function clusterPoints(points, gridDeg = 0.15, topN = 6) {
+    const buckets = new Map();
+    for (const [lat, lon] of points) {
+      const key = `${Math.round(lat / gridDeg)}|${Math.round(lon / gridDeg)}`;
+      const b = buckets.get(key);
+      if (b) { b.latSum += lat; b.lonSum += lon; b.n += 1; }
+      else buckets.set(key, { latSum: lat, lonSum: lon, n: 1 });
+    }
+    return Array.from(buckets.values())
+      .sort((a, b) => b.n - a.n)
+      .slice(0, topN)
+      .map(b => ({ lat: b.latSum / b.n, lon: b.lonSum / b.n, count: b.n }));
+  }
+
+  /* ── Render a chapter: arcs first, impacts bloom at the end ── */
+  function renderChapter(ch) {
+    clearOverlay();
+    sizeOverlay();
+
+    const origin = ORIGINS[ch.actor];
+    if (!origin) return;
+    const clusters = clusterPoints(ch.points, 0.18, 6);
+    if (!clusters.length) return;
+    const maxCount = d3.max(clusters, c => c.count) || 1;
+
+    // Origin marker — pulsing dot at launch site
+    const [ox, oy] = project(origin.lat, origin.lon);
+    overlay.append('circle')
+      .attr('class', 'origin-dot')
+      .attr('cx', ox).attr('cy', oy)
+      .attr('r', 6).attr('fill', ch.color)
+      .style('color', ch.color)
+      .attr('opacity', 0.95);
+    overlay.append('circle')
+      .attr('cx', ox).attr('cy', oy)
+      .attr('r', 6).attr('fill', 'none')
+      .attr('stroke', ch.color).attr('stroke-width', 2)
+      .attr('opacity', 0.6)
+      .transition().duration(1400).ease(d3.easeCubicOut)
+      .attr('r', 22).attr('opacity', 0)
+      .on('end', function repeat() {
+        d3.select(this).attr('r', 6).attr('opacity', 0.6)
+          .transition().duration(1400).ease(d3.easeCubicOut)
+          .attr('r', 22).attr('opacity', 0)
+          .on('end', repeat);
+      });
+    overlay.append('text')
+      .attr('x', ox).attr('y', oy - 14)
+      .attr('text-anchor', 'middle')
+      .attr('fill', ch.color)
+      .attr('font-family', 'IBM Plex Mono')
+      .attr('font-size', 10)
+      .attr('letter-spacing', '.14em')
+      .text(origin.label.toUpperCase());
+
+    // Arcs from origin to each cluster centroid
+    const ARC_DUR = 1100;
+    clusters.forEach((c, i) => {
+      const pathD = arcPathD(origin, c);
+      const path = overlay.append('path')
+        .attr('class', 'arc-path')
+        .attr('d', pathD)
+        .attr('stroke', ch.color)
+        .attr('stroke-width', 1.6)
+        .attr('stroke-dasharray', '6 5')
+        .attr('opacity', 0.85);
+      const len = path.node().getTotalLength();
+      path.attr('stroke-dasharray', `${len} ${len}`)
+          .attr('stroke-dashoffset', len)
+          .transition()
+          .delay(i * 110)
+          .duration(ARC_DUR)
+          .ease(d3.easeCubicInOut)
+          .attr('stroke-dashoffset', 0)
+          .on('end', () => {
+            // Restore dashed look after draw-on finishes
+            path.attr('stroke-dasharray', '6 5').attr('stroke-dashoffset', 0);
+            // Bloom at the impact cluster
+            bloomAt(c, ch.color, maxCount);
+          });
+    });
+  }
+
+  function bloomAt(cluster, color, maxCount) {
+    const [x, y] = project(cluster.lat, cluster.lon);
+    const scale = Math.sqrt(cluster.count / maxCount);
+    const maxR = 18 + scale * 32;
+
+    // Persistent impact dot (core)
+    overlay.append('circle')
+      .attr('cx', x).attr('cy', y)
+      .attr('r', 0).attr('fill', color).attr('opacity', 0.85)
+      .transition().duration(260).ease(d3.easeCubicOut)
+      .attr('r', 4 + scale * 3);
+
+    // Expanding shock ring
+    overlay.append('circle')
+      .attr('cx', x).attr('cy', y)
+      .attr('r', 2).attr('fill', 'none')
+      .attr('stroke', color).attr('stroke-width', 2)
+      .attr('opacity', 0.9)
+      .transition().duration(1100).ease(d3.easeCubicOut)
+      .attr('r', maxR).attr('opacity', 0)
+      .remove();
+
+    // Count label (persistent, subtle)
+    overlay.append('text')
+      .attr('x', x).attr('y', y - (6 + scale * 3))
+      .attr('text-anchor', 'middle')
+      .attr('fill', color)
+      .attr('font-family', 'IBM Plex Mono')
+      .attr('font-size', 9)
+      .attr('opacity', 0)
+      .text(cluster.count.toLocaleString())
+      .transition().delay(120).duration(260)
+      .attr('opacity', 0.75);
+  }
+
+  /* ── Compute bounds so both origin and impact area fit ── */
+  function chapterBounds(ch) {
+    const origin = ORIGINS[ch.actor];
+    const impactLL = [ch.map.center[1], ch.map.center[0]];
+    if (!origin) return L.latLngBounds([impactLL, impactLL]).pad(0.4);
+    // Include origin + each cluster centroid
+    const clusters = clusterPoints(ch.points, 0.18, 6);
+    const pts = [[origin.lat, origin.lon], impactLL]
+      .concat(clusters.map(c => [c.lat, c.lon]));
+    return L.latLngBounds(pts).pad(0.18);
+  }
+
+  /* ── Fly to chapter, then render arcs once map settles ── */
   function activateChapter(idx) {
     if (idx === activeChapterIdx) return;
     activeChapterIdx = idx;
-
     const ch = chaptersData[idx];
+    currentChapter = ch;
     const counter = document.getElementById('chapter-counter');
     const note = document.getElementById('map-note');
-
     counter.textContent = `Chapter ${ch.chapter} / 6`;
     counter.style.color = ch.color;
     note.textContent = ch.points_note;
 
-    storyMap.flyTo([ch.map.center[1], ch.map.center[0]], ch.map.zoom, {
-      duration: 1.8,
-      easeLinearity: 0.35,
-    });
-
-    // Scatter dots after fly starts (600ms delay)
-    clearDots();
-    setTimeout(() => scatterDots(ch.points, ch.color), 650);
+    clearOverlay();
+    const bounds = chapterBounds(ch);
+    storyMap.flyToBounds(bounds, { duration: 1.6, easeLinearity: 0.35 });
+    // Rendering happens on the moveend listener below, once the map settles.
   }
 
-  /* ── Reset to overview ── */
+  /* ── Redraw overlay whenever the map settles ── */
+  storyMap.on('moveend', () => {
+    if (currentChapter) renderChapter(currentChapter);
+  });
+
   function resetMap() {
     activeChapterIdx = -1;
-    clearDots();
+    currentChapter = null;
+    clearOverlay();
     const counter = document.getElementById('chapter-counter');
     counter.textContent = '— / 6';
     counter.style.color = '';
     document.getElementById('map-note').textContent = '';
-    storyMap.flyTo([33.0, 36.5], 5.8, { duration: 1.5 });
+    storyMap.flyTo([31.7, 35.2], 6, { duration: 1.3 });
   }
 
   /* ── Build chapter DOM ── */
