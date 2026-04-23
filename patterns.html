@@ -31,14 +31,35 @@
 <nav>
   <a href="index.html" class="nav-brand">Under Fire</a>
   <div class="nav-links">
-    <a href="timeline.html">Timeline</a>
-    <a href="oct7.html">Oct 7</a>
-    <a href="fronts.html">Fronts</a>
-    <a href="calendar.html">Calendar</a>
-    <a href="patterns.html" class="active">Patterns</a>
-    <a href="areas.html">By Area</a>
-    <a href="story.html">Story</a>
-    <a href="records.html">Records</a>
+    <div class="nav-group">
+      <button class="nav-group-btn" type="button">Charts<span class="caret">▾</span></button>
+      <div class="nav-dropdown">
+        <a href="timeline.html">Timeline</a>
+        <a href="fronts.html">Fronts</a>
+        <a href="calendar.html">Calendar</a>
+      </div>
+    </div>
+    <div class="nav-group">
+      <button class="nav-group-btn" type="button">Maps<span class="caret">▾</span></button>
+      <div class="nav-dropdown">
+        <a href="oct7.html">Oct 7</a>
+        <a href="story.html">Story</a>
+      </div>
+    </div>
+    <div class="nav-group">
+      <button class="nav-group-btn" type="button">Patterns<span class="caret">▾</span></button>
+      <div class="nav-dropdown">
+        <a href="patterns.html">Patterns</a>
+        <a href="areas.html">By Area</a>
+      </div>
+    </div>
+    <div class="nav-group">
+      <button class="nav-group-btn" type="button">More<span class="caret">▾</span></button>
+      <div class="nav-dropdown">
+        <a href="records.html">Records &amp; Stats</a>
+        <a href="mission.html">Mission</a>
+      </div>
+    </div>
   </div>
   <div class="nav-badge" id="nav-badge">🔔 Loading…</div>
 </nav>
@@ -61,26 +82,32 @@
 
     <div id="runner"></div>
 
-    <div class="patterns-grid">
-      <div>
-        <div class="chart-title">Alerts by Hour of Day — per actor</div>
-        <div class="chart-sub">Concentric rings: inner = Hamas, outer = Iran. Radius = count.</div>
-        <div id="clock-chart"></div>
-      </div>
-      <div id="dow">
-        <div class="chart-title">Alerts by Day of Week</div>
-        <div class="chart-sub">Saturday is the single busiest day by a wide margin.</div>
-        <div id="dow-chart"></div>
-      </div>
+    <div class="chart-gated-hint" id="patterns-hint">
+      Press <span class="accent">▶ Run</span> in the code panel above to reveal the clock, weekday bar, and actor heatmap.
     </div>
-    <p class="chart-note">All 142,837 alerts, 2020–2026. Source: RocketAlert.live</p>
 
-    <div class="pattern-section">
-      <div class="section-label" style="margin-bottom:.5rem;">04b — Attribution × Time</div>
-      <h2 class="section-title" style="font-size:2rem;">Who Attacks When</h2>
-      <p class="section-desc" style="max-width:720px;">Each actor has a signature time-of-day pattern. Iran clusters heavily around 10am strikes. Hezbollah runs from mid-morning into evening. Houthis operate disproportionately through the small hours of the night.</p>
-      <div id="actor-hour-chart"></div>
-      <p class="chart-note">4 actors × 24 hours, coloured by that actor's alert count at that hour. Source: RocketAlert.live</p>
+    <div id="patterns-all" class="chart-gated">
+      <div class="patterns-grid">
+        <div>
+          <div class="chart-title">Alerts by Hour of Day — per actor</div>
+          <div class="chart-sub">Concentric rings: inner = Hamas, outer = Iran. Radius = count.</div>
+          <div id="clock-chart"></div>
+        </div>
+        <div id="dow">
+          <div class="chart-title">Alerts by Day of Week</div>
+          <div class="chart-sub">Saturday is the single busiest day by a wide margin.</div>
+          <div id="dow-chart"></div>
+        </div>
+      </div>
+      <p class="chart-note">All 142,837 alerts, 2020–2026. Source: RocketAlert.live</p>
+
+      <div class="pattern-section">
+        <div class="section-label" style="margin-bottom:.5rem;">04b — Attribution × Time</div>
+        <h2 class="section-title" style="font-size:2rem;">Who Attacks When</h2>
+        <p class="section-desc" style="max-width:720px;">Each actor has a signature time-of-day pattern. Iran clusters heavily around 10am strikes. Hezbollah runs from mid-morning into evening. Houthis operate disproportionately through the small hours of the night.</p>
+        <div id="actor-hour-chart"></div>
+        <p class="chart-note">4 actors × 24 hours, coloured by that actor's alert count at that hour. Source: RocketAlert.live</p>
+      </div>
     </div>
   </div>
 </div>
@@ -291,18 +318,8 @@ function drawActorHour(cells) {
     drawActorHour(actorHour);
   }
 
-  // First reveal via code-runner; also auto-play when scrolled into view.
-  let played = false;
-  const target = document.getElementById('clock-chart');
-  const io = new IntersectionObserver(entries => {
-    if (played) return;
-    if (entries.some(e => e.isIntersecting)) {
-      played = true;
-      renderAll();
-      io.disconnect();
-    }
-  }, { threshold: 0.4 });
-  io.observe(target);
+  const wrap = document.getElementById('patterns-all');
+  const hint = document.getElementById('patterns-hint');
 
   mountCodeRunner({
     mount: '#runner',
@@ -318,7 +335,11 @@ function drawActorHour(cells) {
       { text: 'bars(dow.day_of_week).growFromZero(1200)' },
       { text: 'heatmap(ah, rows: actors, cols: 24).fade(30ms stagger)' },
     ],
-    onRun: () => { played = true; renderAll(); }
+    onRun: () => {
+      if (hint) hint.style.display = 'none';
+      wrap.classList.add('revealed');
+      renderAll();
+    }
   });
 })();
 </script>

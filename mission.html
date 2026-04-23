@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Under Fire — Mission</title>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400;1,700&family=IBM+Plex+Mono:wght@300;400;500&family=IBM+Plex+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="src/css/shared.css">
+  <style>
+    .mission-hero {
+      padding: 8rem 6rem 4rem;
+      max-width: 960px;
+      margin: 0 auto;
+    }
+    .mission-eyebrow {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: .62rem;
+      letter-spacing: .22em;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin-bottom: 1.5rem;
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+    .mission-eyebrow::before {
+      content: '';
+      display: block;
+      width: 36px;
+      height: 1px;
+      background: var(--accent);
+      flex-shrink: 0;
+    }
+    .mission-title {
+      font-family: 'Playfair Display', serif;
+      font-size: clamp(2.4rem, 4.5vw, 3.8rem);
+      font-weight: 900;
+      color: #fff;
+      line-height: 1.08;
+      letter-spacing: -.02em;
+      margin-bottom: 1.4rem;
+    }
+    .mission-dedication {
+      font-family: 'Playfair Display', serif;
+      font-style: italic;
+      font-size: 1.1rem;
+      color: var(--accent);
+      line-height: 1.8;
+      max-width: 640px;
+      margin-bottom: 2rem;
+    }
+    .mission-body {
+      font-size: .95rem;
+      color: var(--muted);
+      line-height: 1.9;
+      max-width: 640px;
+      margin-bottom: 2rem;
+    }
+    .mission-placeholder {
+      margin-top: 3rem;
+      padding: 2rem 2.4rem;
+      border: 1px dashed var(--border);
+      border-radius: 6px;
+      background: rgba(15,15,20,.45);
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: .72rem;
+      color: var(--muted);
+      line-height: 1.8;
+      max-width: 640px;
+    }
+    .mission-placeholder strong {
+      display: block;
+      font-size: .62rem;
+      letter-spacing: .2em;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin-bottom: .6rem;
+    }
+  </style>
+</head>
+<body>
+
+<div id="file-protocol-warning">
+  <strong>⚠ CHARTS WON'T LOAD VIA FILE://</strong>
+  Run: <code>python3 -m http.server 8000</code>
+  <span class="close-x" onclick="this.parentElement.style.display='none'">✕</span>
+</div>
+
+<nav>
+  <a href="index.html" class="nav-brand">Under Fire</a>
+  <div class="nav-links">
+    <div class="nav-group">
+      <button class="nav-group-btn" type="button">Charts<span class="caret">▾</span></button>
+      <div class="nav-dropdown">
+        <a href="timeline.html">Timeline</a>
+        <a href="fronts.html">Fronts</a>
+        <a href="calendar.html">Calendar</a>
+      </div>
+    </div>
+    <div class="nav-group">
+      <button class="nav-group-btn" type="button">Maps<span class="caret">▾</span></button>
+      <div class="nav-dropdown">
+        <a href="oct7.html">Oct 7</a>
+        <a href="story.html">Story</a>
+      </div>
+    </div>
+    <div class="nav-group">
+      <button class="nav-group-btn" type="button">Patterns<span class="caret">▾</span></button>
+      <div class="nav-dropdown">
+        <a href="patterns.html">Patterns</a>
+        <a href="areas.html">By Area</a>
+      </div>
+    </div>
+    <div class="nav-group">
+      <button class="nav-group-btn" type="button">More<span class="caret">▾</span></button>
+      <div class="nav-dropdown">
+        <a href="records.html">Records &amp; Stats</a>
+        <a href="mission.html">Mission</a>
+      </div>
+    </div>
+  </div>
+  <div class="nav-badge" id="nav-badge">🔔 Loading…</div>
+</nav>
+
+<div id="tooltip"></div>
+
+<div class="chart-page">
+  <div class="mission-hero">
+    <a href="index.html" class="back-link">← Back to all charts</a>
+    <div class="mission-eyebrow">Mission Statement</div>
+    <h1 class="mission-title">For the brave soldiers of the IDF.</h1>
+
+    <p class="mission-dedication">
+      This project is dedicated to every soldier who stands between Israel and the storm
+      of rockets, missiles, and drones recorded on these pages.
+    </p>
+
+    <p class="mission-body">
+      Behind every alert on every chart is a siren, a shelter, a 90-second sprint,
+      and the men and women whose job is to make sure the next one doesn't land.
+      The numbers are theirs.
+    </p>
+
+    <div class="mission-placeholder">
+      <strong>In progress</strong>
+      The full mission statement is coming. Alfie is writing the dedication in the format
+      he wants — this page is a placeholder until that copy is ready to drop in.
+    </div>
+  </div>
+</div>
+
+<footer>
+  <div class="footer-left">Under Fire — 2026</div>
+  <div class="footer-credit">
+    Alert data from <a href="https://rocketalert.live" target="_blank">RocketAlert.live</a>.
+  </div>
+</footer>
+
+<script src="src/js/shared.js"></script>
+</body>
+</html>

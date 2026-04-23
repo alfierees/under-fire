@@ -109,30 +109,101 @@ async function drawPreviewCalendar(svgEl) {
   }
 }
 
-// Story map mini preview: coloured dot clusters per chapter/actor
+// Shared: draw a schematic Levant map as a background for map-card previews.
+// Coast runs down the left, Israel silhouette sits along the coastline, and a
+// light stipple texture hints at terrain inland.
+function drawMapBg(svg, W, H, seedStart = 42) {
+  // Water
+  const seaEdge = W * 0.38;
+  svg.append('rect').attr('width', seaEdge).attr('height', H).attr('fill', '#080a13');
+  // Inland
+  svg.append('rect').attr('x', seaEdge).attr('width', W - seaEdge).attr('height', H).attr('fill', '#11131c');
+  // Coastline glow
+  svg.append('line')
+    .attr('x1', seaEdge).attr('x2', seaEdge).attr('y1', 0).attr('y2', H)
+    .attr('stroke', 'rgba(232,184,75,0.22)').attr('stroke-width', 0.6);
+
+  // Stipple texture inland (cheap, deterministic)
+  let s = seedStart;
+  const rng = () => { s ^= s<<13; s ^= s>>17; s ^= s<<5; return (s>>>0) / 4294967296; };
+  for (let i = 0; i < 70; i++) {
+    svg.append('circle')
+      .attr('cx', seaEdge + rng() * (W - seaEdge))
+      .attr('cy', rng() * H)
+      .attr('r', 0.35)
+      .attr('fill', 'rgba(200,200,216,0.10)');
+  }
+
+  // Lebanon strip (top)
+  svg.append('path')
+    .attr('d', `M ${seaEdge} 0 L ${seaEdge + W*0.18} 0 L ${seaEdge + W*0.20} ${H*0.12} L ${seaEdge + 2} ${H*0.14} Z`)
+    .attr('fill', 'rgba(232,184,75,0.05)')
+    .attr('stroke', 'rgba(232,184,75,0.22)').attr('stroke-width', 0.4);
+
+  // Israel silhouette (narrow vertical down the coast)
+  const L = seaEdge + 2;
+  const R = seaEdge + W * 0.17;
+  const israelPath = [
+    `M ${L + 3} ${H * 0.14}`,
+    `L ${R} ${H * 0.24}`,
+    `L ${R - 2} ${H * 0.55}`,
+    `L ${L + W * 0.12} ${H * 0.92}`,
+    `L ${L} ${H * 0.76}`,
+    `L ${L + 2} ${H * 0.34}`,
+    `Z`,
+  ].join(' ');
+  svg.append('path').attr('d', israelPath)
+    .attr('fill', 'rgba(232,184,75,0.08)')
+    .attr('stroke', 'rgba(232,184,75,0.35)').attr('stroke-width', 0.5);
+}
+
+// Translate a chapter lat/lon into the preview svg space.
+// Israel silhouette roughly spans lat 29.5 – 33.3, lon 34.3 – 35.9.
+function projectToPreview(lat, lon, W, H) {
+  const seaEdge = W * 0.38;
+  const xLeft = seaEdge + 2, xRight = seaEdge + W * 0.17;
+  const yTop = H * 0.14, yBot = H * 0.92;
+  const lonMin = 34.2, lonMax = 35.9;
+  const latMin = 29.3, latMax = 33.4;
+  const x = xLeft + ((lon - lonMin) / (lonMax - lonMin)) * (xRight - xLeft);
+  const y = yBot - ((lat - latMin) / (latMax - latMin)) * (yBot - yTop);
+  return [x, y];
+}
+
+// Story map mini preview: schematic map background + coloured dot clusters.
 async function drawPreviewStory(svgEl) {
-  const W = svgEl.clientWidth || 280, H = svgEl.clientHeight || 70;
+  const W = svgEl.clientWidth || 280, H = svgEl.clientHeight || 80;
   const svg = d3.select(svgEl).attr('viewBox', `0 0 ${W} ${H}`);
-  // Clusters representing each chapter's region and actor colour
+  drawMapBg(svg, W, H, 91);
+
+  // Chapter clusters — actor colour + rough lat/lon
   const clusters = [
-    { cx: W*0.28, cy: H*0.78, col: '#d63031', n: 18, r: H*0.25 }, // Hamas south
-    { cx: W*0.32, cy: H*0.55, col: '#d63031', n: 12, r: H*0.18 }, // Hamas barrages
-    { cx: W*0.42, cy: H*0.18, col: '#f39c12', n: 20, r: H*0.22 }, // Hezbollah north
-    { cx: W*0.35, cy: H*0.88, col: '#4a9eff', n: 8,  r: H*0.14 }, // Houthis south tip
-    { cx: W*0.34, cy: H*0.60, col: '#c678dd', n: 10, r: H*0.20 }, // Iran direct
-    { cx: W*0.36, cy: H*0.48, col: '#c678dd', n: 30, r: H*0.42 }, // 2026 total war
+    { lat: 31.45, lon: 34.50, col: '#d63031', n: 14 }, // Hamas: Gaza envelope
+    { lat: 31.80, lon: 34.75, col: '#d63031', n: 8  }, // Hamas: coastal
+    { lat: 33.05, lon: 35.30, col: '#f39c12', n: 18 }, // Hezbollah: north
+    { lat: 29.55, lon: 34.95, col: '#4a9eff', n: 4  }, // Houthis: Eilat
+    { lat: 31.60, lon: 35.00, col: '#c678dd', n: 12 }, // Iran Apr/Oct 24
+    { lat: 31.95, lon: 35.15, col: '#c678dd', n: 16 }, // Iran 2026
   ];
-  const rng = (() => { let s = 42; return () => { s ^= s<<13; s ^= s>>17; s ^= s<<5; return (s>>>0)/4294967296; }; })();
+
+  let s = 77;
+  const rng = () => { s ^= s<<13; s ^= s>>17; s ^= s<<5; return (s>>>0) / 4294967296; };
+
   clusters.forEach(cl => {
-    for (let i = 0; i < cl.n; i++) {
+    const [cx, cy] = projectToPreview(cl.lat, cl.lon, W, H);
+    // Soft halo
+    svg.append('circle').attr('cx', cx).attr('cy', cy)
+      .attr('r', 3 + cl.n * 0.15).attr('fill', cl.col).attr('opacity', 0.18);
+    // Dots around centroid
+    for (let i = 0; i < Math.min(cl.n, 10); i++) {
       const a = rng() * Math.PI * 2;
-      const dist = rng() * cl.r;
+      const dist = rng() * 3.5;
       svg.append('circle')
-        .attr('cx', cl.cx + Math.cos(a) * dist)
-        .attr('cy', cl.cy + Math.sin(a) * dist)
-        .attr('r', rng() * 1.4 + 0.6)
+        .attr('cx', cx + Math.cos(a) * dist)
+        .attr('cy', cy + Math.sin(a) * dist)
+        .attr('r', rng() * 0.8 + 0.7)
         .attr('fill', cl.col)
-        .attr('opacity', 0.65 + rng() * 0.3);
+        .attr('opacity', 0.7 + rng() * 0.25);
     }
   });
 }
@@ -190,24 +261,34 @@ async function drawPreviewAreas(svgEl) {
   });
 }
 
-// Oct 7 preview — small shape suggesting map pins
+// Oct 7 preview — schematic map + dense dots across Israel, coloured by time.
 async function drawPreviewOct7(svgEl) {
-  const W = svgEl.clientWidth || 280, H = svgEl.clientHeight || 70;
+  const W = svgEl.clientWidth || 280, H = svgEl.clientHeight || 80;
   const svg = d3.select(svgEl).attr('viewBox', `0 0 ${W} ${H}`);
-  // Scatter dots resembling Israel shape
-  const pts = [];
-  for (let i = 0; i < 120; i++) {
-    const cx = W * 0.4 + (Math.random() - 0.5) * W * 0.5;
-    const cy = H * 0.5 + (Math.random() - 0.5) * H * 0.8;
-    pts.push({ x: cx, y: cy, r: Math.random() * 1.6 + 0.4 });
+  drawMapBg(svg, W, H, 128);
+
+  let s = 313;
+  const rng = () => { s ^= s<<13; s ^= s>>17; s ^= s<<5; return (s>>>0) / 4294967296; };
+
+  // Sample random lat/lons biased toward the Gaza envelope + central Israel.
+  // Colour gradient represents progression through the day.
+  const N = 90;
+  for (let i = 0; i < N; i++) {
+    // bias heavily toward the south-coast (Gaza envelope)
+    const bias = rng();
+    const lat = bias < 0.55
+      ? 31.3 + rng() * 0.6          // southern cluster
+      : 31.9 + rng() * 1.1;         // central + northern sprinkle
+    const lon = 34.4 + rng() * 1.2;
+    const [x, y] = projectToPreview(lat, lon, W, H);
+    const t = i / N;
+    const col = t < 0.5
+      ? d3.interpolateRgb('#4a9eff', '#e8b84b')(t * 2)
+      : d3.interpolateRgb('#e8b84b', '#d63031')((t - 0.5) * 2);
+    svg.append('circle').attr('cx', x).attr('cy', y)
+      .attr('r', rng() * 1.1 + 0.6)
+      .attr('fill', col).attr('opacity', 0.65 + rng() * 0.3);
   }
-  pts.forEach(p => {
-    const mixT = Math.min(Math.max((p.y / H), 0), 1);
-    const col = mixT < 0.5
-      ? d3.interpolateRgb('#4a9eff', '#e8b84b')(mixT * 2)
-      : d3.interpolateRgb('#e8b84b', '#d63031')((mixT - 0.5) * 2);
-    svg.append('circle').attr('cx', p.x).attr('cy', p.y).attr('r', p.r).attr('fill', col).attr('opacity', 0.75);
-  });
 }
 
 // DOW mini bars

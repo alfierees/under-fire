@@ -26,14 +26,35 @@
 <nav>
   <a href="index.html" class="nav-brand">Under Fire</a>
   <div class="nav-links">
-    <a href="timeline.html">Timeline</a>
-    <a href="oct7.html">Oct 7</a>
-    <a href="fronts.html">Fronts</a>
-    <a href="calendar.html" class="active">Calendar</a>
-    <a href="patterns.html">Patterns</a>
-    <a href="areas.html">By Area</a>
-    <a href="story.html">Story</a>
-    <a href="records.html">Records</a>
+    <div class="nav-group">
+      <button class="nav-group-btn" type="button">Charts<span class="caret">▾</span></button>
+      <div class="nav-dropdown">
+        <a href="timeline.html">Timeline</a>
+        <a href="fronts.html">Fronts</a>
+        <a href="calendar.html">Calendar</a>
+      </div>
+    </div>
+    <div class="nav-group">
+      <button class="nav-group-btn" type="button">Maps<span class="caret">▾</span></button>
+      <div class="nav-dropdown">
+        <a href="oct7.html">Oct 7</a>
+        <a href="story.html">Story</a>
+      </div>
+    </div>
+    <div class="nav-group">
+      <button class="nav-group-btn" type="button">Patterns<span class="caret">▾</span></button>
+      <div class="nav-dropdown">
+        <a href="patterns.html">Patterns</a>
+        <a href="areas.html">By Area</a>
+      </div>
+    </div>
+    <div class="nav-group">
+      <button class="nav-group-btn" type="button">More<span class="caret">▾</span></button>
+      <div class="nav-dropdown">
+        <a href="records.html">Records &amp; Stats</a>
+        <a href="mission.html">Mission</a>
+      </div>
+    </div>
   </div>
   <div class="nav-badge" id="nav-badge">🔔 Loading…</div>
 </nav>
@@ -70,31 +91,36 @@
 <script src="src/js/shared.js"></script>
 <script>
 (async () => {
-  const data = await fetchData('daily_counts.json');
-  data.forEach(d => { d.dateObj = new Date(d.date + 'T00:00:00'); });
+  const raw = await fetchData('daily_counts.json');
+  const rawByDate = new Map(raw.map(r => [r.date, r.count]));
+
+  // Fill missing days: source data omits zero-count days early in the record.
+  // Without this, the grid has holes and month labels for months whose 1st
+  // was missing (or not a Monday) never rendered.
+  const fmtDate = d3.timeFormat('%Y-%m-%d');
+  const firstDate = new Date(raw[0].date + 'T00:00:00');
+  const lastDate  = new Date(raw[raw.length - 1].date + 'T00:00:00');
+  const gridStart = new Date(firstDate.getFullYear(), firstDate.getMonth(), 1);
+  const data = [];
+  for (let d = new Date(gridStart); d <= lastDate; d = new Date(d.getFullYear(), d.getMonth(), d.getDate() + 1)) {
+    const iso = fmtDate(d);
+    data.push({ date: iso, dateObj: new Date(d), count: rawByDate.get(iso) || 0 });
+  }
 
   const cell = 12, pad = 2;
   const weekW = cell + pad;
   const rowH = cell + pad;
-  const monthGap = 6;
 
-  // Group by ISO-week columns. Column = weeks since the first Monday in the data.
-  // Use UTC arithmetic so DST transitions (which can make a Monday→Monday span
-  // 6d23h or 7d1h in local time) do not corrupt week indices.
-  const first = data[0].dateObj;
   const mondayOf = d => {
     const utcMs = Date.UTC(d.getFullYear(), d.getMonth(), d.getDate());
-    const dow = (new Date(utcMs).getUTCDay() + 6) % 7; // Mon=0..Sun=6
+    const dow = (new Date(utcMs).getUTCDay() + 6) % 7;
     return utcMs - dow * 86400000;
   };
-  const startMon = mondayOf(first);
+  const startMon = mondayOf(data[0].dateObj);
   const weekIndex = d => Math.round((mondayOf(d) - startMon) / (7 * 86400000));
-  const dayRow = d => (d.getDay() + 6) % 7; // local day-of-week for display rows
+  const dayRow = d => (d.getDay() + 6) % 7;
 
-  data.forEach(d => {
-    d.col = weekIndex(d.dateObj);
-    d.row = dayRow(d.dateObj);
-  });
+  data.forEach(d => { d.col = weekIndex(d.dateObj); d.row = dayRow(d.dateObj); });
 
   const totalWeeks = d3.max(data, d => d.col) + 1;
   const svgW = totalWeeks * weekW + 60;
@@ -104,38 +130,40 @@
     .attr('width', svgW).attr('height', svgH);
   const g = svg.append('g').attr('transform', 'translate(40, 32)');
 
-  // Colour scale: log-ish for wide dynamic range (0 → ~10k).
   const maxC = d3.max(data, d => d.count);
   const scale = d3.scaleSequential(
     t => d3.interpolateRgb('#15151c', '#d63031')(t)
   ).domain([0, Math.log10(maxC + 1)]);
   const cellFill = v => v === 0 ? '#0f0f14' : scale(Math.log10(v + 1));
 
-  // Day-of-week labels (show Mon, Wed, Fri, Sun)
   const dayLabels = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
   dayLabels.forEach((d, i) => {
     if (i % 2 === 0 || i === 5) {
       g.append('text').attr('x', -8).attr('y', i * rowH + cell - 2)
         .attr('text-anchor','end').attr('fill','var(--muted)')
-        .attr('font-family','IBM Plex Mono').attr('font-size','9px').text(d);
+        .attr('font-family','IBM Plex Mono').attr('font-size','10px').text(d);
     }
   });
 
-  // Month labels along the top — print at the first week of each month.
+  // Month labels: pin to the column of the 1st of each month, regardless of
+  // the weekday. January renders as the year in accent colour.
   const monthSeen = new Set();
   data.forEach(d => {
+    if (d.dateObj.getDate() !== 1) return;
     const key = d.dateObj.getFullYear() + '-' + d.dateObj.getMonth();
-    if (!monthSeen.has(key) && d.dateObj.getDate() <= 7 && d.row === 0) {
-      monthSeen.add(key);
-      const label = d.dateObj.getMonth() === 0
-        ? d.dateObj.getFullYear().toString()
-        : d3.timeFormat('%b')(d.dateObj);
-      g.append('text').attr('x', d.col * weekW).attr('y', -8)
-        .attr('fill', d.dateObj.getMonth() === 0 ? 'var(--accent)' : 'var(--muted)')
-        .attr('font-family','IBM Plex Mono').attr('font-size','9px')
-        .attr('font-weight', d.dateObj.getMonth() === 0 ? '500' : '300')
-        .text(label);
-    }
+    if (monthSeen.has(key)) return;
+    monthSeen.add(key);
+    const isJan = d.dateObj.getMonth() === 0;
+    const label = isJan
+      ? d.dateObj.getFullYear().toString()
+      : d3.timeFormat('%b')(d.dateObj);
+    g.append('text').attr('x', d.col * weekW).attr('y', -8)
+      .attr('fill', isJan ? 'var(--accent)' : 'var(--muted)')
+      .attr('font-family','IBM Plex Mono')
+      .attr('font-size', isJan ? '10px' : '9px')
+      .attr('font-weight', isJan ? '600' : '400')
+      .attr('letter-spacing', isJan ? '.08em' : '0')
+      .text(label);
   });
 
   g.selectAll('rect.day').data(data).enter().append('rect')
@@ -149,10 +177,9 @@
       showTip(`<b>${fmt(d.dateObj)}</b><br>${fmtNum(d.count)} alerts`, e);
     })
     .on('mousemove', moveTip).on('mouseleave', hideTip)
-    .transition().duration(900).delay((d, i) => (d.col / totalWeeks) * 1500)
+    .transition().duration(900).delay((d) => (d.col / totalWeeks) * 1500)
     .attr('fill', d => cellFill(d.count));
 
-  // Legend strip
   const strip = document.getElementById('cal-legend-strip');
   [0, 0.2, 0.4, 0.6, 0.8, 1].forEach(t => {
     const s = document.createElement('span');
