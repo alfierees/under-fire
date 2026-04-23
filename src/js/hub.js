@@ -109,33 +109,32 @@ async function drawPreviewCalendar(svgEl) {
   }
 }
 
-// Arcs mini preview: 4 curved strokes converging on a centre dot
-async function drawPreviewArcs(svgEl) {
+// Story map mini preview: coloured dot clusters per chapter/actor
+async function drawPreviewStory(svgEl) {
   const W = svgEl.clientWidth || 280, H = svgEl.clientHeight || 70;
   const svg = d3.select(svgEl).attr('viewBox', `0 0 ${W} ${H}`);
-  const tgt = { x: W * 0.5, y: H * 0.55 };
-  const srcs = [
-    { x: W * 0.30, y: H * 0.82, col: '#d63031', w: 4 },   // Hamas/Gaza
-    { x: W * 0.68, y: H * 0.18, col: '#f39c12', w: 3 },   // Hezb/Lebanon
-    { x: W * 0.88, y: H * 0.90, col: '#4a9eff', w: 2.2 }, // Houthis/Yemen
-    { x: W * 0.94, y: H * 0.45, col: '#c678dd', w: 6 },   // Iran
+  // Clusters representing each chapter's region and actor colour
+  const clusters = [
+    { cx: W*0.28, cy: H*0.78, col: '#d63031', n: 18, r: H*0.25 }, // Hamas south
+    { cx: W*0.32, cy: H*0.55, col: '#d63031', n: 12, r: H*0.18 }, // Hamas barrages
+    { cx: W*0.42, cy: H*0.18, col: '#f39c12', n: 20, r: H*0.22 }, // Hezbollah north
+    { cx: W*0.35, cy: H*0.88, col: '#4a9eff', n: 8,  r: H*0.14 }, // Houthis south tip
+    { cx: W*0.34, cy: H*0.60, col: '#c678dd', n: 10, r: H*0.20 }, // Iran direct
+    { cx: W*0.36, cy: H*0.48, col: '#c678dd', n: 30, r: H*0.42 }, // 2026 total war
   ];
-  srcs.forEach(s => {
-    const midX = (s.x + tgt.x) / 2, midY = (s.y + tgt.y) / 2;
-    const dx = tgt.x - s.x, dy = tgt.y - s.y;
-    const len = Math.sqrt(dx*dx + dy*dy);
-    const nx = -dy / len, ny = dx / len;
-    const bow = Math.min(14, len * 0.25);
-    const cx = midX + nx * bow, cy = midY + ny * bow;
-    svg.append('path')
-      .attr('d', `M ${s.x} ${s.y} Q ${cx} ${cy} ${tgt.x} ${tgt.y}`)
-      .attr('fill', 'none').attr('stroke', s.col).attr('stroke-width', s.w)
-      .attr('stroke-linecap', 'round').attr('opacity', 0.8);
-    svg.append('circle').attr('cx', s.x).attr('cy', s.y).attr('r', s.w * 0.7)
-      .attr('fill', s.col);
+  const rng = (() => { let s = 42; return () => { s ^= s<<13; s ^= s>>17; s ^= s<<5; return (s>>>0)/4294967296; }; })();
+  clusters.forEach(cl => {
+    for (let i = 0; i < cl.n; i++) {
+      const a = rng() * Math.PI * 2;
+      const dist = rng() * cl.r;
+      svg.append('circle')
+        .attr('cx', cl.cx + Math.cos(a) * dist)
+        .attr('cy', cl.cy + Math.sin(a) * dist)
+        .attr('r', rng() * 1.4 + 0.6)
+        .attr('fill', cl.col)
+        .attr('opacity', 0.65 + rng() * 0.3);
+    }
   });
-  svg.append('circle').attr('cx', tgt.x).attr('cy', tgt.y).attr('r', 3)
-    .attr('fill', '#e8b84b');
 }
 
 // Records mini preview: 4 stacked stat bars with a big number on top
@@ -237,7 +236,7 @@ const previewMap = {
   dow:      drawPreviewDow,
   areas:    drawPreviewAreas,
   oct7:     drawPreviewOct7,
-  arcs:     drawPreviewArcs,
+  story:    drawPreviewStory,
   records:  drawPreviewRecords,
 };
 
