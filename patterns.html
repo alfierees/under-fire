@@ -90,7 +90,7 @@
       <div class="patterns-grid">
         <div>
           <div class="chart-title">Alerts by Hour of Day — per actor</div>
-          <div class="chart-sub">Concentric rings: inner = Hamas, outer = Iran. Radius = count.</div>
+          <div class="chart-sub">Inner → outer: Hamas · Houthis · Hezbollah · Iran. Band width = actor's total share. Wedge fill = that hour's count vs the global peak (Iran 10:00 = 7,396).</div>
           <div id="clock-chart"></div>
         </div>
         <div id="dow">
@@ -99,14 +99,14 @@
           <div id="dow-chart"></div>
         </div>
       </div>
-      <p class="chart-note">All 142,837 alerts, 2020–2026. Source: RocketAlert.live</p>
+      <p class="chart-note">All 142,837 alerts, 2020–2026.</p>
 
       <div class="pattern-section">
         <div class="section-label" style="margin-bottom:.5rem;">04b — Attribution × Time</div>
         <h2 class="section-title" style="font-size:2rem;">Who Attacks When</h2>
         <p class="section-desc" style="max-width:720px;">Each actor has a signature time-of-day pattern. Iran clusters heavily around 10am strikes. Hezbollah runs from mid-morning into evening. Houthis operate disproportionately through the small hours of the night.</p>
         <div id="actor-hour-chart"></div>
-        <p class="chart-note">4 actors × 24 hours, coloured by that actor's alert count at that hour. Source: RocketAlert.live</p>
+        <p class="chart-note">4 actors × 24 hours, coloured by that actor's alert count at that hour.</p>
       </div>
     </div>
   </div>
@@ -126,7 +126,7 @@ const ACTOR_COLORS = {
   Houthis: 'var(--houthis)', Iran: 'var(--iran)'
 };
 
-function drawClock(data) {
+function drawClock(data, totals) {
   const c = document.getElementById('clock-chart');
   c.innerHTML = '';
   const size = Math.min(c.clientWidth || 380, 420);
@@ -134,10 +134,29 @@ function drawClock(data) {
   const innerR = 44;
   const outerMaxR = size/2 - 34;
   const bandSpace = outerMaxR - innerR;
-  const bandW = bandSpace / ACTORS.length;
 
-  const maxByActor = {};
-  ACTORS.forEach(a => { maxByActor[a] = d3.max(data, d => d[a] || 0); });
+  // Order rings from inside (smallest total) to outside (largest total): Hamas, Houthis, Hezbollah, Iran.
+  const RING_ORDER = ['Hamas', 'Houthis', 'Hezbollah', 'Iran'];
+  const MIN_SHARE = 0.07; // floor so the smallest band stays readable
+  const totalRaw = d3.sum(RING_ORDER.map(a => (totals && totals[a]) || 0)) || 1;
+  const minBand = MIN_SHARE * bandSpace;
+  const flexSpace = Math.max(0, bandSpace - minBand * RING_ORDER.length);
+  const bandWidths = {};
+  RING_ORDER.forEach(a => {
+    const share = ((totals && totals[a]) || 0) / totalRaw;
+    bandWidths[a] = minBand + share * flexSpace;
+  });
+  const bandPos = {};
+  let cursor = innerR;
+  RING_ORDER.forEach(a => {
+    const r0 = cursor;
+    const r1 = cursor + bandWidths[a];
+    bandPos[a] = { r0, r1 };
+    cursor = r1;
+  });
+
+  // Single global maximum across every (hour, actor) cell — Iran 10:00 dominates.
+  const GLOBAL_MAX = d3.max(data, d => d3.max(RING_ORDER, a => d[a] || 0)) || 1;
 
   const svg = d3.select('#clock-chart').append('svg').attr('width', size).attr('height', size);
   const g = svg.append('g').attr('transform', `translate(${cx},${cy})`);
@@ -154,12 +173,12 @@ function drawClock(data) {
       .attr('class', 'hour-group')
       .attr('data-hour', d.hour)
       .attr('opacity', 0);
-    ACTORS.forEach((actor, i) => {
+    RING_ORDER.forEach(actor => {
       const val = d[actor] || 0;
-      const maxA = maxByActor[actor] || 1;
-      const r0 = innerR + i * bandW;
-      const ringR = r0 + bandW - 1;
-      const fillR = r0 + (val / maxA) * (bandW - 1);
+      const { r0, r1 } = bandPos[actor];
+      const bw = r1 - r0;
+      const ringR = r1 - 1;
+      const fillR = r0 + (val / GLOBAL_MAX) * (bw - 1);
       const bgArc = d3.arc()
         .innerRadius(r0).outerRadius(ringR)
         .startAngle(startA).endAngle(startA + sA - 0.01);
@@ -182,7 +201,7 @@ function drawClock(data) {
     hourGroup.append('path').attr('d', hitArc)
       .attr('fill', 'transparent').style('cursor', 'pointer')
       .on('mouseover', e => {
-        const parts = ACTORS.filter(a => (d[a] || 0) > 0)
+        const parts = RING_ORDER.filter(a => (d[a] || 0) > 0)
           .map(a => `${a}: ${fmtNum(d[a])}`).join('<br>');
         showTip(`<b>${String(d.hour).padStart(2,'0')}:00</b> — ${fmtNum(d.count)} total<br>${parts}`, e);
       })
@@ -307,13 +326,14 @@ function drawActorHour(cells) {
 }
 
 (async () => {
-  const [dow, actorHour] = await Promise.all([
+  const [dow, actorHour, stats] = await Promise.all([
     fetchData('hourly_dow.json'),
     fetchData('actor_hour.json'),
+    fetchData('stats_summary.json'),
   ]);
 
   function renderAll() {
-    drawClock(dow.hourly);
+    drawClock(dow.hourly, stats.origins);
     drawDoW(dow.day_of_week);
     drawActorHour(actorHour);
   }
@@ -326,14 +346,17 @@ function drawActorHour(cells) {
     file: 'build_patterns.js',
     lines: [
       { text: '// 24h polar clock + weekday bar + actor signature heatmap', kind: 'cm' },
-      { text: 'const dow = load("hourly_dow.json")' },
-      { text: 'const ah  = load("actor_hour.json")' },
-      { text: 'const actors = ["Hamas","Hezbollah","Houthis","Iran"]' },
-      { text: '// Clock: 4 concentric rings, one per actor' },
+      { text: 'const dow   = load("hourly_dow.json")' },
+      { text: 'const ah    = load("actor_hour.json")' },
+      { text: 'const stats = load("stats_summary.json")' },
+      { text: 'const ringOrder = ["Hamas","Houthis","Hezbollah","Iran"] // inside → outside' },
+      { text: '// Clock: rings ordered small-total → big-total' },
+      { text: 'bandWidth(actor) ∝ actor.total      // Iran widest, Hamas narrowest' },
+      { text: 'wedgeFill(hour, actor) = count / GLOBAL_MAX  // Iran 10:00 = 7,396' },
       { text: 'sweep(duration: 2200).onPass(hour => fadeIn(hour))' },
       { text: 'flare(10, color: red) // 10am is the global peak' },
       { text: 'bars(dow.day_of_week).growFromZero(1200)' },
-      { text: 'heatmap(ah, rows: actors, cols: 24).fade(30ms stagger)' },
+      { text: 'heatmap(ah, rows: ringOrder, cols: 24).fade(30ms stagger)' },
     ],
     onRun: () => {
       if (hint) hint.style.display = 'none';

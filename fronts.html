@@ -69,20 +69,25 @@
     <h1 class="section-title">From One Front to Four</h1>
     <p class="section-desc">Before October 2023, almost all alerts originated from Hamas in Gaza. What followed was the opening of three additional fronts simultaneously. Iran alone accounts for more than half of all recorded alerts. Each actor's stacked monthly bars grow in sequence when the chart enters view.</p>
 
-    <div class="actor-legend">
-      <div class="actor-tag"><div class="actor-swatch" style="background:var(--iran)"></div>Iran</div>
-      <div class="actor-tag"><div class="actor-swatch" style="background:var(--hezbollah)"></div>Hezbollah</div>
-      <div class="actor-tag"><div class="actor-swatch" style="background:var(--houthis)"></div>Houthis (Yemen)</div>
-      <div class="actor-tag"><div class="actor-swatch" style="background:var(--hamas)"></div>Hamas</div>
-      <div class="actor-tag"><div class="actor-swatch" style="background:var(--unknown)"></div>Unattributed</div>
+    <div class="actor-legend" id="actor-legend">
+      <div class="actor-tag" data-actor="Iran"><div class="actor-swatch" style="background:var(--iran)"></div><span class="actor-label">IRAN</span></div>
+      <div class="actor-tag" data-actor="Hezbollah"><div class="actor-swatch" style="background:var(--hezbollah)"></div><span class="actor-label">HEZBOLLAH</span></div>
+      <div class="actor-tag" data-actor="Houthis"><div class="actor-swatch" style="background:var(--houthis)"></div><span class="actor-label">HOUTHIS</span></div>
+      <div class="actor-tag" data-actor="Hamas"><div class="actor-swatch" style="background:var(--hamas)"></div><span class="actor-label">HAMAS</span></div>
+      <div class="actor-tag" data-actor="Unknown"><div class="actor-swatch" style="background:var(--unknown)"></div><span class="actor-label">UNATTRIBUTED</span></div>
     </div>
 
     <div id="runner"></div>
     <div class="chart-gated-hint" id="fronts-hint">
       Press <span class="accent">▶ Run</span> in the code panel above to build the chart.
     </div>
+    <div class="filter-bar chart-gated" id="scale-toggle">
+      <span class="filter-label">Y axis:</span>
+      <button class="filter-btn active" data-scale="sqrt">√ Square root</button>
+      <button class="filter-btn" data-scale="linear">Linear</button>
+    </div>
     <div id="fronts-chart" class="chart-gated"></div>
-    <p class="chart-note">Monthly alert counts by estimated origin. Pre-Oct 2023 data does not include origin attribution. Source: RocketAlert.live</p>
+    <p class="chart-note">Monthly alert counts by estimated origin. Pre-Oct 2023 data does not include origin attribution.</p>
   </div>
 </div>
 
@@ -94,8 +99,13 @@
 <script src="src/js/shared.js"></script>
 <script src="src/js/code-runner.js"></script>
 <script>
-function drawFronts(raw) {
+const ACTORS = ['Iran', 'Hezbollah', 'Houthis', 'Hamas', 'Unknown'];
+const ACTOR_COLORS = { Iran:'var(--iran)', Hezbollah:'var(--hezbollah)', Houthis:'var(--houthis)', Hamas:'var(--hamas)', Unknown:'var(--unknown)' };
+let currentScale = 'sqrt';
+
+function drawFronts(raw, scaleType) {
   const container = document.getElementById('fronts-chart');
+  d3.select(container).selectAll('*').interrupt();
   container.innerHTML = '';
   const W = container.clientWidth || 1000;
   const H = 420;
@@ -103,10 +113,7 @@ function drawFronts(raw) {
   const w = W - M.left - M.right;
   const h = H - M.top - M.bottom;
 
-  const actors = ['Iran', 'Hezbollah', 'Houthis', 'Hamas', 'Unknown'];
-  const colors = { Iran:'var(--iran)', Hezbollah:'var(--hezbollah)', Houthis:'var(--houthis)', Hamas:'var(--hamas)', Unknown:'var(--unknown)' };
-
-  const data = raw.map(d => { const r = { month: d.month }; actors.forEach(a => r[a] = d[a] || 0); return r; });
+  const data = raw.map(d => { const r = { month: d.month }; ACTORS.forEach(a => r[a] = d[a] || 0); return r; });
 
   const svg = d3.select('#fronts-chart').append('svg').attr('width', W).attr('height', H);
   const g = svg.append('g').attr('transform', `translate(${M.left},${M.top})`);
@@ -117,10 +124,11 @@ function drawFronts(raw) {
   const xTime = d3.scaleTime()
     .domain(d3.extent(data, d => parseMonth(d.month))).range([0, w]);
 
-  const stack = d3.stack().keys(actors);
+  const stack = d3.stack().keys(ACTORS);
   const stacked = stack(data);
   const yMax = d3.max(stacked[stacked.length - 1], d => d[1]);
-  const y = d3.scaleLinear().domain([0, yMax]).range([h, 0]).nice();
+  const y = (scaleType === 'linear' ? d3.scaleLinear() : d3.scaleSqrt())
+    .domain([0, yMax]).range([h, 0]).nice();
 
   g.append('g').call(d3.axisLeft(y).ticks(5).tickSize(-w).tickFormat(''))
     .call(g => g.select('.domain').remove())
@@ -128,34 +136,60 @@ function drawFronts(raw) {
 
   const barW = xBand.bandwidth();
   const baselineY = y(0);
-  const layerGroups = stacked.map((layer, i) => {
-    const gLayer = g.append('g').attr('data-actor', actors[i]);
-    gLayer.selectAll('rect').data(layer).enter().append('rect')
-      .attr('x', d => xBand(d.data.month))
-      .attr('width', barW)
-      .attr('y', baselineY)
-      .attr('height', 0)
-      .attr('fill', colors[actors[i]])
-      .attr('opacity', 0.92);
-    return { group: gLayer, layer, actor: actors[i] };
+
+  const rectsByMonth = data.map(() => []);
+  stacked.forEach((layer, li) => {
+    const actor = ACTORS[li];
+    const gLayer = g.append('g').attr('data-actor', actor);
+    layer.forEach((seg, mi) => {
+      const rect = gLayer.append('rect')
+        .datum(seg)
+        .attr('x', xBand(seg.data.month))
+        .attr('width', barW)
+        .attr('y', baselineY)
+        .attr('height', 0)
+        .attr('fill', ACTOR_COLORS[actor])
+        .attr('opacity', 0.92);
+      rectsByMonth[mi].push({ rect, seg });
+    });
   });
 
-  // Animate each layer growing from zero, stacked bottom-up, staggered per actor.
-  // Hamas first (bottom), Unknown last (top). Each layer ~1200ms, stagger 450ms.
-  const order = ['Hamas', 'Hezbollah', 'Houthis', 'Iran', 'Unknown'];
-  order.forEach((actor, i) => {
-    const entry = layerGroups.find(lg => lg.actor === actor);
-    if (!entry) return;
-    entry.group.selectAll('rect')
-      .transition().delay(i * 450).duration(1200).ease(d3.easeCubicOut)
-      .attr('y', d => y(d[1]))
-      .attr('height', d => Math.max(0, y(d[0]) - y(d[1])));
+  const colDuration = 280;
+  const colStagger = 55;
+  rectsByMonth.forEach((segs, i) => {
+    segs.forEach(({ rect, seg }) => {
+      rect.transition()
+        .delay(i * colStagger)
+        .duration(colDuration)
+        .ease(d3.easeCubicOut)
+        .attr('y', y(seg[1]))
+        .attr('height', Math.max(0, y(seg[0]) - y(seg[1])));
+    });
   });
 
   const oct7x = xTime(new Date('2023-10-01'));
-  g.append('line').attr('x1', oct7x).attr('x2', oct7x).attr('y1', 0).attr('y2', h)
-    .attr('stroke', '#e8b84b').attr('stroke-width', 1.5).attr('stroke-dasharray', '4,3');
-  g.append('text').attr('x', oct7x + 6).attr('y', 14).attr('class', 'tl-annotation').text('Oct 7, 2023');
+  const lineLen = h;
+  const oct7Line = g.append('line')
+    .attr('x1', oct7x).attr('x2', oct7x).attr('y1', 0).attr('y2', h)
+    .attr('stroke', '#e8b84b').attr('stroke-width', 1.5).attr('stroke-dasharray', '4,3')
+    .attr('opacity', 0);
+  const oct7Label = g.append('text')
+    .attr('x', oct7x + 6).attr('y', 14).attr('class', 'tl-annotation').text('Oct 7, 2023')
+    .attr('opacity', 0);
+  const totalRevealMs = (rectsByMonth.length - 1) * colStagger + colDuration;
+  oct7Line.transition().delay(totalRevealMs + 80).duration(50).attr('opacity', 1)
+    .on('start', function() {
+      // Temporarily swap to a single long dash so dashoffset animates a draw-on, then restore the dotted style at the end.
+      d3.select(this)
+        .attr('stroke-dasharray', lineLen + ' ' + lineLen)
+        .attr('stroke-dashoffset', lineLen)
+        .transition().duration(600).ease(d3.easeCubicOut)
+        .attr('stroke-dashoffset', 0)
+        .on('end', function() {
+          d3.select(this).attr('stroke-dasharray', '4,3').attr('stroke-dashoffset', null);
+        });
+    });
+  oct7Label.transition().delay(totalRevealMs + 500).duration(400).attr('opacity', 1);
 
   g.append('g').attr('transform', `translate(0,${h})`)
     .call(d3.axisBottom(xTime).ticks(8).tickFormat(d3.timeFormat('%Y')))
@@ -164,7 +198,17 @@ function drawFronts(raw) {
       g.selectAll('text').attr('fill','var(--muted)').attr('font-family','IBM Plex Mono').attr('font-size','10px');
       g.selectAll('line').attr('stroke','var(--border)');
     });
-  g.append('g').call(d3.axisLeft(y).ticks(5).tickFormat(d => d >= 1000 ? (d/1000).toFixed(0)+'k' : d))
+
+  const tickFmt = d => d >= 1000 ? (d/1000).toFixed(0)+'k' : d;
+  const yAxis = d3.axisLeft(y).tickFormat(tickFmt);
+  if (scaleType === 'sqrt') {
+    // sqrt's default ticks are awkward — pick round, evenly-perceived values.
+    const sqrtTicks = [0, 100, 1000, 5000, 20000, 50000].filter(t => t <= yMax);
+    yAxis.tickValues(sqrtTicks);
+  } else {
+    yAxis.ticks(5);
+  }
+  g.append('g').call(yAxis)
     .call(g => {
       g.select('.domain').remove();
       g.selectAll('text').attr('fill','var(--muted)').attr('font-family','IBM Plex Mono').attr('font-size','10px');
@@ -183,16 +227,42 @@ function drawFronts(raw) {
       if (!d) return;
       const cx = xBand(d.month) + barW / 2;
       vLine.attr('x1', cx).attr('x2', cx).attr('opacity', 1);
-      const total = actors.reduce((s, a) => s + d[a], 0);
-      showTip(`<b>${d.month}</b><br>` + actors.filter(a => d[a] > 0).map(a => `${a}: ${fmtNum(d[a])}`).join('<br>') + `<br><b>Total: ${fmtNum(total)}</b>`, event);
+      const total = ACTORS.reduce((s, a) => s + d[a], 0);
+      showTip(`<b>${d.month}</b><br>` + ACTORS.filter(a => d[a] > 0).map(a => `${a}: ${fmtNum(d[a])}`).join('<br>') + `<br><b>Total: ${fmtNum(total)}</b>`, event);
     })
     .on('mouseleave', () => { vLine.attr('opacity',0); hideTip(); });
+}
+
+function updateLegendTotals(raw) {
+  const totals = {};
+  ACTORS.forEach(a => { totals[a] = 0; });
+  raw.forEach(m => ACTORS.forEach(a => { totals[a] += (m[a] || 0); }));
+  document.querySelectorAll('#actor-legend .actor-tag').forEach(tag => {
+    const a = tag.getAttribute('data-actor');
+    if (totals[a] == null) return;
+    const label = tag.querySelector('.actor-label');
+    const baseText = label.textContent.replace(/\s*·.*$/, '');
+    label.textContent = `${baseText} · ${fmtNum(totals[a])}`;
+  });
 }
 
 (async () => {
   const data = await fetchData('actors_monthly.json');
   const chart = document.getElementById('fronts-chart');
   const hint = document.getElementById('fronts-hint');
+  const toggle = document.getElementById('scale-toggle');
+
+  updateLegendTotals(data);
+
+  toggle.querySelectorAll('button').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const scale = btn.getAttribute('data-scale');
+      if (scale === currentScale) return;
+      currentScale = scale;
+      toggle.querySelectorAll('button').forEach(b => b.classList.toggle('active', b === btn));
+      if (chart.classList.contains('revealed')) drawFronts(data, currentScale);
+    });
+  });
 
   mountCodeRunner({
     mount: '#runner',
@@ -200,20 +270,20 @@ function drawFronts(raw) {
     lines: [
       { text: '// Monthly alerts broken down by estimated origin', kind: 'cm' },
       { text: 'const data = load("actors_monthly.json")' },
-      { text: 'const actors = ["Hamas","Hezbollah","Houthis","Iran","Unknown"]' },
+      { text: 'const actors = ["Iran","Hezbollah","Houthis","Hamas","Unknown"]' },
       { text: 'const stack = d3.stack(data, actors)' },
       { text: 'const x = scaleBand(data.month)' },
-      { text: 'const y = scale.linear(stack.total)' },
-      { text: '// For each layer, grow bars from the baseline' },
-      { text: 'stack.forEach((layer, i) => {' },
-      { text: '  bars(layer).transition(1200).delay(i * 450)' },
-      { text: '    .attrTween("height", fromZero) // grow from zero' },
+      { text: 'const y = scaleSqrt(stack.total) // compress the Mar-2026 spike' },
+      { text: '// Build bars left → right, oldest month first', kind: 'cm' },
+      { text: 'data.forEach((m, i) => {' },
+      { text: '  bars(m).transition().delay(i * 55).duration(280)' },
+      { text: '    .attr("height", fromZero) // staircase reveal' },
       { text: '})' },
     ],
     onRun: () => {
       if (hint) hint.style.display = 'none';
       chart.classList.add('revealed');
-      drawFronts(data);
+      drawFronts(data, currentScale);
     }
   });
 })();
