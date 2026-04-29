@@ -7,10 +7,16 @@
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400;1,700&family=IBM+Plex+Mono:wght@300;400;500&family=IBM+Plex+Sans:wght@300;400;500&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="src/css/shared.css">
   <style>
-    .mission-hero {
-      padding: 8rem 6rem 4rem;
-      max-width: 960px;
+    /* ─── PAGE LAYOUT ─── */
+    .mission-wrap {
+      max-width: 880px;
       margin: 0 auto;
+      padding: 7rem 6rem 5rem;
+    }
+
+    /* ─── HERO ─── */
+    .mission-hero {
+      margin-bottom: 4.5rem;
     }
     .mission-eyebrow {
       font-family: 'IBM Plex Mono', monospace;
@@ -38,43 +44,164 @@
       color: #fff;
       line-height: 1.08;
       letter-spacing: -.02em;
-      margin-bottom: 1.4rem;
+      margin-bottom: 2rem;
     }
-    .mission-dedication {
+    .mission-lead {
       font-family: 'Playfair Display', serif;
+      font-size: 1.25rem;
       font-style: italic;
-      font-size: 1.1rem;
+      color: var(--text);
+      line-height: 1.7;
+      max-width: 720px;
+    }
+    .mission-lead em {
       color: var(--accent);
-      line-height: 1.8;
-      max-width: 640px;
-      margin-bottom: 2rem;
+      font-style: italic;
     }
-    .mission-body {
-      font-size: .95rem;
-      color: var(--muted);
-      line-height: 1.9;
-      max-width: 640px;
-      margin-bottom: 2rem;
+
+    /* ─── SECTIONS ─── */
+    .mission-section {
+      margin-bottom: 4rem;
+      max-width: 720px;
     }
-    .mission-placeholder {
-      margin-top: 3rem;
-      padding: 2rem 2.4rem;
-      border: 1px dashed var(--border);
-      border-radius: 6px;
-      background: rgba(15,15,20,.45);
+    .mission-section h2 {
       font-family: 'IBM Plex Mono', monospace;
-      font-size: .72rem;
-      color: var(--muted);
-      line-height: 1.8;
-      max-width: 640px;
-    }
-    .mission-placeholder strong {
-      display: block;
-      font-size: .62rem;
-      letter-spacing: .2em;
+      font-size: .68rem;
+      letter-spacing: .22em;
       text-transform: uppercase;
       color: var(--accent);
-      margin-bottom: .6rem;
+      margin-bottom: 1.4rem;
+      padding-bottom: .8rem;
+      border-bottom: 1px solid var(--border);
+    }
+    .mission-section h3 {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.6rem;
+      font-weight: 700;
+      color: #fff;
+      letter-spacing: -.01em;
+      margin-bottom: 1.1rem;
+      line-height: 1.2;
+    }
+    .mission-section p {
+      font-size: .98rem;
+      color: var(--muted);
+      line-height: 1.85;
+      margin-bottom: 1.2rem;
+    }
+    .mission-section p strong {
+      color: var(--text);
+      font-weight: 500;
+    }
+    .mission-section p em {
+      color: var(--accent);
+      font-style: italic;
+    }
+    .mission-section a {
+      color: var(--accent);
+      text-decoration: none;
+      border-bottom: 1px dotted rgba(232,184,75,.4);
+    }
+    .mission-section a:hover {
+      border-bottom-color: var(--accent);
+    }
+
+    /* ─── PIPELINE 3-COL ─── */
+    .pipeline-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1.2rem;
+      margin-top: 2rem;
+    }
+    .pipeline-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-top: 2px solid var(--accent);
+      border-radius: 0 0 4px 4px;
+      padding: 1.4rem 1.4rem 1.6rem;
+    }
+    .pipeline-card h4 {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: .6rem;
+      letter-spacing: .18em;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin-bottom: .9rem;
+    }
+    .pipeline-card .pipeline-headline {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.05rem;
+      font-weight: 700;
+      color: #fff;
+      line-height: 1.3;
+      margin-bottom: .75rem;
+    }
+    .pipeline-card p {
+      font-size: .82rem;
+      color: var(--muted);
+      line-height: 1.7;
+      margin: 0;
+    }
+
+    /* ─── DEDICATION ─── */
+    .dedication {
+      margin-top: 5rem;
+      padding: 3rem 3rem 3rem;
+      background: linear-gradient(180deg, rgba(232,184,75,.04), rgba(232,184,75,.01));
+      border-top: 2px solid var(--accent);
+      border-bottom: 1px solid var(--border);
+      border-radius: 4px;
+      max-width: 760px;
+    }
+    .dedication-eyebrow {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: .62rem;
+      letter-spacing: .24em;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin-bottom: 1.6rem;
+      text-align: center;
+    }
+    .dedication p {
+      font-family: 'Playfair Display', serif;
+      font-style: italic;
+      font-size: 1.18rem;
+      color: var(--text);
+      line-height: 1.85;
+      text-align: center;
+      max-width: 620px;
+      margin: 0 auto 1.6rem;
+    }
+    .dedication-rule {
+      width: 60px;
+      height: 1px;
+      background: var(--accent);
+      margin: 2rem auto;
+      opacity: .7;
+    }
+    .dedication p.dedication-iran {
+      color: var(--accent);
+      font-size: 1.12rem;
+    }
+
+    /* ─── RESPONSIVE ─── */
+    @media (max-width: 900px) {
+      .mission-wrap {
+        padding: 5.5rem 1.6rem 3.5rem;
+      }
+      .pipeline-grid {
+        grid-template-columns: 1fr;
+        gap: .9rem;
+      }
+      .dedication {
+        padding: 2rem 1.4rem;
+      }
+      .mission-lead {
+        font-size: 1.1rem;
+      }
+      .mission-section h3 {
+        font-size: 1.35rem;
+      }
     }
   </style>
 </head>
@@ -125,27 +252,151 @@
 <div id="tooltip"></div>
 
 <div class="chart-page">
-  <div class="mission-hero">
+  <div class="mission-wrap">
     <a href="index.html" class="back-link">← Back to all charts</a>
-    <div class="mission-eyebrow">Mission Statement</div>
-    <h1 class="mission-title">For the brave soldiers of the IDF.</h1>
 
-    <p class="mission-dedication">
-      This project is dedicated to every soldier who stands between Israel and the storm
-      of rockets, missiles, and drones recorded on these pages.
-    </p>
-
-    <p class="mission-body">
-      Behind every alert on every chart is a siren, a shelter, a 90-second sprint,
-      and the men and women whose job is to make sure the next one doesn't land.
-      The numbers are theirs.
-    </p>
-
-    <div class="mission-placeholder">
-      <strong>In progress</strong>
-      The full mission statement is coming. Alfie is writing the dedication in the format
-      he wants — this page is a placeholder until that copy is ready to drop in.
+    <!-- HERO -->
+    <div class="mission-hero">
+      <div class="mission-eyebrow">Mission Statement</div>
+      <h1 class="mission-title">Structuring six years of alerts over Israel.</h1>
+      <p class="mission-lead">
+        Between 2020 and 2026, Israel was the target of an unprecedented sustained
+        campaign of rocket, missile, and drone attacks from Hamas in Gaza, Hezbollah
+        in Lebanon, the Houthis in Yemen, and the Islamic Republic of Iran.
+        <em>Under Fire</em> is an attempt to structure, visualise, and preserve
+        that record.
+      </p>
     </div>
+
+    <!-- THE EXPERIMENT -->
+    <section class="mission-section">
+      <h2>01 — The Experiment</h2>
+      <h3>Can modern AI synthesise a fast-moving, multi-source conflict in near real-time?</h3>
+      <p>
+        At its core, <em>Under Fire</em> is an experiment — an exploration of whether
+        frontier AI models can be used to aggregate, structure, and visualise a large,
+        fast-moving dataset drawn from multiple, often conflicting perspectives.
+      </p>
+      <p>
+        The Iran–Israel conflict generates data at a pace that overwhelms traditional
+        OSINT methods. Salvos arrive in rapid succession. Munitions counts vary across
+        sources. Casualty figures are revised. Launch sites are identified days after
+        impact. Israeli, Iranian, American, and international outlets offer conflicting
+        accounts of the same events.
+      </p>
+      <p>
+        This project asks a simple question: can a combination of frontier AI,
+        open-source intelligence, and human editorial oversight produce a structured,
+        geo-visualised record of the conflict that is accurate, transparent, and useful?
+        The answer so far is a qualified <em>yes</em> — and the site you're reading is
+        the result.
+      </p>
+    </section>
+
+    <!-- THE SUBJECT -->
+    <section class="mission-section">
+      <h2>02 — The Subject</h2>
+      <h3>142,837 alerts. 30 areas. Four actors. Six years.</h3>
+      <p>
+        The dataset is a six-year sweep of every alert recorded across Israel between
+        January 2020 and March 2026 — every siren, every shelter, every 90-second
+        sprint. Each event is attributed, where the evidence allows, to one of four
+        actors: <strong>Hamas</strong>, <strong>Hezbollah</strong>,
+        <strong>the Houthis</strong>, or <strong>Iran</strong>.
+      </p>
+      <p>
+        The underlying alert feed is sourced from
+        <a href="https://rocketalert.live" target="_blank">RocketAlert.live</a>, which
+        relays Israel's Home Front Command warnings in real time. Origin attribution is
+        estimated from the geography of the impact area and the timing of the salvo —
+        cross-referenced with public IDF, IRGC, and press reporting. Where attribution
+        is uncertain, alerts are tagged as <em>unknown</em> rather than guessed.
+      </p>
+    </section>
+
+    <!-- AI-DRIVEN OSINT SYNTHESIS -->
+    <section class="mission-section">
+      <h2>03 — AI-Driven OSINT Synthesis</h2>
+      <h3>A potpourri of frontier models, open-source intelligence, and human judgement.</h3>
+      <p>
+        The pipeline behind <em>Under Fire</em> combines large language models with a
+        spread of open-source intelligence sources, anchored throughout by human
+        editorial oversight. None of these three legs would be sufficient on its own.
+      </p>
+
+      <div class="pipeline-grid">
+        <div class="pipeline-card">
+          <h4>Large Language Models</h4>
+          <div class="pipeline-headline">Claude Opus 4.6</div>
+          <p>
+            Anthropic's frontier model handles research, source synthesis, data
+            structuring, and the bulk of the site's development. A project of this
+            scale and pace would not be possible without modern frontier models.
+          </p>
+        </div>
+
+        <div class="pipeline-card">
+          <h4>OSINT Sources</h4>
+          <div class="pipeline-headline">RocketAlert + IDF + the wires</div>
+          <p>
+            <a href="https://rocketalert.live" target="_blank">RocketAlert.live</a> as
+            the primary alert feed. IDF and IRGC public statements. Reuters, AP,
+            Al&nbsp;Jazeera, Times of Israel. Satellite imagery from Planet Labs and
+            Maxar. Research from ISW, CSIS, and the Alma Center.
+          </p>
+        </div>
+
+        <div class="pipeline-card">
+          <h4>Human Oversight</h4>
+          <div class="pipeline-headline">Editorial judgement, source verification</div>
+          <p>
+            AI handles synthesis and structuring. Humans provide editorial judgement,
+            source verification, and the contextual understanding that models cannot
+            yet replicate — especially in a contested information environment.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- WHY THIS MATTERS -->
+    <section class="mission-section">
+      <h2>04 — Why This Matters</h2>
+      <h3>Four actors. Four fronts. 142,837 alerts.</h3>
+      <p>
+        Tens of thousands of munitions. Arrow, David's Sling, Iron Dome, THAAD,
+        Patriot, Aegis — a layered defence architecture that intercepted the vast
+        majority of incoming threats. Behind each of those interceptions is a name,
+        a shift, an engineering decision made years before, and a ninety-second
+        warning that someone had to act on.
+      </p>
+      <p>
+        This is a dataset that deserves to be structured, preserved, and made
+        accessible — both as a historical record of what was endured, and as a
+        demonstration of what open-source intelligence, combined with modern AI
+        tools, can achieve.
+      </p>
+    </section>
+
+    <!-- DEDICATION -->
+    <div class="dedication">
+      <div class="dedication-eyebrow">Dedication</div>
+      <p>
+        This project is dedicated to every soldier who stands between Israel and the
+        storm of rockets, missiles, and drones recorded on these pages — to the
+        aerospace engineers who designed the interceptors, the radar operators and
+        intelligence officers who track every launch, the pilots and missile operators
+        who fire them — most of whose names we will never know.
+      </p>
+
+      <div class="dedication-rule"></div>
+
+      <p class="dedication-iran">
+        And to the brave Iranians working from within Iran to bring about a peaceful
+        country — one that does not threaten its neighbours, but grows together with
+        them.
+      </p>
+    </div>
+
   </div>
 </div>
 
