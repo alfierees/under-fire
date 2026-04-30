@@ -215,136 +215,26 @@ function drawIsraelStipple(svg, W, H, opts = {}) {
   return { project, boxX, boxY, boxW, boxH };
 }
 
-// Oct 7 preview — Israel silhouette as a stipple field, dense alert cloud
-// over the Gaza envelope coloured by time-of-day progression.
+// Oct 7 preview — static image
 async function drawPreviewOct7(svgEl) {
   const W = svgEl.clientWidth || 280, H = svgEl.clientHeight || 110;
   const svg = d3.select(svgEl).attr('viewBox', `0 0 ${W} ${H}`);
-
-  const { project } = drawIsraelStipple(svg, W, H, { seed: 313, stippleN: 280 });
-
-  let s = 919;
-  const rng = () => { s ^= s<<13; s ^= s>>17; s ^= s<<5; return (s>>>0) / 4294967296; };
-
-  // Cluster centres in normalised polygon space — Gaza envelope (south coast) + a sprinkle.
-  const N = 80;
-  for (let i = 0; i < N; i++) {
-    const t = i / N;
-    const bias = rng();
-    let nx, ny;
-    if (bias < 0.7) {
-      // Heavy southern coastal cluster
-      nx = 0.18 + rng() * 0.20;
-      ny = 0.46 + rng() * 0.20;
-    } else if (bias < 0.9) {
-      // Central sprinkle
-      nx = 0.30 + rng() * 0.30;
-      ny = 0.30 + rng() * 0.18;
-    } else {
-      // Stray northern dots
-      nx = 0.40 + rng() * 0.25;
-      ny = 0.10 + rng() * 0.15;
-    }
-    const [x, y] = project(nx, ny);
-    const col = t < 0.5
-      ? d3.interpolateRgb('#4a9eff', '#e8b84b')(t * 2)
-      : d3.interpolateRgb('#e8b84b', '#d63031')((t - 0.5) * 2);
-    svg.append('circle').attr('cx', x).attr('cy', y)
-      .attr('r', rng() * 1.0 + 0.7)
-      .attr('fill', col).attr('opacity', 0.75 + rng() * 0.2);
-  }
+  svg.append('image')
+    .attr('href', 'images/oct7-preview.png')
+    .attr('x', 0).attr('y', 0)
+    .attr('width', W).attr('height', H)
+    .attr('preserveAspectRatio', 'xMidYMid slice');
 }
 
-// Story preview — sky-burst still frame: dark sky, stars, missile arcs being
-// intercepted, one explosion bloom, tiny city skyline at the bottom.
+// Story preview — static image
 async function drawPreviewStory(svgEl) {
   const W = svgEl.clientWidth || 280, H = svgEl.clientHeight || 110;
   const svg = d3.select(svgEl).attr('viewBox', `0 0 ${W} ${H}`);
-
-  // Sky gradient (deeper at top, very dark navy at bottom)
-  const defs = svg.append('defs');
-  const sky = defs.append('linearGradient').attr('id', 'story-sky')
-    .attr('x1', 0).attr('y1', 0).attr('x2', 0).attr('y2', 1);
-  sky.append('stop').attr('offset', '0%').attr('stop-color', '#0b0d18');
-  sky.append('stop').attr('offset', '70%').attr('stop-color', '#070710');
-  sky.append('stop').attr('offset', '100%').attr('stop-color', '#050508');
-  svg.append('rect').attr('width', W).attr('height', H).attr('fill', 'url(#story-sky)');
-
-  // Stars
-  let s = 4242;
-  const rng = () => { s ^= s<<13; s ^= s>>17; s ^= s<<5; return (s>>>0) / 4294967296; };
-  for (let i = 0; i < 60; i++) {
-    svg.append('circle')
-      .attr('cx', rng() * W).attr('cy', rng() * H * 0.78)
-      .attr('r', rng() * 0.7 + 0.2)
-      .attr('fill', `rgba(195,210,235,${(0.25 + rng() * 0.55).toFixed(3)})`);
-  }
-
-  const groundY = H * 0.86;
-
-  // Quadratic Bezier arc — render as a path with a faded leading-edge dot.
-  function arc(sx, sy, ex, ey, cpx, cpy, color, width, headR) {
-    const path = `M ${sx} ${sy} Q ${cpx} ${cpy} ${ex} ${ey}`;
-    svg.append('path').attr('d', path)
-      .attr('fill', 'none')
-      .attr('stroke', color)
-      .attr('stroke-width', width)
-      .attr('stroke-linecap', 'round')
-      .attr('opacity', 0.85);
-    // Glow head at the end of the arc
-    const grad = defs.append('radialGradient').attr('id', `g-${Math.round(ex)}-${Math.round(ey)}-${Math.round(rng()*9999)}`);
-    grad.append('stop').attr('offset', '0%').attr('stop-color', color).attr('stop-opacity', 1);
-    grad.append('stop').attr('offset', '100%').attr('stop-color', color).attr('stop-opacity', 0);
-    svg.append('circle')
-      .attr('cx', ex).attr('cy', ey).attr('r', headR)
-      .attr('fill', `url(#${grad.attr('id')})`);
-  }
-
-  // Three incoming missile arcs (red) from screen edges to upper sky
-  const missiles = [
-    { sx: -W * 0.04, sy: H * 0.18, ex: W * 0.36, ey: H * 0.30, cpx: W * 0.10, cpy: H * 0.05 },
-    { sx:  W * 1.04, sy: H * 0.22, ex: W * 0.62, ey: H * 0.28, cpx: W * 0.92, cpy: H * 0.06 },
-    { sx:  W * 1.05, sy: H * 0.10, ex: W * 0.78, ey: H * 0.40, cpx: W * 0.95, cpy: H * 0.02 },
-  ];
-  missiles.forEach(m => arc(m.sx, m.sy, m.ex, m.ey, m.cpx, m.cpy, '#ff5a4a', 1.4, 5));
-
-  // Two interceptor arcs (blue) rising from city batteries toward two missile tips
-  const interceptors = [
-    { sx: W * 0.22, sy: groundY, ex: missiles[0].ex, ey: missiles[0].ey, cpx: W * 0.30, cpy: H * 0.20 },
-    { sx: W * 0.70, sy: groundY, ex: missiles[1].ex, ey: missiles[1].ey, cpx: W * 0.66, cpy: H * 0.18 },
-  ];
-  interceptors.forEach(it => arc(it.sx, it.sy, it.ex, it.ey, it.cpx, it.cpy, '#4a9eff', 1.0, 3));
-
-  // Explosion bloom at the first interception
-  const ex = missiles[0].ex, ey = missiles[0].ey;
-  const exGrad = defs.append('radialGradient').attr('id', 'story-bloom');
-  exGrad.append('stop').attr('offset', '0%').attr('stop-color', 'rgba(255,255,255,0.95)');
-  exGrad.append('stop').attr('offset', '40%').attr('stop-color', 'rgba(232,184,75,0.7)');
-  exGrad.append('stop').attr('offset', '100%').attr('stop-color', 'rgba(214,48,49,0)');
-  svg.append('circle').attr('cx', ex).attr('cy', ey).attr('r', 11).attr('fill', 'url(#story-bloom)');
-  svg.append('circle').attr('cx', ex).attr('cy', ey).attr('r', 14)
-    .attr('fill', 'none').attr('stroke', 'rgba(232,184,75,0.45)').attr('stroke-width', 0.5);
-
-  // City skyline silhouette at the bottom
-  const skyline = [
-    [0.00, 0.04], [0.04, 0.07], [0.08, 0.05], [0.12, 0.10], [0.16, 0.06],
-    [0.20, 0.09], [0.24, 0.05], [0.28, 0.11], [0.32, 0.07], [0.36, 0.10],
-    [0.40, 0.05], [0.44, 0.09], [0.48, 0.06], [0.52, 0.12], [0.56, 0.07],
-    [0.60, 0.10], [0.64, 0.05], [0.68, 0.11], [0.72, 0.06], [0.76, 0.09],
-    [0.80, 0.05], [0.84, 0.10], [0.88, 0.07], [0.92, 0.09], [0.96, 0.05], [1.00, 0.07],
-  ];
-  let cityD = `M 0 ${H} L 0 ${groundY} `;
-  skyline.forEach(([nx, nh]) => { cityD += `L ${nx * W} ${groundY - nh * H} `; });
-  cityD += `L ${W} ${groundY} L ${W} ${H} Z`;
-  svg.append('path').attr('d', cityD).attr('fill', '#04050a');
-
-  // Battery glow markers on the ground
-  [W * 0.22, W * 0.50, W * 0.70].forEach(bx => {
-    const bg = defs.append('radialGradient').attr('id', `bat-${Math.round(bx)}`);
-    bg.append('stop').attr('offset', '0%').attr('stop-color', 'rgba(74,158,255,0.55)');
-    bg.append('stop').attr('offset', '100%').attr('stop-color', 'rgba(74,158,255,0)');
-    svg.append('circle').attr('cx', bx).attr('cy', groundY).attr('r', 8).attr('fill', `url(#bat-${Math.round(bx)})`);
-  });
+  svg.append('image')
+    .attr('href', 'images/story-preview.png')
+    .attr('x', 0).attr('y', 0)
+    .attr('width', W).attr('height', H)
+    .attr('preserveAspectRatio', 'xMidYMid slice');
 }
 
 // Records mini preview: 4 stacked stat bars with a big number on top
