@@ -7,7 +7,7 @@
 //   salvo.fire({ count: 4000, label: 'Oct 7, 2023' });
 
 (function () {
-  const MAX_MISSILES = 80;
+  const MAX_MISSILES = 250;
 
   function bezierQ(t, p0, cp, p1) {
     const mt = 1 - t;

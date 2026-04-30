@@ -90,7 +90,7 @@
       <div class="patterns-grid">
         <div>
           <div class="chart-title">Alerts by Hour of Day — per actor</div>
-          <div class="chart-sub">Inner → outer: Hamas · Houthis · Hezbollah · Iran. Band width = actor's total share. Wedge fill = that hour's count vs the global peak (Iran 10:00 = 7,396).</div>
+          <div class="chart-sub">Inner → outer: Hamas · Houthis · Hezbollah · Iran. Band width = actor's total share. Wedge fill = that hour's count vs that actor's own peak.</div>
           <div id="clock-chart"></div>
         </div>
         <div id="dow">
@@ -137,14 +137,16 @@ function drawClock(data, totals) {
 
   // Order rings from inside (smallest total) to outside (largest total): Hamas, Houthis, Hezbollah, Iran.
   const RING_ORDER = ['Hamas', 'Houthis', 'Hezbollah', 'Iran'];
-  const MIN_SHARE = 0.07; // floor so the smallest band stays readable
+  const MIN_SHARE = 0.04; // floor so the smallest band stays readable
   const totalRaw = d3.sum(RING_ORDER.map(a => (totals && totals[a]) || 0)) || 1;
   const minBand = MIN_SHARE * bandSpace;
   const flexSpace = Math.max(0, bandSpace - minBand * RING_ORDER.length);
   const bandWidths = {};
+  // sqrt-scale the shares so Iran's dominance doesn't swamp the smaller actors
+  const sqrtTotal = d3.sum(RING_ORDER.map(a => Math.sqrt(((totals && totals[a]) || 0) / totalRaw)));
   RING_ORDER.forEach(a => {
-    const share = ((totals && totals[a]) || 0) / totalRaw;
-    bandWidths[a] = minBand + share * flexSpace;
+    const sqrtShare = Math.sqrt(((totals && totals[a]) || 0) / totalRaw) / (sqrtTotal || 1);
+    bandWidths[a] = minBand + sqrtShare * flexSpace;
   });
   const bandPos = {};
   let cursor = innerR;
@@ -155,8 +157,9 @@ function drawClock(data, totals) {
     cursor = r1;
   });
 
-  // Single global maximum across every (hour, actor) cell — Iran 10:00 dominates.
-  const GLOBAL_MAX = d3.max(data, d => d3.max(RING_ORDER, a => d[a] || 0)) || 1;
+  // Per-actor maximum so each ring fills relative to its own peak, not Iran's.
+  const maxByActor = {};
+  RING_ORDER.forEach(a => { maxByActor[a] = d3.max(data, d => d[a] || 0) || 1; });
 
   const svg = d3.select('#clock-chart').append('svg').attr('width', size).attr('height', size);
   const g = svg.append('g').attr('transform', `translate(${cx},${cy})`);
@@ -178,7 +181,7 @@ function drawClock(data, totals) {
       const { r0, r1 } = bandPos[actor];
       const bw = r1 - r0;
       const ringR = r1 - 1;
-      const fillR = r0 + (val / GLOBAL_MAX) * (bw - 1);
+      const fillR = r0 + (val / maxByActor[actor]) * (bw - 1);
       const bgArc = d3.arc()
         .innerRadius(r0).outerRadius(ringR)
         .startAngle(startA).endAngle(startA + sA - 0.01);
@@ -245,6 +248,43 @@ function drawClock(data, totals) {
         .style('filter', 'drop-shadow(0 0 0 rgba(214,48,49,0))');
     }
   });
+
+  // 10am callout: show per-actor counts as a labelled spoke after the sweep
+  const h10 = data.find(d => d.hour === 10);
+  if (h10) {
+    const midA = ((10 + 0.5) / 24) * tau - Math.PI/2;
+    const spokeTip = outerMaxR + 10;
+    const tipX = Math.cos(midA) * spokeTip;
+    const tipY = Math.sin(midA) * spokeTip;
+
+    const ann = g.append('g').attr('opacity', 0);
+
+    ann.append('circle')
+      .attr('cx', Math.cos(midA) * outerMaxR).attr('cy', Math.sin(midA) * outerMaxR)
+      .attr('r', 2.5).attr('fill', 'var(--accent)');
+
+    ann.append('line')
+      .attr('x1', Math.cos(midA) * outerMaxR).attr('y1', Math.sin(midA) * outerMaxR)
+      .attr('x2', tipX).attr('y2', tipY)
+      .attr('stroke', 'var(--accent)').attr('stroke-width', 0.8).attr('opacity', 0.5);
+
+    ann.append('text')
+      .attr('x', tipX + 6).attr('y', tipY - 8)
+      .attr('fill', 'var(--accent)').attr('font-family', 'IBM Plex Mono')
+      .attr('font-size', '9px').attr('font-weight', 500)
+      .text('10:00 peak');
+
+    // Iran → Hamas order (largest first)
+    [...RING_ORDER].reverse().forEach((actor, i) => {
+      ann.append('text')
+        .attr('x', tipX + 6).attr('y', tipY + 4 + i * 12)
+        .attr('fill', ACTOR_COLORS[actor]).attr('font-family', 'IBM Plex Mono')
+        .attr('font-size', '9px')
+        .text(`${actor}: ${fmtNum(h10[actor] || 0)}`);
+    });
+
+    ann.transition().delay(duration + 400).duration(500).attr('opacity', 1);
+  }
 }
 
 function drawDoW(data) {

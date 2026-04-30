@@ -20,12 +20,12 @@ on:
         default: "0"
 
 permissions:
-  contents: write   # needed to commit data back to repo
+  contents: write # needed to commit data back to repo
 
 jobs:
   update:
     runs-on: ubuntu-latest
-    timeout-minutes: 8   # safety: kill if it hangs
+    timeout-minutes: 8 # safety: kill if it hangs
 
     steps:
       - name: Checkout repo
@@ -57,4 +57,4 @@ jobs:
           file_pattern: "data/*.json data/*.log"
           commit_user_name: "under-fire-bot"
           commit_user_email: "bot@under-fire-project.com"
-          skip_dirty_check: false   # only commits if files actually changed
+          skip_dirty_check: false # only commits if files actually changed

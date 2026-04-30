@@ -1,93 +1,85 @@
 # Under Fire
 
-**Patterns in rocket and missile attacks on Israel — a live data journalism project.**
+**Patterns in rocket, missile, and drone attacks on Israel — an interactive data journalism project.**
+
+Six years of alert data (2020–2026), visualised across eight pages: timelines, heatmaps, geographic arcs, and records. Built to make the scale and rhythm of the conflict legible.
 
 ---
 
-## How to get it live in 4 steps
+## Live site
 
-### Step 1 — Create a GitHub repo
+**[alfierees.github.io/under-fire](https://alfierees.github.io/under-fire)**
+
+Deployed automatically from the `main` branch via GitHub Pages. Any push to `main` goes live within a minute or two.
+
+---
+
+## Running locally
 
 ```bash
-git init
-git add .
-git commit -m "initial commit"
-gh repo create under-fire --public
-git push -u origin main
+python3 -m http.server 8000
 ```
 
-### Step 2 — Enable GitHub Pages
-
-In your repo → **Settings** → **Pages** → Source: **Deploy from branch** → `main` / `/ (root)`
-
-Your site will be live at `https://YOUR-USERNAME.github.io/under-fire`
-
-### Step 3 — Enable GitHub Actions
-
-The workflow file `.github/workflows/update-data.yml` is already in the repo.
-GitHub Actions runs it automatically. Just make sure Actions are enabled:
-**Settings** → **Actions** → **Allow all actions** ✓
-
-### Step 4 — Backfill historical data (one-time)
-
-Trigger this manually from the Actions tab to pull years of history:
-
-1. Go to **Actions** → **Update Alert Data**
-2. Click **Run workflow**
-3. Set `backfill_days` to `3650` (10 years)
-4. Run it — it'll populate `data/alerts.json` with historical alerts
-
-After this, the Action runs every 10 minutes automatically and adds new alerts as they happen.
+Then open `http://localhost:8000` — use `http://`, not `file://`, as the pages load data via `fetch()`.
 
 ---
 
 ## Architecture
 
-```
-OREF API (oref.org.il)
-    │  polls every 10 minutes
-    ▼
-GitHub Actions workflow
-    │  appends new alerts
-    ▼
-data/alerts.json  (in this repo, auto-committed)
-    │  GitHub Pages serves it as a static file
-    ▼
-index.html  (fetches data/alerts.json on load, refreshes every 5 min)
-```
+Static site — no build step, no server, no database.
 
-**No server. No database. Completely free.**
+```
+Python scripts (offline)
+    │  process raw alert data
+    ▼
+data/processed/*.json   ← pre-aggregated, committed to the repo
+    │  fetched at page load
+    ▼
+HTML + D3 + Leaflet pages
+```
 
 ---
 
-## To also add ACLED data (richer actor attribution)
+## Scripts
 
-Once you have an ACLED API key:
+All in `scripts/`. Run from the repo root.
 
-```bash
-export ACLED_KEY="your_key"
-export ACLED_EMAIL="your@email.com"
-python scripts/01_acled_pull.py
-```
+| Script | What it does |
+|--------|-------------|
+| `generate_extra_aggregates.py` | Rebuilds all JSON files in `data/processed/` — run this after changing source data |
+| `generate_story_chapters.py` | Regenerates the scroll-driven story map chapter data |
+| `oref_scraper.py` | Fetches raw alert data from the OREF API |
+| `backfill.py` | Historical data backfill |
+| `sync.sh` | Pulls latest from origin and rebases — run before starting any edits |
 
-This produces `data/clean_acled.csv`. A merge script (coming soon) will
-blend ACLED actor/episode data with the OREF timestamp data.
+To update what the website shows, edit the source data and then run `generate_extra_aggregates.py` to regenerate the JSON files.
 
 ---
 
 ## File structure
 
 ```
-index.html                   ← Main website (open this in browser)
-data/
-  alerts.json                ← Auto-updated alert data (OREF)
-  clean_acled.csv            ← Conflict event data (ACLED, after setup)
-  plots/                     ← EDA charts from Python pipeline
-scripts/
-  oref_scraper.py            ← OREF live + history fetcher
-  backfill.py                ← Historical backfill tool
-  01_acled_pull.py           ← ACLED data pull
-  02_eda_temporal.py         ← Temporal analysis & charts
-.github/workflows/
-  update-data.yml            ← GitHub Actions: runs scraper every 10 min
+index.html                    ← Homepage (hero + card grid)
+timeline.html                 ← Six-year area chart
+fronts.html                   ← Stacked monthly bars by actor
+calendar.html                 ← Daily heatmap (2020–present)
+patterns.html                 ← 24h polar clock + weekday + heatmap
+arcs.html                     ← Schematic arcs from each origin
+records.html                  ← Records & extremes
+oct7.html                     ← Oct 7 minute-by-minute replay
+data/processed/               ← Pre-aggregated JSON (source of truth for charts)
+scripts/                      ← Data pipeline
+src/css/                      ← Shared + page-specific styles
+src/js/                       ← Shared utilities + page scripts
+images/                       ← Static assets
+```
+
+---
+
+## Sync before editing
+
+This repo is edited both locally and via Claude Code on the web. Always pull before starting work:
+
+```bash
+./scripts/sync.sh
 ```
