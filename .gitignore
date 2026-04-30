@@ -18,3 +18,9 @@ __pycache__/
 
 # Editor
 .vscode/
+
+# wrangler files
+.wrangler
+.dev.vars*
+!.dev.vars.example
+!.env.example
