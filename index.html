@@ -9,6 +9,76 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.8.5/d3.min.js"></script>
   <link rel="stylesheet" href="src/css/shared.css">
   <link rel="stylesheet" href="src/css/hub.css">
+  <!-- Google Analytics -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-JXKX4MKJ8W"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-JXKX4MKJ8W');
+  </script>
+  <style>
+    .mission-panel {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 5rem 4rem 6rem;
+      border-top: 1px solid var(--border);
+    }
+    .mission-panel-eyebrow {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: .58rem;
+      letter-spacing: .22em;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin-bottom: 1.4rem;
+      display: flex;
+      align-items: center;
+      gap: .9rem;
+    }
+    .mission-panel-eyebrow::before {
+      content: '';
+      display: block;
+      width: 28px;
+      height: 1px;
+      background: var(--accent);
+      flex-shrink: 0;
+    }
+    .mission-panel h2 {
+      font-family: 'Playfair Display', serif;
+      font-size: clamp(1.6rem, 3vw, 2.4rem);
+      font-weight: 900;
+      color: #fff;
+      line-height: 1.1;
+      letter-spacing: -.02em;
+      margin-bottom: 1.4rem;
+      max-width: 680px;
+    }
+    .mission-panel p {
+      font-size: .95rem;
+      color: var(--muted);
+      line-height: 1.85;
+      max-width: 680px;
+      margin-bottom: 2rem;
+    }
+    .mission-panel a.mission-link {
+      display: inline-flex;
+      align-items: center;
+      gap: .5rem;
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: .62rem;
+      letter-spacing: .14em;
+      text-transform: uppercase;
+      color: var(--accent);
+      text-decoration: none;
+      border-bottom: 1px solid rgba(232,184,75,.3);
+      padding-bottom: .15rem;
+      transition: border-color .2s;
+    }
+    .mission-panel a.mission-link:hover { border-color: var(--accent); }
+    @media (max-width: 700px) {
+      .mission-panel { padding: 3.5rem 1.4rem 4rem; }
+    }
+  </style>
 </head>
 <body>
 
@@ -195,6 +265,20 @@
   </div>
 
 </main>
+
+<!-- MISSION STATEMENT PANEL -->
+<section class="mission-panel">
+  <div class="mission-panel-eyebrow">Mission Statement</div>
+  <h2>Structuring six years of alerts over Israel.</h2>
+  <p>
+    Between 2020 and 2026, Israel was the target of an unprecedented sustained campaign
+    of rocket, missile, and drone attacks from Hamas in Gaza, Hezbollah in Lebanon,
+    the Houthis in Yemen, and the Islamic Republic of Iran. <em style="color:var(--accent);font-style:italic;">Under Fire</em> is an attempt
+    to structure, visualise, and preserve that record — using frontier AI, open-source
+    intelligence, and human editorial oversight.
+  </p>
+  <a href="mission.html" class="mission-link">Read the full mission statement →</a>
+</section>
 
 <footer>
   <div class="footer-left">Under Fire — Data Visualisation Project — 2026</div>

@@ -46,8 +46,8 @@ h1.hero-title {
 .stat-actors-dots { display:inline-flex; gap:4px; align-items:center; margin-left:.5rem; vertical-align:middle; }
 .stat-actors-dots span { display:inline-block; width:8px; height:8px; border-radius:2px; }
 .stat-label { font-family:'IBM Plex Mono',monospace; font-size:.58rem; letter-spacing:.14em; text-transform:uppercase; color:rgba(165,170,195,0.75); margin-top:.55rem; }
-.hero-scroll { position:absolute; bottom:3rem; left:6rem; font-family:'IBM Plex Mono',monospace; font-size:.58rem; letter-spacing:.16em; text-transform:uppercase; color:rgba(200,200,216,.35); display:flex; align-items:center; gap:.8rem; }
-.hero-scroll::before { content:''; display:block; width:40px; height:1px; background:rgba(200,200,216,.25); }
+.hero-scroll { position:absolute; bottom:3rem; left:6rem; font-family:'IBM Plex Mono',monospace; font-size:.58rem; letter-spacing:.16em; text-transform:uppercase; color:#ffffff; display:flex; align-items:center; gap:.8rem; }
+.hero-scroll::before { content:''; display:block; width:40px; height:1px; background:#ffffff; }
 
 #iron-dome-canvas {
   position:absolute; inset:0; z-index:2;

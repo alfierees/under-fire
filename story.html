@@ -286,6 +286,14 @@
       #chapter-counter { display: none; }
     }
   </style>
+  <!-- Google Analytics -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-JXKX4MKJ8W"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-JXKX4MKJ8W');
+  </script>
 </head>
 <body>
 
@@ -340,10 +348,10 @@
 
     <div class="story-hero" id="hero-section">
       <div class="hero-eyebrow">Data Narrative</div>
-      <h1>The War,<br>Chapter by Chapter</h1>
+      <h1>The Wars,<br>Chapter by Chapter</h1>
       <p class="hero-sub">
         From the first rockets of October 7 to the largest barrage in recorded history —
-        six chapters, six fronts, 142,000 alerts.
+        six chapters, six fronts, 142,000+ alerts.
       </p>
       <div class="hero-meta">
         <div class="hero-meta-item">
@@ -413,7 +421,7 @@
   /* ── Origin coordinates per actor (rough approximations) ── */
   const ORIGINS = {
     Hamas:     { lat: 31.43, lon: 34.38, label: 'Gaza' },
-    Hezbollah: { lat: 33.40, lon: 35.48, label: 'S. Lebanon' },
+    Hezbollah: { lat: 33.38, lon: 35.30, label: 'S. Lebanon' },
     Houthis:   { lat: 15.37, lon: 44.20, label: 'Sana’a, Yemen' },
     Iran:      { lat: 35.70, lon: 51.42, label: 'Tehran' },
   };
@@ -477,7 +485,13 @@
 
     const origin = ORIGINS[ch.actor];
     if (!origin) return;
-    const clusters = clusterPoints(ch.points, 0.18, 6);
+    // For Hezbollah, drop points above lat 32.95 — the Lebanese border sits at ~33.05–33.27
+    // and the area bounding boxes bleed into Lebanese territory, so cluster centroids
+    // were landing in Tibnine, Rmeish etc. This keeps impacts in clearly Israeli towns.
+    const pts = ch.actor === 'Hezbollah'
+      ? ch.points.filter(p => p[0] <= 32.95)
+      : ch.points;
+    const clusters = clusterPoints(pts, 0.18, 6);
     if (!clusters.length) return;
     const maxCount = d3.max(clusters, c => c.count) || 1;
 
@@ -561,17 +575,6 @@
       .attr('r', maxR).attr('opacity', 0)
       .remove();
 
-    // Count label (persistent, subtle)
-    overlay.append('text')
-      .attr('x', x).attr('y', y - (6 + scale * 3))
-      .attr('text-anchor', 'middle')
-      .attr('fill', color)
-      .attr('font-family', 'IBM Plex Mono')
-      .attr('font-size', 9)
-      .attr('opacity', 0)
-      .text(cluster.count.toLocaleString())
-      .transition().delay(120).duration(260)
-      .attr('opacity', 0.75);
   }
 
   /* ── Compute bounds so both origin and impact area fit ── */
@@ -579,11 +582,19 @@
     const origin = ORIGINS[ch.actor];
     const impactLL = [ch.map.center[1], ch.map.center[0]];
     if (!origin) return L.latLngBounds([impactLL, impactLL]).pad(0.4);
-    // Include origin + each cluster centroid
-    const clusters = clusterPoints(ch.points, 0.18, 6);
+    const filteredPts = ch.actor === 'Hezbollah'
+      ? ch.points.filter(p => p[0] <= 32.95)
+      : ch.points;
+    const clusters = clusterPoints(filteredPts, 0.18, 6);
     const pts = [[origin.lat, origin.lon], impactLL]
       .concat(clusters.map(c => [c.lat, c.lon]));
-    return L.latLngBounds(pts).pad(0.18);
+    const bounds = L.latLngBounds(pts).pad(0.18);
+    // For Hezbollah, force the view south to at least lat 32.4 so the
+    // Lebanon→Israel border crossing is clearly visible on screen.
+    if (ch.actor === 'Hezbollah') {
+      bounds.extend([32.4, bounds.getWest()]);
+    }
+    return bounds;
   }
 
   /* ── Fly to chapter, then render arcs once map settles ── */
