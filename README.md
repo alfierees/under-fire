@@ -67,6 +67,9 @@ patterns.html                 ← 24h polar clock + weekday + heatmap
 arcs.html                     ← Schematic arcs from each origin
 records.html                  ← Records & extremes
 oct7.html                     ← Oct 7 minute-by-minute replay
+story.html                    ← Scroll-driven war narrative map
+mission.html                  ← About the project
+404.html                      ← Custom 404 page
 data/processed/               ← Pre-aggregated JSON (source of truth for charts)
 scripts/                      ← Data pipeline
 src/css/                      ← Shared + page-specific styles

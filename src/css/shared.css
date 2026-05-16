@@ -238,4 +238,18 @@ footer {
   .nav-badge { display:none; }
   .nav-links { gap:.8rem; }
   .nav-group-btn { font-size:.55rem; }
+  .section-wrapper { padding: 5rem 1rem 4rem; }
+  .section-title { font-size: 2rem; }
+  .section-desc { font-size: .82rem; }
+  footer { padding: 2rem 1rem; }
+  .finding-row { flex-direction: column; }
+  .finding-stat { font-size: 1.4rem; }
+  .code-runner-body { font-size: .68rem; padding: .8rem; overflow-x: auto; }
+  .filter-bar { gap: .35rem; }
+  .filter-btn { font-size: .56rem; padding: .35rem .65rem; }
+}
+@media (max-width:400px) {
+  nav { padding: 0 .8rem; }
+  .nav-links { gap: .5rem; }
+  .nav-group-btn { font-size: .5rem; letter-spacing: .06em; }
 }

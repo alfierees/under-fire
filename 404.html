@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <link rel="icon" type="image/png" href="images/favicon.png">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Under Fire — Page Not Found</title>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=IBM+Plex+Mono:wght@300;400&family=IBM+Plex+Sans:wght@300;400&display=swap" rel="stylesheet">
+  <!-- Google Analytics -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-JXKX4MKJ8W"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-JXKX4MKJ8W');
+  </script>
+  <style>
+    :root {
+      --bg: #07070a; --surface: #0f0f14; --border: #2d2d3c;
+      --accent: #e8b84b; --red: #d63031;
+      --text: #e7e9f1; --muted: #c4c7d6; --dim: #9297ac;
+    }
+    *, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+    body {
+      background: var(--bg); color: var(--text);
+      font-family: 'IBM Plex Sans', sans-serif; font-weight: 300;
+      min-height: 100vh; display: flex; align-items: center; justify-content: center;
+    }
+    .container { text-align: center; padding: 2rem; }
+    .code {
+      font-family: 'IBM Plex Mono', monospace; font-size: 6rem; font-weight: 300;
+      color: var(--red); letter-spacing: .1em; line-height: 1;
+    }
+    h1 {
+      font-family: 'Playfair Display', serif; font-size: 1.8rem; font-weight: 700;
+      margin: 1.5rem 0 .8rem; letter-spacing: .04em;
+    }
+    p { color: var(--muted); font-size: .95rem; max-width: 360px; margin: 0 auto 2rem; line-height: 1.6; }
+    a.home {
+      display: inline-block; font-family: 'IBM Plex Mono', monospace; font-size: .7rem;
+      letter-spacing: .18em; text-transform: uppercase; color: var(--accent);
+      text-decoration: none; border: 1px solid var(--border); padding: .7rem 2rem;
+      transition: border-color .2s;
+    }
+    a.home:hover { border-color: var(--accent); }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="code">404</div>
+    <h1>Page Not Found</h1>
+    <p>The page you're looking for doesn't exist or has been moved.</p>
+    <a class="home" href="./">Back to Under Fire</a>
+  </div>
+</body>
+</html>

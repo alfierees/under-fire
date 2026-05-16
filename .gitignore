@@ -18,3 +18,7 @@ __pycache__/
 
 # Editor
 .vscode/
+
+# Local tooling
+.playwright-cli/
+notebooks/

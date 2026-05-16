@@ -155,3 +155,19 @@ h1.hero-title {
   .hero-scroll { left: 1.8rem; }
   .hub { padding: 3rem 1.8rem; }
 }
+@media (max-width: 620px) {
+  #hero { padding: 0 1.2rem; min-height: 100svh; }
+  h1.hero-title { font-size: clamp(2.8rem, 12vw, 4.5rem); }
+  .hero-subtitle { font-size: .68rem; margin-bottom: 2rem; }
+  .hero-stats { gap: 1.5rem; }
+  .stat-num { font-size: 2rem; }
+  .stat-num span { font-size: 1.2rem; }
+  .stat-label { font-size: .5rem; }
+  .hero-scroll { left: 1.2rem; bottom: 2rem; }
+  .hub { padding: 2rem 1rem; }
+  .category { margin-bottom: 3rem; }
+  .category-title { font-size: 1.3rem; }
+  .card-grid { grid-template-columns: 1fr; gap: 1rem; }
+  .card { min-height: auto; padding: 1.2rem; }
+  .card-title { font-size: 1.15rem; }
+}

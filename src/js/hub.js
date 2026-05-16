@@ -220,7 +220,7 @@ async function drawPreviewOct7(svgEl) {
   const W = svgEl.clientWidth || 280, H = svgEl.clientHeight || 110;
   const svg = d3.select(svgEl).attr('viewBox', `0 0 ${W} ${H}`);
   svg.append('image')
-    .attr('href', 'images/oct7-preview.png')
+    .attr('href', 'images/oct7-preview.webp')
     .attr('x', 0).attr('y', 0)
     .attr('width', W).attr('height', H)
     .attr('preserveAspectRatio', 'xMidYMid slice');
@@ -231,7 +231,7 @@ async function drawPreviewStory(svgEl) {
   const W = svgEl.clientWidth || 280, H = svgEl.clientHeight || 110;
   const svg = d3.select(svgEl).attr('viewBox', `0 0 ${W} ${H}`);
   svg.append('image')
-    .attr('href', 'images/story-preview.png')
+    .attr('href', 'images/story-preview.webp')
     .attr('x', 0).attr('y', 0)
     .attr('width', W).attr('height', H)
     .attr('preserveAspectRatio', 'xMidYMid slice');
