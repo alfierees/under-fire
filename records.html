@@ -150,7 +150,7 @@
   <div class="footer-credit">Alert data from <a href="https://rocketalert.live" target="_blank">RocketAlert.live</a>.</div>
 </footer>
 
-<script src="src/js/shared.js"></script>
+<script src="src/js/shared.js?v=20260518"></script>
 <script>
 (async () => {
   const [records, oct7] = await Promise.all([
@@ -188,18 +188,20 @@
     `${bw.count.toLocaleString()} total alerts across all Saturdays`;
 
   // Days under attack
-  const da = records.days_under_attack;
-  document.getElementById('rec-attack-days').innerHTML =
-    `${da.pct}<span>%</span>`;
-  document.getElementById('rec-attack-days-sub').textContent =
-    `${da.days_with_alerts.toLocaleString()} of ${da.total_days.toLocaleString()} days had at least one alert`;
+  if (records.days_under_attack) {
+    const da = records.days_under_attack;
+    document.getElementById('rec-attack-days').innerHTML = `${da.pct}<span>%</span>`;
+    document.getElementById('rec-attack-days-sub').textContent =
+      `${da.days_with_alerts.toLocaleString()} of ${da.total_days.toLocaleString()} days had at least one alert`;
+  }
 
   // Major attack days
-  const md = records.major_attack_days;
-  document.getElementById('rec-major-days').innerHTML =
-    `${md.count.toLocaleString()}<span> days</span>`;
-  document.getElementById('rec-major-days-sub').textContent =
-    `${md.threshold}+ alerts in a single 24-hour window`;
+  if (records.major_attack_days) {
+    const md = records.major_attack_days;
+    document.getElementById('rec-major-days').innerHTML = `${md.count.toLocaleString()}<span> days</span>`;
+    document.getElementById('rec-major-days-sub').textContent =
+      `${md.threshold}+ alerts in a single 24-hour window`;
+  }
 
   // Peak day minute-by-minute chart
   const perMinute = new Map();
