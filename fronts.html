@@ -105,6 +105,16 @@
     </div>
     <div id="fronts-chart" class="chart-gated"></div>
     <p class="chart-note">Monthly alert counts by estimated origin. Pre-Oct 2023 data does not include origin attribution.</p>
+
+    <div style="margin-top:3.5rem;">
+      <div class="section-label" style="margin-bottom:.5rem;">Share breakdown</div>
+      <h2 class="section-title" style="font-size:1.8rem;margin-bottom:.25rem;">Who Fired What</h2>
+      <p class="section-desc" style="margin-bottom:1.5rem;max-width:600px;">Proportion of total alerts by origin across the full six-year record.</p>
+      <div id="donut-wrap" style="display:flex;align-items:center;gap:3rem;flex-wrap:wrap;">
+        <div id="donut-chart"></div>
+        <div id="donut-legend" style="display:flex;flex-direction:column;gap:.9rem;"></div>
+      </div>
+    </div>
   </div>
 </div>
 
@@ -302,6 +312,64 @@ function updateLegendTotals(raw) {
       chart.classList.add('revealed');
       drawFronts(data, currentScale);
     }
+  });
+})();
+
+// ── Actor share donut ─────────────────────────────────────────────────────
+(async () => {
+  const monthly = await fetchData('actors_monthly.json');
+  const totals = {};
+  ACTORS.forEach(a => { totals[a] = 0; });
+  monthly.forEach(m => ACTORS.forEach(a => { totals[a] += (m[a] || 0); }));
+  const grand = Object.values(totals).reduce((s, v) => s + v, 0);
+
+  const slices = ACTORS.map(a => ({ actor: a, count: totals[a], pct: totals[a] / grand }))
+    .sort((a, b) => b.count - a.count);
+
+  const R = 110, r = 62, W = R * 2 + 20, H = R * 2 + 20;
+  const svg = d3.select('#donut-chart').append('svg').attr('width', W).attr('height', H);
+  const g = svg.append('g').attr('transform', `translate(${W / 2},${H / 2})`);
+
+  const pie = d3.pie().value(d => d.count).sort(null).padAngle(0.025);
+  const arc = d3.arc().innerRadius(r).outerRadius(R).cornerRadius(3);
+  const arcMid = d3.arc().innerRadius(r).outerRadius(R);
+
+  const arcs = g.selectAll('path').data(pie(slices)).enter().append('path')
+    .attr('fill', d => ACTOR_COLORS[d.data.actor])
+    .attr('opacity', 0.9)
+    .attr('d', arc)
+    .each(function(d) { this._current = { startAngle: d.startAngle, endAngle: d.startAngle }; });
+
+  arcs.transition().duration(900).ease(d3.easeCubicOut)
+    .attrTween('d', function(d) {
+      const i = d3.interpolate(this._current, d);
+      return t => arc(i(t));
+    });
+
+  // pct labels on large slices
+  g.selectAll('text.donut-pct').data(pie(slices)).enter().append('text')
+    .filter(d => d.data.pct > 0.07)
+    .attr('class', 'donut-pct')
+    .attr('transform', d => `translate(${arcMid.centroid(d)})`)
+    .attr('text-anchor', 'middle').attr('dominant-baseline', 'middle')
+    .attr('font-family', 'IBM Plex Mono').attr('font-size', '11px').attr('fill', '#fff')
+    .attr('opacity', 0)
+    .text(d => Math.round(d.data.pct * 100) + '%')
+    .transition().delay(900).duration(300).attr('opacity', 1);
+
+  // Legend
+  const fmt = d3.format(',');
+  const leg = document.getElementById('donut-legend');
+  slices.forEach(d => {
+    const row = document.createElement('div');
+    row.style.cssText = 'display:flex;align-items:center;gap:.7rem;';
+    row.innerHTML = `
+      <div style="width:10px;height:10px;border-radius:2px;flex-shrink:0;background:${ACTOR_COLORS[d.actor]}"></div>
+      <div>
+        <div style="font-family:'IBM Plex Mono',monospace;font-size:.6rem;letter-spacing:.1em;color:var(--muted);">${d.actor.toUpperCase()} · ${Math.round(d.pct * 100)}%</div>
+        <div style="font-family:'IBM Plex Mono',monospace;font-size:.75rem;color:var(--text);">${fmt(d.count)} alerts</div>
+      </div>`;
+    leg.appendChild(row);
   });
 })();
 </script>
