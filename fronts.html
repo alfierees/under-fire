@@ -106,11 +106,11 @@
     <div id="fronts-chart" class="chart-gated"></div>
     <p class="chart-note">Monthly alert counts by estimated origin. Pre-Oct 2023 data does not include origin attribution.</p>
 
-    <div style="margin-top:3.5rem;">
+    <div id="donut-section" class="chart-gated" style="margin-top:3.5rem;">
       <div class="section-label" style="margin-bottom:.5rem;">Share breakdown</div>
       <h2 class="section-title" style="font-size:1.8rem;margin-bottom:.25rem;">Who Fired What</h2>
       <p class="section-desc" style="margin-bottom:1.5rem;max-width:600px;">Proportion of total alerts by origin across the full six-year record.</p>
-      <div id="donut-wrap" style="display:flex;align-items:center;gap:3rem;flex-wrap:wrap;">
+      <div style="display:flex;align-items:center;gap:3rem;flex-wrap:wrap;">
         <div id="donut-chart"></div>
         <div id="donut-legend" style="display:flex;flex-direction:column;gap:.9rem;"></div>
       </div>
@@ -306,18 +306,21 @@ function updateLegendTotals(raw) {
       { text: '  bars(m).transition().delay(i * 55).duration(280)' },
       { text: '    .attr("height", fromZero) // staircase reveal' },
       { text: '})' },
+      { text: '// Actor share breakdown donut', kind: 'cm' },
+      { text: 'donut(actors).reveal()' },
     ],
     onRun: () => {
       if (hint) hint.style.display = 'none';
       chart.classList.add('revealed');
+      document.getElementById('donut-section').classList.add('revealed');
       drawFronts(data, currentScale);
+      drawDonut(data);
     }
   });
 })();
 
 // ── Actor share donut ─────────────────────────────────────────────────────
-(async () => {
-  const monthly = await fetchData('actors_monthly.json');
+function drawDonut(monthly) {
   const totals = {};
   ACTORS.forEach(a => { totals[a] = 0; });
   monthly.forEach(m => ACTORS.forEach(a => { totals[a] += (m[a] || 0); }));
@@ -371,7 +374,7 @@ function updateLegendTotals(raw) {
       </div>`;
     leg.appendChild(row);
   });
-})();
+}
 </script>
 </body>
 </html>

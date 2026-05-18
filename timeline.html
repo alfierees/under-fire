@@ -185,7 +185,7 @@
     </p>
     <p class="chart-note">Weekly alert counts. Vertical line marks October 7, 2023.</p>
 
-    <div style="margin-top:3.5rem;">
+    <div id="year-wrap" class="chart-gated" style="margin-top:3.5rem;">
       <div class="section-label" style="margin-bottom:.5rem;">Year by year</div>
       <h2 class="section-title" style="font-size:1.8rem;margin-bottom:.25rem;">Annual Alert Totals</h2>
       <p class="section-desc" style="margin-bottom:1.5rem;max-width:600px;">Alerts recorded each calendar year, 2020–2026. The 2026 figure covers January to March only.</p>
@@ -499,10 +499,13 @@ async function init() {
       { text: 'mini.forEach(a => area(a).reveal({ dot: true, ms: 8000 }))' },
       { text: 'const stack = d3.stack().keys([...actors, "Unknown"])' },
       { text: 'draw(stack(data)).revealWithRadar({ ms: 8000 })' },
+      { text: '// Annual totals — stacked by actor share', kind: 'cm' },
+      { text: 'yearChart(data, actors).reveal()' },
     ],
     onRun: () => {
       if (hint) hint.style.display = 'none';
       reveal.classList.add('revealed');
+      document.getElementById('year-wrap').classList.add('revealed');
       const charts = [
         ...ACTORS.map(a => drawMini(a, timelineData)),
         drawTimeline(timelineData),
@@ -511,23 +514,33 @@ async function init() {
       document.getElementById('click-hint').style.display = 'block';
       salvo = mountSalvo({ mount: '#timeline-chart' });
       runReveal(charts);
+      // fix actor card % to use full total incl. Unknown
+      const grand = Object.values(origins).reduce((s, v) => s + v, 0);
+      ACTORS.forEach(actor => {
+        const card = document.querySelector(`.actor-card[data-actor="${actor}"]`);
+        if (!card) return;
+        card.querySelector('.pct').textContent = ((origins[actor] || 0) / grand * 100).toFixed(1) + '%';
+      });
+      drawYearChart(timelineData);
     }
   });
 }
 
 init();
 
-// ── Year-by-year bar chart ────────────────────────────────────────────────
-(async () => {
-  const weekly = await fetchData('timeline_weekly.json');
-  const yearTotals = {};
+// ── Year-by-year stacked bar chart ───────────────────────────────────────
+function drawYearChart(weekly) {
+  const ALL_ACTORS = ['Iran', 'Hezbollah', 'Houthis', 'Hamas', 'Unknown'];
+
+  // Aggregate per year per actor
+  const yearMap = {};
   weekly.forEach(d => {
     const yr = d.week.slice(0, 4);
-    yearTotals[yr] = (yearTotals[yr] || 0) + (d.total || 0);
+    if (!yearMap[yr]) { yearMap[yr] = { year: yr, total: 0 }; ALL_ACTORS.forEach(a => yearMap[yr][a] = 0); }
+    ALL_ACTORS.forEach(a => { yearMap[yr][a] += (d[a] || 0); });
+    yearMap[yr].total += (d.total || 0);
   });
-  const years = Object.entries(yearTotals)
-    .map(([year, total]) => ({ year, total }))
-    .sort((a, b) => +a.year - +b.year);
+  const years = Object.values(yearMap).sort((a, b) => +a.year - +b.year);
 
   const container = document.getElementById('year-chart');
   const W = container.clientWidth || 860;
@@ -543,38 +556,46 @@ init();
   const g = svg.append('g').attr('transform', `translate(${M.left},0)`);
 
   const ANNO = { '2023': 'INC. OCT 7', '2026': 'JAN–MAR ONLY' };
-  const BAR_COLOR = { '2023': '#e8b84b', '2026': 'rgba(255,255,255,0.18)' };
 
   years.forEach((d, i) => {
-    const y = i * (barH + gap);
-    const color = BAR_COLOR[d.year] || 'rgba(255,255,255,0.12)';
+    const yPos = i * (barH + gap);
 
-    g.append('rect').attr('x', 0).attr('y', y).attr('width', w).attr('height', barH)
-      .attr('fill', 'rgba(255,255,255,0.03)').attr('rx', 3);
+    // Track running x offset for stacking
+    let xOff = 0;
+    ALL_ACTORS.forEach(actor => {
+      const val = d[actor] || 0;
+      if (!val) return;
+      const segW = x(val);
+      g.append('rect')
+        .attr('x', xOff).attr('y', yPos)
+        .attr('height', barH).attr('fill', ACTOR_HEX[actor]).attr('opacity', 0.88)
+        .attr('width', 0)
+        .transition().duration(700).delay(i * 90).ease(d3.easeCubicOut)
+        .attr('width', segW);
+      xOff += segW;
+    });
 
-    g.append('rect').attr('x', 0).attr('y', y).attr('height', barH).attr('rx', 3)
-      .attr('fill', color).attr('width', 0)
-      .transition().duration(700).delay(i * 90).ease(d3.easeCubicOut)
-      .attr('width', x(d.total));
-
-    g.append('text').attr('x', -8).attr('y', y + barH / 2 + 4)
+    // Year label
+    g.append('text').attr('x', -8).attr('y', yPos + barH / 2 + 4)
       .attr('text-anchor', 'end').attr('fill', 'var(--muted)')
       .attr('font-family', 'IBM Plex Mono').attr('font-size', '11px').text(d.year);
 
-    const countLabel = g.append('text').attr('x', x(d.total) + 10).attr('y', y + barH / 2 + 4)
+    // Total count label
+    const totalW = x(d.total);
+    g.append('text').attr('x', totalW + 10).attr('y', yPos + barH / 2 + 4)
       .attr('fill', 'var(--text)').attr('font-family', 'IBM Plex Mono').attr('font-size', '11px')
-      .attr('opacity', 0).text(d.total.toLocaleString());
-    countLabel.transition().duration(300).delay(i * 90 + 500).attr('opacity', 1);
+      .attr('opacity', 0).text(d.total.toLocaleString())
+      .transition().duration(300).delay(i * 90 + 500).attr('opacity', 1);
 
     if (ANNO[d.year]) {
-      const anno = g.append('text').attr('x', x(d.total) + 10).attr('y', y + barH / 2 + 16)
+      g.append('text').attr('x', totalW + 10).attr('y', yPos + barH / 2 + 16)
         .attr('fill', d.year === '2023' ? 'var(--accent)' : 'var(--muted)')
         .attr('font-family', 'IBM Plex Mono').attr('font-size', '8px')
-        .attr('letter-spacing', '.07em').attr('opacity', 0).text(ANNO[d.year]);
-      anno.transition().duration(300).delay(i * 90 + 500).attr('opacity', 1);
+        .attr('letter-spacing', '.07em').attr('opacity', 0).text(ANNO[d.year])
+        .transition().duration(300).delay(i * 90 + 500).attr('opacity', 1);
     }
   });
-})();
+}
 </script>
 </body>
 </html>
