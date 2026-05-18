@@ -23,6 +23,8 @@
     .rec-card.gold   { border-left-color:var(--accent); }
     .rec-card.blue   { border-left-color:var(--blue); }
     .rec-card.purple { border-left-color:var(--iran); }
+    .rec-card.green  { border-left-color:#2ecc71; }
+    .rec-card.orange { border-left-color:var(--orange); }
     .rec-label { font-family:'IBM Plex Mono',monospace; font-size:.58rem; letter-spacing:.14em; text-transform:uppercase; color:var(--muted); margin-bottom:.8rem; }
     .rec-big { font-family:'Playfair Display',serif; font-size:3.4rem; font-weight:900; color:#fff; line-height:1; margin-bottom:.4rem; }
     .rec-big span { font-size:1.4rem; color:var(--muted); font-weight:400; }
@@ -115,10 +117,22 @@
         <div class="rec-desc">The longest consecutive run of weeks with fewer than five alerts nationwide. A moment of relative calm before Oct 7 broke it.</div>
       </div>
       <div class="rec-card purple">
-        <div class="rec-label">Biggest single-area spike</div>
-        <div class="rec-big" id="rec-area">—</div>
-        <div class="rec-sub" id="rec-area-when">—</div>
-        <div class="rec-desc">The most alerts any single geographic region recorded in a 24-hour window. The concentration is almost entirely along one line.</div>
+        <div class="rec-label">Busiest day of the week</div>
+        <div class="rec-big" id="rec-weekday">—</div>
+        <div class="rec-sub" id="rec-weekday-count">—</div>
+        <div class="rec-desc">Saturdays account for more alerts than any other day of the week — nearly double the quietest day across the full six-year record.</div>
+      </div>
+      <div class="rec-card green">
+        <div class="rec-label">Days under attack</div>
+        <div class="rec-big" id="rec-attack-days">—</div>
+        <div class="rec-sub" id="rec-attack-days-sub">—</div>
+        <div class="rec-desc">Of every day across the six-year record, more than four in five had at least one alert somewhere in Israel.</div>
+      </div>
+      <div class="rec-card orange">
+        <div class="rec-label">Major attack days</div>
+        <div class="rec-big" id="rec-major-days">—</div>
+        <div class="rec-sub" id="rec-major-days-sub">—</div>
+        <div class="rec-desc">Days where Israel recorded 100 or more alerts in a single 24-hour window — roughly one in every six days in the dataset.</div>
       </div>
     </div>
 
@@ -167,12 +181,25 @@
   document.getElementById('rec-quiet-when').textContent =
     `${qStart} → ${qEnd} · fewer than ${qs.threshold} alerts per week`;
 
-  // Biggest area spike
-  const ba = records.biggest_area_spike;
-  document.getElementById('rec-area').innerHTML =
-    `${ba.count.toLocaleString()}<span> alerts</span>`;
-  document.getElementById('rec-area-when').textContent =
-    `${ba.area} · ${d3.timeFormat('%d %B %Y')(new Date(ba.date + 'T00:00:00'))}`;
+  // Busiest weekday
+  const bw = records.busiest_weekday;
+  document.getElementById('rec-weekday').textContent = bw.day;
+  document.getElementById('rec-weekday-count').textContent =
+    `${bw.count.toLocaleString()} total alerts across all Saturdays`;
+
+  // Days under attack
+  const da = records.days_under_attack;
+  document.getElementById('rec-attack-days').innerHTML =
+    `${da.pct}<span>%</span>`;
+  document.getElementById('rec-attack-days-sub').textContent =
+    `${da.days_with_alerts.toLocaleString()} of ${da.total_days.toLocaleString()} days had at least one alert`;
+
+  // Major attack days
+  const md = records.major_attack_days;
+  document.getElementById('rec-major-days').innerHTML =
+    `${md.count.toLocaleString()}<span> days</span>`;
+  document.getElementById('rec-major-days-sub').textContent =
+    `${md.threshold}+ alerts in a single 24-hour window`;
 
   // Peak day minute-by-minute chart
   const perMinute = new Map();

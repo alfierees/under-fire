@@ -22,5 +22,14 @@
   "busiest_weekday": {
     "day": "Saturday",
     "count": 29033
+  },
+  "days_under_attack": {
+    "days_with_alerts": 1007,
+    "total_days": 1239,
+    "pct": 81
+  },
+  "major_attack_days": {
+    "count": 207,
+    "threshold": 100
   }
 }

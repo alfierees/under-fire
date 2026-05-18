@@ -155,11 +155,9 @@
 
   const dayLabels = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
   dayLabels.forEach((d, i) => {
-    if (i % 2 === 0 || i === 5) {
-      g.append('text').attr('x', -8).attr('y', i * rowH + cell - 2)
-        .attr('text-anchor','end').attr('fill','var(--muted)')
-        .attr('font-family','IBM Plex Mono').attr('font-size','10px').text(d);
-    }
+    g.append('text').attr('x', -8).attr('y', i * rowH + cell - 2)
+      .attr('text-anchor','end').attr('fill','var(--muted)')
+      .attr('font-family','IBM Plex Mono').attr('font-size','10px').text(d);
   });
 
   // Month labels: pin to the column of the 1st of each month, regardless of
