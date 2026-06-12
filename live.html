@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <link rel="icon" type="image/png" href="images/favicon.png">
+  <link rel="canonical" href="https://under-fire.org/live">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Live Israel Rocket Alert Feed — Under Fire</title>
+  <meta name="description" content="The most recent rocket, missile, and drone alerts over Israel — live feed updated every 30 minutes, with origin attribution and affected areas.">
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="Live Israel Rocket Alert Feed — Under Fire">
+  <meta property="og:description" content="The most recent rocket, missile, and drone alerts over Israel — live feed updated every 30 minutes, with origin attribution and affected areas.">
+  <meta property="og:image" content="https://under-fire.org/images/og-card.png">
+  <meta property="og:url" content="https://under-fire.org/live">
+  <meta name="twitter:card" content="summary_large_image">
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400;1,700&family=IBM+Plex+Mono:wght@300;400;500&family=IBM+Plex+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="src/css/shared.css">
+  <style>
+    .live-dot { display:inline-block; width:8px; height:8px; border-radius:50%; background: var(--red); margin-right: 8px; animation: live-pulse 1.6s ease-in-out infinite; }
+    @keyframes live-pulse { 0%,100% { opacity: 1; } 50% { opacity: 0.25; } }
+
+    /* status banner */
+    .feed-status { display:flex; align-items:baseline; gap:14px; flex-wrap:wrap; border:1px solid var(--border); border-radius:8px; background:var(--surface); padding:16px 20px; margin:18px 0 26px; font-family:'IBM Plex Mono',monospace; }
+    .feed-status .big { font-family:'Playfair Display',serif; font-weight:900; font-size:1.6rem; }
+    .feed-status.active .big { color: var(--red); }
+    .feed-status.quiet .big { color: var(--blue); }
+    .feed-status .sub { color: var(--muted); font-size: 12px; }
+
+    /* 14-day activity strip */
+    .activity-strip { margin: 0 0 30px; }
+    .activity-strip .lbl { font-family:'IBM Plex Mono',monospace; font-size:10.5px; letter-spacing:.08em; text-transform:uppercase; color:var(--muted); margin-bottom:6px; }
+    .activity-strip svg { display:block; width:100%; height:56px; }
+
+    /* table */
+    .recent-table-wrap { border: 1px solid var(--border); border-radius: 8px; background: var(--surface); overflow: hidden; }
+    .recent-table { width: 100%; border-collapse: collapse; font-family: 'IBM Plex Mono', monospace; font-size: 12.5px; }
+    .recent-table th { position: sticky; top: 0; background: var(--surface2); z-index: 2; text-align: left; padding: 10px 14px; color: var(--muted); font-weight: 500; font-size: 10.5px; text-transform: uppercase; letter-spacing: 0.08em; border-bottom: 1px solid var(--border); }
+    .recent-table td { padding: 10px 14px; border-bottom: 1px solid var(--border); vertical-align: top; }
+    .recent-table tbody tr:last-child td { border-bottom: none; }
+    .recent-table tbody tr.ev:hover { background: var(--surface2); }
+    .recent-table .num, .recent-table td.num { text-align: right; white-space: nowrap; }
+    .recent-when { white-space: nowrap; }
+    .recent-rel { color: var(--muted); font-size: 11px; display: block; }
+    .recent-more { color: var(--muted); font-size: 11px; }
+    .origin-pill { display: inline-block; padding: 2px 9px; border-radius: 999px; font-size: 11px; white-space: nowrap; border: 1px solid; }
+    tr.ev.expandable { cursor: pointer; }
+    tr.ev.expandable .chev { display:inline-block; margin-left:6px; color:var(--muted); transition: transform .15s; font-size:10px; }
+    tr.ev.expanded .chev { transform: rotate(90deg); }
+    tr.detail td { background: rgba(255,255,255,0.02); padding: 12px 14px 14px; }
+    .area-chips { display:flex; flex-wrap:wrap; gap:6px; }
+    .area-chip { border:1px solid var(--border); border-radius:4px; padding:2px 8px; font-size:11px; color:var(--muted); }
+    .big-count { color: var(--gold); font-weight: 500; }
+
+    /* mobile: collapse to cards */
+    @media (max-width: 640px) {
+      .recent-table thead { display: none; }
+      .recent-table, .recent-table tbody, .recent-table tr.ev { display: block; width: 100%; }
+      .recent-table tr.ev { padding: 10px 14px; border-bottom: 1px solid var(--border); }
+      .recent-table tr.ev td { display: inline-block; border: none; padding: 2px 8px 2px 0; }
+      .recent-table tr.ev td.num { display: block; text-align: left; }
+      .recent-table tr.detail { display:block; }
+      .recent-table tr.detail td { display:block; }
+      .feed-status .big { font-size: 1.25rem; }
+    }
+  </style>
+  <!-- Google Analytics -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-JXKX4MKJ8W"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-JXKX4MKJ8W');
+  </script>
+</head>
+<body>
+
+<div id="file-protocol-warning">
+  <strong>⚠ CHARTS WON'T LOAD VIA FILE://</strong>
+  Run: <code>python3 -m http.server 8000</code>
+  <span class="close-x" onclick="this.parentElement.style.display='none'">✕</span>
+</div>
+
+<nav>
+  <a href="index.html" class="nav-brand">Under Fire</a>
+  <div class="nav-links">
+    <div class="nav-group">
+      <button class="nav-group-btn" type="button">Charts<span class="caret">▾</span></button>
+      <div class="nav-dropdown">
+        <a href="timeline.html">Timeline</a>
+        <a href="fronts.html">Fronts</a>
+        <a href="calendar.html">Calendar</a>
+      </div>
+    </div>
+    <div class="nav-group">
+      <button class="nav-group-btn" type="button">Maps<span class="caret">▾</span></button>
+      <div class="nav-dropdown">
+        <a href="oct7.html">Oct 7</a>
+        <a href="story.html">Story</a>
+      </div>
+    </div>
+    <div class="nav-group">
+      <button class="nav-group-btn" type="button">Patterns<span class="caret">▾</span></button>
+      <div class="nav-dropdown">
+        <a href="patterns.html">Patterns</a>
+        <a href="areas.html">By Area</a>
+      </div>
+    </div>
+    <div class="nav-group">
+      <button class="nav-group-btn" type="button">More<span class="caret">▾</span></button>
+      <div class="nav-dropdown">
+        <a href="live.html">Live Feed</a>
+        <a href="records.html">Records &amp; Stats</a>
+        <a href="mission.html">Mission</a>
+      </div>
+    </div>
+  </div>
+  <a href="live.html" class="nav-badge" id="nav-badge">🔔 Loading…</a>
+</nav>
+
+<div id="tooltip"></div>
+
+<div class="chart-page">
+  <div class="section-wrapper">
+    <a href="index.html" class="back-link">← Back to all charts</a>
+    <div class="section-label"><span class="live-dot"></span>Live Feed</div>
+    <h1 class="section-title">The Latest Alerts</h1>
+    <p class="section-desc">The most recent alert events over Israel, newest first. Alerts from the same origin within ten minutes are grouped into a single salvo — click a row to see every affected area. The dataset refreshes automatically every 30 minutes.</p>
+
+    <div class="feed-status" id="feed-status" style="display:none;">
+      <span class="big" id="status-big"></span>
+      <span class="sub" id="status-sub"></span>
+    </div>
+
+    <div class="activity-strip" id="activity-strip" style="display:none;">
+      <div class="lbl">Alerts per day — last 14 days</div>
+      <svg id="strip-svg" preserveAspectRatio="none"></svg>
+    </div>
+
+    <div class="recent-table-wrap">
+      <table class="recent-table" id="recent-table">
+        <thead>
+          <tr><th>When</th><th>Where</th><th>By</th><th>Type</th><th class="num">Alerts</th></tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </div>
+    <p class="chart-note" id="recent-updated">Loading the latest data…</p>
+  </div>
+</div>
+
+<footer>
+  <div class="footer-left">Under Fire — <span data-live="end-year">2026</span></div>
+  <div class="footer-credit">Alert data from <a href="https://rocketalert.live" target="_blank">RocketAlert.live</a>.</div>
+</footer>
+
+<script src="src/js/shared.js?v=20260613a"></script>
+<script>
+const ACTOR_COLORS = {
+  'Hamas': '#d63031', 'Hezbollah': '#f39c12', 'Houthis': '#4a9eff',
+  'Iran': '#c678dd', 'Unknown': '#9a9aa8'
+};
+
+const tsToMs = alertTsToMs, relTime = alertRelTime;
+const MONTHS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+const fmtWhen = ts => `${+ts.slice(8,10)} ${MONTHS[+ts.slice(5,7)-1]}, ${ts.slice(11,16)}`;
+
+function renderStatus(latest) {
+  const wrap = document.getElementById('feed-status');
+  const big = document.getElementById('status-big');
+  const sub = document.getElementById('status-sub');
+  const hours = (israelNowMs() - tsToMs(latest.ts)) / 3600e3;
+  if (hours >= 24) {
+    wrap.className = 'feed-status quiet';
+    big.textContent = `Quiet for ${Math.floor(hours / 24)}d ${Math.round(hours % 24)}h`;
+    sub.textContent = `Last alert: ${fmtWhen(latest.ts)} — ${latest.origin === 'Unknown' ? 'unattributed' : latest.origin}, ${latest.areas[0] || 'Israel'}`;
+  } else {
+    wrap.className = 'feed-status active';
+    big.textContent = `Last alert ${relTime(latest.ts)}`;
+    const extra = latest.areas.length - 1;
+    sub.textContent = `${latest.origin === 'Unknown' ? 'Unattributed' : latest.origin} — ${latest.areas[0] || 'Israel'}` +
+      (extra > 0 ? ` +${extra} more areas` : '') +
+      (latest.count > 1 ? ` (${latest.count} alerts)` : '');
+  }
+  wrap.style.display = '';
+}
+
+function renderStrip(daily) {
+  // daily: [{date, count}] — take the last 14 days
+  const days = daily.slice(-14);
+  if (!days.length) return;
+  const svg = document.getElementById('strip-svg');
+  const W = 1000, H = 56, gap = 4;
+  svg.setAttribute('viewBox', `0 0 ${W} ${H}`);
+  const bw = (W - gap * (days.length - 1)) / days.length;
+  const max = Math.max(1, ...days.map(d => d.count));
+  svg.innerHTML = days.map((d, i) => {
+    const h = d.count === 0 ? 2 : Math.max(3, (d.count / max) * (H - 16));
+    const x = i * (bw + gap), y = H - 14 - h;
+    const col = d.count === 0 ? 'rgba(255,255,255,0.12)' : 'rgba(214,48,49,0.75)';
+    const lbl = +d.date.slice(8, 10);
+    return `<rect x="${x}" y="${y}" width="${bw}" height="${h}" rx="2" fill="${col}"><title>${d.date}: ${d.count} alerts</title></rect>` +
+           `<text x="${x + bw / 2}" y="${H - 2}" text-anchor="middle" font-family="IBM Plex Mono" font-size="9" fill="rgba(255,255,255,0.35)">${lbl}</text>`;
+  }).join('');
+  document.getElementById('activity-strip').style.display = '';
+}
+
+function renderTable(data) {
+  const tbody = document.querySelector('#recent-table tbody');
+  tbody.innerHTML = '';
+  data.events.forEach(ev => {
+    const tr = document.createElement('tr');
+    tr.className = 'ev';
+    const col = ACTOR_COLORS[ev.origin] || ACTOR_COLORS.Unknown;
+    const extra = ev.areas.length - 1;
+    const where = (ev.areas[0] || 'Israel') +
+      (extra > 0 ? ` <span class="recent-more">+${extra} more</span><span class="chev">▶</span>` : '');
+    const locs = ev.locations > 1 ? ` <span class="recent-more">(${ev.locations} locations)</span>` : '';
+    const countCls = ev.count >= 100 ? ' big-count' : '';
+    tr.innerHTML =
+      `<td class="recent-when">${fmtWhen(ev.ts)}<span class="recent-rel">${relTime(ev.ts)}</span></td>` +
+      `<td>${where}</td>` +
+      `<td><span class="origin-pill" style="color:${col};border-color:${col}">${ev.origin === 'Unknown' ? 'Unattributed' : ev.origin}</span></td>` +
+      `<td>${ev.type}</td>` +
+      `<td class="num"><span class="${countCls.trim()}">${ev.count.toLocaleString()}</span>${locs}</td>`;
+    if (extra > 0) {
+      tr.classList.add('expandable');
+      tr.addEventListener('click', () => {
+        if (tr.classList.toggle('expanded')) {
+          const d = document.createElement('tr');
+          d.className = 'detail';
+          d.innerHTML = `<td colspan="5"><div class="area-chips">` +
+            ev.areas.map(a => `<span class="area-chip">${a}</span>`).join('') + `</div></td>`;
+          tr.after(d);
+        } else {
+          tr.nextElementSibling?.remove();
+        }
+      });
+    }
+    tbody.appendChild(tr);
+  });
+  document.getElementById('recent-updated').textContent =
+    `Times are Israel local time. Latest alert in dataset: ${data.generated}. Refreshes every 30 minutes.`;
+}
+
+(async () => {
+  try {
+    const data = await fetchData('recent_alerts.json');
+    renderTable(data);
+    if (data.events.length) renderStatus(data.events[0]);
+    if (data.last14) renderStrip(data.last14);
+  } catch (e) {
+    document.getElementById('recent-updated').textContent = 'Could not load the latest alerts — try refreshing.';
+  }
+})();
+</script>
+</body>
+</html>

@@ -20,21 +20,6 @@
     #area-chart { width:100%; overflow-x:auto; }
     #area-chart svg { display:block; }
 
-    .recent-block { margin-top: 72px; }
-    .recent-title { font-family: 'Playfair Display', serif; font-weight: 900; font-size: clamp(1.4rem, 3vw, 2rem); margin: 6px 0 10px; }
-    .live-dot { display:inline-block; width:8px; height:8px; border-radius:50%; background: var(--red); margin-right: 8px; animation: live-pulse 1.6s ease-in-out infinite; }
-    @keyframes live-pulse { 0%,100% { opacity: 1; } 50% { opacity: 0.25; } }
-    .recent-table-wrap { overflow-x: auto; border: 1px solid var(--border); border-radius: 8px; background: var(--surface); }
-    .recent-table { width: 100%; border-collapse: collapse; font-family: 'IBM Plex Mono', monospace; font-size: 12.5px; min-width: 560px; }
-    .recent-table th { text-align: left; padding: 10px 14px; color: var(--muted); font-weight: 500; font-size: 10.5px; text-transform: uppercase; letter-spacing: 0.08em; border-bottom: 1px solid var(--border); }
-    .recent-table td { padding: 10px 14px; border-bottom: 1px solid var(--border); vertical-align: top; }
-    .recent-table tbody tr:last-child td { border-bottom: none; }
-    .recent-table tbody tr:hover { background: var(--surface2); }
-    .recent-table .num, .recent-table td.num { text-align: right; }
-    .recent-when { white-space: nowrap; }
-    .recent-rel { color: var(--muted); font-size: 11px; display: block; }
-    .recent-more { color: var(--muted); font-size: 11px; }
-    .origin-pill { display: inline-block; padding: 2px 9px; border-radius: 999px; font-size: 11px; white-space: nowrap; border: 1px solid; }
 
   </style>
   <!-- Google Analytics -->
@@ -82,12 +67,13 @@
     <div class="nav-group">
       <button class="nav-group-btn" type="button">More<span class="caret">▾</span></button>
       <div class="nav-dropdown">
+        <a href="live.html">Live Feed</a>
         <a href="records.html">Records &amp; Stats</a>
         <a href="mission.html">Mission</a>
       </div>
     </div>
   </div>
-  <div class="nav-badge" id="nav-badge">🔔 Loading…</div>
+  <a href="live.html" class="nav-badge" id="nav-badge">🔔 Loading…</a>
 </nav>
 
 <div id="tooltip"></div>
@@ -110,20 +96,6 @@
       <p class="chart-note">Total alerts per region, <span data-live="year-range">2020–2026</span>.</p>
     </div>
 
-    <div class="recent-block">
-      <div class="section-label"><span class="live-dot"></span>Live — Latest Alerts</div>
-      <h2 class="recent-title">Most Recent Alerts</h2>
-      <p class="section-desc">The last 20 alert events, newest first. Alerts from the same origin within ten minutes are grouped into a single salvo. Data refreshes automatically every 30 minutes.</p>
-      <div class="recent-table-wrap">
-        <table class="recent-table" id="recent-table">
-          <thead>
-            <tr><th>When</th><th>Where</th><th>By</th><th>Type</th><th class="num">Alerts</th></tr>
-          </thead>
-          <tbody></tbody>
-        </table>
-      </div>
-      <p class="chart-note" id="recent-updated"></p>
-    </div>
   </div>
 </div>
 
@@ -192,56 +164,8 @@ function drawAreas(data) {
     });
 }
 
-const ACTOR_COLORS = {
-  'Hamas': '#d63031', 'Hezbollah': '#f39c12', 'Houthis': '#4a9eff',
-  'Iran': '#c678dd', 'Unknown': 'rgba(255,255,255,0.45)'
-};
-
-// Alert timestamps are Israel local time — compare against "now" in Asia/Jerusalem.
-function israelNowMs() {
-  const p = Object.fromEntries(new Intl.DateTimeFormat('en-GB', {
-    timeZone: 'Asia/Jerusalem', year: 'numeric', month: '2-digit', day: '2-digit',
-    hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false
-  }).formatToParts(new Date()).map(x => [x.type, x.value]));
-  return Date.UTC(p.year, p.month - 1, p.day, p.hour, p.minute, p.second);
-}
-
-function relTime(ts) {
-  const t = Date.UTC(ts.slice(0,4), +ts.slice(5,7) - 1, +ts.slice(8,10), +ts.slice(11,13), +ts.slice(14,16), +ts.slice(17,19));
-  const mins = Math.max(0, Math.round((israelNowMs() - t) / 60000));
-  if (mins < 60) return `${mins} min ago`;
-  if (mins < 48 * 60) return `${Math.round(mins / 60)} h ago`;
-  return `${Math.round(mins / 1440)} d ago`;
-}
-
-const MONTHS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-
-function renderRecent(data) {
-  const tbody = document.querySelector('#recent-table tbody');
-  tbody.innerHTML = '';
-  data.events.forEach(ev => {
-    const tr = document.createElement('tr');
-    const col = ACTOR_COLORS[ev.origin] || ACTOR_COLORS.Unknown;
-    const when = `${+ev.ts.slice(8,10)} ${MONTHS[+ev.ts.slice(5,7)-1]}, ${ev.ts.slice(11,16)}`;
-    const where = ev.areas[0] + (ev.areas.length > 1 ? ` <span class="recent-more">+${ev.areas.length - 1} more</span>` : '');
-    const locs = ev.locations > 1 ? ` <span class="recent-more">(${ev.locations} locations)</span>` : '';
-    tr.innerHTML =
-      `<td class="recent-when">${when}<span class="recent-rel">${relTime(ev.ts)}</span></td>` +
-      `<td>${where}</td>` +
-      `<td><span class="origin-pill" style="color:${col};border-color:${col}">${ev.origin === 'Unknown' ? 'Unattributed' : ev.origin}</span></td>` +
-      `<td>${ev.type}</td>` +
-      `<td class="num">${ev.count}${locs}</td>`;
-    tbody.appendChild(tr);
-  });
-  document.getElementById('recent-updated').textContent =
-    `Times are Israel local time. Latest alert in dataset: ${data.generated}.`;
-}
-
 (async () => {
   const areas = await fetchData('areas_summary.json');
-
-  fetchData('recent_alerts.json').then(renderRecent)
-    .catch(() => { document.getElementById('recent-updated').textContent = 'Latest alerts unavailable.'; });
 
   const wrap = document.getElementById('areas-all');
   const hint = document.getElementById('areas-hint');

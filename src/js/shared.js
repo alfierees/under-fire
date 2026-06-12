@@ -25,6 +25,28 @@ function moveTip(e) {
 function hideTip() { if (tooltip) tooltip.style.opacity = 0; }
 
 function fmtNum(n) { return n.toLocaleString(); }
+
+// ── Israel-time helpers ──────────────────────────────────────────────────────
+// Alert timestamps are Israel wall-clock time; compare against "now" in
+// Asia/Jerusalem rather than the browser's zone.
+function israelNowMs() {
+  const p = Object.fromEntries(new Intl.DateTimeFormat('en-GB', {
+    timeZone: 'Asia/Jerusalem', year: 'numeric', month: '2-digit', day: '2-digit',
+    hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false
+  }).formatToParts(new Date()).map(x => [x.type, x.value]));
+  return Date.UTC(p.year, p.month - 1, p.day, p.hour, p.minute, p.second);
+}
+function alertTsToMs(ts) {
+  return Date.UTC(ts.slice(0, 4), +ts.slice(5, 7) - 1, +ts.slice(8, 10),
+                  +ts.slice(11, 13), +ts.slice(14, 16), +ts.slice(17, 19));
+}
+function alertRelTime(ts) {
+  const mins = Math.max(0, Math.round((israelNowMs() - alertTsToMs(ts)) / 60000));
+  if (mins < 60) return mins + ' min ago';
+  if (mins < 48 * 60) return Math.round(mins / 60) + ' h ago';
+  return Math.round(mins / 1440) + ' d ago';
+}
+
 function fmtPct(p) { return (p * 100).toFixed(1) + '%'; }
 
 // File-protocol warning

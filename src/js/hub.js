@@ -28,6 +28,25 @@ function animateCounter(el, target, duration = 2000, suffix = '') {
   }
 })();
 
+
+// ── Live ticker under the hero ──────────────────────────────────────────────
+(async () => {
+  const strip = document.getElementById('live-strip');
+  if (!strip) return;
+  try {
+    const data = await fetchData('recent_alerts.json');
+    const ev = data.events && data.events[0];
+    if (!ev) return;
+    const who = ev.origin === 'Unknown' ? 'Unattributed' : ev.origin;
+    const extra = ev.areas.length - 1;
+    document.getElementById('live-strip-text').textContent =
+      `Last alert ${alertRelTime(ev.ts)} — ${who}, ${ev.areas[0] || 'Israel'}` +
+      (extra > 0 ? ` +${extra} more areas` : '') +
+      (ev.count > 1 ? ` (${ev.count.toLocaleString()} alerts)` : '');
+    strip.style.display = '';
+  } catch (e) { /* ticker is optional */ }
+})();
+
 // ── Card sparkline previews ────────────────────────────────────────────────
 // Each card gets a tiny live D3 chart rendered on first scroll into view.
 // Data is shared/cached so loading one chart costs nothing for siblings.
