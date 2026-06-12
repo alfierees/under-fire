@@ -112,11 +112,11 @@ def main():
             "id": "oct7",
             "chapter": 1,
             "eyebrow": "Chapter 1 — October 7, 2023",
-            "title": "The Day It Changed",
+            "title": "The Day Everything Changed",
             "date": "7 October 2023, 06:29 – 23:13",
             "actor": "Hamas",
             "color": "#d63031",
-            "description": "At 06:29 on a Saturday morning — Shabbat — Hamas launched the largest attack on Israel in decades. In under twenty minutes, rockets were falling across the Gaza Envelope, Lakhish, and the coastal lowlands. By nightfall, nearly 4,000 individual alerts had been recorded and 1,200 people were dead.",
+            "description": "On a Saturday morning that should have been the quiet peak of the Jewish holiday season, the silence was shattered. At 06:29, Hamas launched a coordinated, multi-front invasion that would become the deadliest day in Israel's history.Within minutes, thousands of rockets began raining down across the Gaza Envelope, the Negev, and the coastal heartland. As families scrambled into bomb shelters, thousands of terrorists breached the border by land, sea, and air. By the time the first day ended, nearly 4,000 rocket alerts had been triggered, and 1,200 lives—children, parents, and festival-goers—had been taken.",
             "stats": [
                 {"label": "Alerts in one day", "value": str(len(oct7))},
                 {"label": "Duration", "value": "17 hours"},
@@ -134,7 +134,7 @@ def main():
             "date": "October 2023 – October 2024",
             "actor": "Hamas",
             "color": "#d63031",
-            "description": "Even as Israel's ground offensive pushed deeper into Gaza, the rockets kept coming. Lakhish, the Western Negev, and the Gaza Envelope absorbed near-daily barrages. Short-range, familiar trajectories — the grinding soundtrack of a conflict now stripped of all pretence.",
+            "description": "Even as the IDF moved into the Gaza Strip, the sky over southern Israel rarely stayed clear. For the residents of the Gaza Envelope, Lakhish, and the Western Negev, the war didn't just happen on the front lines—it happened in their living rooms and bomb shelters. Day after day, Hamas maintained a steady rhythm of rocket fire, a grinding campaign designed to ensure that life could not return to normal. These weren't just data points; they were the soundtrack of a region under siege, where the familiar whistle of an incoming projectile became a grim, daily certainty.",
             "stats": [
                 {"label": "Hamas alerts (total)", "value": str(stats['origins'].get('Hamas', 0))},
                 {"label": "Most-hit area", "value": "Gaza Envelope"},
@@ -152,7 +152,7 @@ def main():
             "date": "8 October 2023 – September 2024",
             "actor": "Hezbollah",
             "color": "#f39c12",
-            "description": "The day after October 7, Hezbollah opened a second front from Lebanon. For eleven months the Confrontation Line — Israel's northern border communities — took near-daily anti-tank fire, rockets, and UAVs. 60,000 residents were evacuated. The north went dark.",
+            "description": "While the south was still reeling, a second front ignited in the north. On October 8, Hezbollah began a campaign of \"solidarity\" that effectively turned the Galilee into a combat zone. For nearly a year, the Confrontation Line—once a string of thriving kibbutzim and tourist towns—became a landscape of sirens and smoke. The threat here was different: precision anti-tank missiles fired directly at homes and swarms of explosive UAVs that gave residents seconds to find cover. By the fall of 2024, more than 60,000 people had been forced from their homes, leaving behind \"ghost towns\" and a region in a state of suspended animation.",
             "stats": [
                 {"label": "Hezbollah alerts", "value": str(stats['origins'].get('Hezbollah', 0))},
                 {"label": "Most-hit area", "value": "Confrontation Line"},
@@ -170,7 +170,7 @@ def main():
             "date": "November 2023 onwards",
             "actor": "Houthis",
             "color": "#4a9eff",
-            "description": "From 2,000 kilometres away in Yemen, Houthi drones and ballistic missiles began crossing Saudi Arabia and Jordan to reach Israel. Eilat was hit first. Then the range grew — Jerusalem, Tel Aviv, Ben Gurion airport. No country had ever intercepted missiles at this distance, at this scale.",
+            "description": "In November 2023, the war reached a distance previously thought impossible for non-state actors. From nearly 2,000 kilometers away in Yemen, the Houthi movement began launching a sophisticated arsenal of drones and ballistic missiles toward Israel. The first targets were the southern resort city of Eilat, turning a vacation destination into a front line. But the reach of these weapons quickly expanded, eventually triggering sirens in Tel Aviv and central Israel. This front redefined modern warfare: for the first time in history, ballistic missiles were intercepted in space by the Arrow system, neutralizing threats from half a continent away before they could reach Israeli soil.",
             "stats": [
                 {"label": "Houthi alerts", "value": str(stats['origins'].get('Houthis', 0))},
                 {"label": "Distance from Yemen", "value": "~2,000 km"},
@@ -188,7 +188,7 @@ def main():
             "date": "14 April 2024 and 1 October 2024",
             "actor": "Iran",
             "color": "#c678dd",
-            "description": "On April 14, 2024, Iran attacked Israel directly for the first time in history — over 300 drones, cruise missiles, and ballistic missiles. A coalition of five nations intercepted almost everything. On October 1, Iran struck again, with ballistic missiles that reached deeper into Israel's heartland.",
+            "description": "For decades, the conflict between Iran and Israel was fought in the shadows. In 2024, that shadow war vanished. On the night of April 14, the world watched as Iran launched over 300 drones and missiles in the first-ever direct assault from Iranian soil. It was a surreal spectacle: streaks of light across the Jerusalem sky as a historic coalition of five nations—Israel, the US, the UK, France, and Jordan—worked in unison to intercept nearly every threat before it reached its target. But the quiet didn't last. On October 1, Iran struck again, this time with a more aggressive barrage of nearly 200 high-speed ballistic missiles. This second wave bypassed the slower drone phase, sending millions of Israelis into shelters simultaneously. While the defense held, the impact sites in central Israel and the Negev signaled a new, dangerous era of direct confrontation where the \"front line\" was now the entire country. ",
             "stats": [
                 {"label": "True Promise 1 alerts", "value": "655"},
                 {"label": "Coalition intercept rate", "value": ">99%"},
@@ -206,7 +206,7 @@ def main():
             "date": "28 February – March 2026",
             "actor": "Iran",
             "color": "#c678dd",
-            "description": "On 28 February 2026, Iran launched the largest single missile barrage ever recorded — 10,162 alerts in a single day. Every region of Israel was struck simultaneously, from Eilat to the Golan, coast to Jordan Valley. The conflict had crossed a threshold it would not come back from.",
+            "description": "On February 28, 2026, the long-simmering regional conflict exploded into what many had feared for decades: a total war. In a single 24-hour window, Iran launched the most massive coordinated missile and drone barrage in the history of modern warfare.This was no longer a limited front. From the northern peaks of the Golan Heights to the southern tip of Eilat, and from the coastal plains to the Jordan Valley, the entire country was unified under the scream of over 10,000 alerts. The sheer volume of fire tested the limits of the world’s most advanced defense systems and forced millions of Israelis into shelters for hours on end. It was the day the conflict moved from the borders into every single home, crossing a threshold from which the region would never be the same.",
             "stats": [
                 {"label": "Alerts — Feb 28 alone", "value": "10,162"},
                 {"label": "Total Iran alerts", "value": str(stats['origins'].get('Iran', 0))},

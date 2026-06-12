@@ -178,6 +178,40 @@ def oct7_replay(rows):
     ]
 
 
+def recent_alerts(rows):
+    """Last 20 alert events, newest first. Consecutive alerts from the same
+    origin within 10 minutes of each other are grouped into one salvo event."""
+    events = []
+    for r in reversed(rows):  # rows sorted ascending → walk newest first
+        ts = datetime.strptime(r["timestamp"], "%Y-%m-%d %H:%M:%S")
+        ev = events[-1] if events else None
+        if (ev and ev["origin"] == r["origin"]
+                and (ev["_oldest"] - ts).total_seconds() <= 600):
+            ev["count"] += 1
+            ev["_oldest"] = ts
+            if r["area_en"] not in ev["areas"]:
+                ev["areas"].append(r["area_en"])
+            ev["_cities"].add(r["city_en"])
+            ev["_types"].add(ALERT_TYPE_NAMES.get(r["alert_type_id"], "Other"))
+        else:
+            if len(events) == 20:
+                break
+            events.append({
+                "ts": r["timestamp"],
+                "origin": r["origin"],
+                "areas": [r["area_en"]],
+                "count": 1,
+                "_cities": {r["city_en"]},
+                "_types": {ALERT_TYPE_NAMES.get(r["alert_type_id"], "Other")},
+                "_oldest": ts,
+            })
+    for ev in events:
+        ev["locations"] = len(ev.pop("_cities"))
+        ev["type"] = " + ".join(sorted(ev.pop("_types")))
+        del ev["_oldest"]
+    return {"generated": rows[-1]["timestamp"], "events": events}
+
+
 GENERATORS = {
     "stats_summary": stats_summary,
     "timeline_weekly": timeline_weekly,
@@ -186,6 +220,7 @@ GENERATORS = {
     "areas_summary": areas_summary,
     "shower_probs": shower_probs,
     "oct7_replay": oct7_replay,
+    "recent_alerts": recent_alerts,
 }
 
 

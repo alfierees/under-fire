@@ -58,6 +58,9 @@ Files in `data/processed/`. Large raw data is gitignored. Regenerate with `pytho
 - `actor_hour.json` — flat `{ actor, hour, count }` for patterns heatmap.
 - `areas_summary.json` — per-region totals.
 - `records.json` — precomputed extremes (busiest day/hour, longest quiet, biggest area spike).
+- `recent_alerts.json` — last 20 alert events, salvo-grouped (same origin within 10 min). Feeds the "Most Recent Alerts" table on `areas.html`.
+
+**Story text:** edit chapter titles/descriptions in `scripts/generate_story_chapters.py`, NEVER in `story_chapters.json` — the pipeline regenerates the JSON every 30 min and overwrites manual edits (this bit us once already).
 
 ## Not yet done (future work)
 See `HANDOFF.md`. Next candidates: zoomable timeline, code-runner on oct7/areas, mobile particle-count tweak.
