@@ -35,17 +35,61 @@ function fmtPct(p) { return (p * 100).toFixed(1) + '%'; }
   }
 })();
 
-// Nav badge: load stats summary and display alert count
-(async function initNavBadge() {
+// ── Live stats: one shared fetch fills the nav badge and any element carrying
+// a [data-live] attribute. Never hardcode a number that the dataset can
+// produce — mark the element instead:
+//   <span data-live="total">160,000+</span>      total alerts
+//   <span data-live="origin:Iran">…</span>       per-actor total
+//   <span data-live="share:Iran">…</span>        per-actor % of total
+//   total+ | end-year | year-range | end-month-name | end-month-year |
+//   range-eyebrow | years-word | years-word-cap | busiest-count | busiest-date
+// The static text in the HTML acts as the fetch-failure fallback, so keep it
+// a safe floor (e.g. "160,000+"), not a precise count.
+window.__statsPromise = fetchData('stats_summary.json')
+  .then(s => (window.__STATS_SUMMARY = s));
+
+(async function initLiveStats() {
   const badge = document.getElementById('nav-badge');
-  if (!badge) return;
-  try {
-    const s = await fetchData('stats_summary.json');
-    badge.textContent = '🔔 ' + fmtNum(s.total_alerts) + ' alerts';
-    window.__STATS_SUMMARY = s;
-  } catch (e) {
-    badge.textContent = '🔔 142,837 alerts';
-  }
+  let s;
+  try { s = await window.__statsPromise; }
+  catch (e) { if (badge) badge.style.display = 'none'; return; }
+
+  if (badge) badge.textContent = '🔔 ' + fmtNum(s.total_alerts) + ' alerts';
+
+  const MONTHS = ['January','February','March','April','May','June',
+                  'July','August','September','October','November','December'];
+  const WORDS = ['zero','one','two','three','four','five','six','seven',
+                 'eight','nine','ten','eleven','twelve'];
+  const start = new Date(s.date_range.start), end = new Date(s.date_range.end);
+  const nYears = Math.floor((end - start) / (365.25 * 86400e3));
+  const word = WORDS[nYears] || String(nYears);
+  const abbr = d => MONTHS[d.getMonth()].slice(0, 3).toUpperCase() + ' ' + d.getFullYear();
+  const busiest = new Date(s.busiest_day.date);
+
+  const vals = {
+    'total': fmtNum(s.total_alerts),
+    'total+': fmtNum(s.total_alerts) + '+',
+    'end-year': String(end.getFullYear()),
+    'year-range': start.getFullYear() + '–' + end.getFullYear(),
+    'end-month-name': MONTHS[end.getMonth()],
+    'end-month-year': MONTHS[end.getMonth()] + ' ' + end.getFullYear(),
+    'range-eyebrow': abbr(start) + ' → ' + abbr(end),
+    'years-word': word,
+    'years-word-cap': word[0].toUpperCase() + word.slice(1),
+    'busiest-count': fmtNum(s.busiest_day.count),
+    'busiest-date': MONTHS[busiest.getMonth()] + ' ' + busiest.getDate() + ', ' + busiest.getFullYear(),
+  };
+
+  document.querySelectorAll('[data-live]').forEach(el => {
+    const k = el.dataset.live;
+    if (vals[k] != null) { el.textContent = vals[k]; return; }
+    const m = k.match(/^(origin|share):(.+)$/);
+    if (m && s.origins && s.origins[m[2]] != null) {
+      el.textContent = m[1] === 'origin'
+        ? fmtNum(s.origins[m[2]])
+        : (s.origins[m[2]] / s.total_alerts * 100).toFixed(1) + '%';
+    }
+  });
 })();
 
 // Nav dropdowns: mark the current page's link + group as active, and enable
