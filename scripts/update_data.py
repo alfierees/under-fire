@@ -35,10 +35,14 @@ ROCKETALERT = "https://agg.rocketalert.live/api/v1/alerts/details"
 TZEVAADOM = "https://api.tzevaadom.co.il/alerts-history/"
 TZEVAADOM_CITIES = "https://www.tzevaadom.co.il/static/cities.json"
 FETCH_WINDOW_DAYS = 30  # max days per RocketAlert request
-# Israel has no second-level DST surprises for date math at day granularity;
-# use UTC+3 as a safe "today in Israel" approximation (UTC+2 in winter only
-# shifts the boundary by an hour — the next run picks up anything missed).
-ISRAEL_TZ = timezone(timedelta(hours=3))
+# Proper DST-aware Israel time (UTC+2 winter / UTC+3 summer). Fall back to
+# the old fixed UTC+3 approximation if tzdata is unavailable — at day
+# granularity the boundary shifts by an hour and the next run catches up.
+try:
+    from zoneinfo import ZoneInfo
+    ISRAEL_TZ = ZoneInfo("Asia/Jerusalem")
+except Exception:
+    ISRAEL_TZ = timezone(timedelta(hours=3))
 
 
 def fetch_json(url, timeout=30):

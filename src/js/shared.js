@@ -102,6 +102,15 @@ window.__statsPromise = fetchData('stats_summary.json')
     'busiest-date': MONTHS[busiest.getMonth()] + ' ' + busiest.getDate() + ', ' + busiest.getFullYear(),
   };
 
+  // freshness stamp in the footer on every page
+  const credit = document.querySelector('.footer-credit');
+  if (credit && !document.getElementById('data-through')) {
+    const span = document.createElement('span');
+    span.id = 'data-through';
+    span.textContent = ' Data through ' + MONTHS[end.getMonth()] + ' ' + end.getDate() + ', ' + end.getFullYear() + ', updated every 30 minutes.';
+    credit.appendChild(span);
+  }
+
   document.querySelectorAll('[data-live]').forEach(el => {
     const k = el.dataset.live;
     if (vals[k] != null) { el.textContent = vals[k]; return; }
