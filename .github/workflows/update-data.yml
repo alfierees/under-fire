@@ -1,7 +1,7 @@
 # ─────────────────────────────────────────────────────────────────
 # UNDER FIRE — Auto-update pipeline
 # ─────────────────────────────────────────────────────────────────
-# Every 20 minutes: fetch new Tzeva Adom alerts (RocketAlert.live,
+# Every 30 minutes: fetch new Tzeva Adom alerts (RocketAlert.live,
 # tzevaadom fallback), attribute origin, append to the committed
 # master (data/master/alerts.csv.gz) and regenerate the 7 processed
 # JSON aggregates the site consumes. Commits only when something
@@ -14,7 +14,7 @@ name: Update Alert Data
 
 on:
   schedule:
-    - cron: "*/20 * * * *"
+    - cron: "*/30 * * * *"
   workflow_dispatch:
 
 permissions:
