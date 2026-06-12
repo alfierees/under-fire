@@ -5,10 +5,10 @@
   <link rel="icon" type="image/png" href="images/favicon.png">
   <link rel="canonical" href="https://alfierees.github.io/under-fire/">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Under Fire — Israel Alert Data 2020–2026</title>
+  <title>Under Fire — Israel Rocket Alert Data, Live — 2020 to Today</title>
   <meta name="description" content="Visualizing over 160,000 rocket alerts across Israel since 2020 — live-updated. Interactive charts, maps, and patterns.">
   <meta property="og:type" content="website">
-  <meta property="og:title" content="Under Fire — Israel Alert Data 2020–2026">
+  <meta property="og:title" content="Under Fire — Israel Rocket Alert Data, Live — 2020 to Today">
   <meta property="og:description" content="Visualizing over 160,000 rocket alerts across Israel since 2020 — live-updated. Interactive charts, maps, and patterns.">
   <meta property="og:image" content="https://alfierees.github.io/under-fire/images/og-card.png">
   <meta property="og:url" content="https://alfierees.github.io/under-fire/">
@@ -87,6 +87,56 @@
       .mission-panel { padding: 3.5rem 1.4rem 4rem; }
     }
   </style>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "WebSite",
+      "name": "Under Fire",
+      "url": "https://alfierees.github.io/under-fire/",
+      "description": "Live-updated visualizations of every rocket, missile, and drone alert across Israel since 2020."
+    },
+    {
+      "@type": "Dataset",
+      "name": "Israel Red Alert (Tzeva Adom) Rocket Alert Dataset, 2020–present",
+      "description": "Every rocket, missile, and drone alert recorded across Israel since January 2020 — over 160,000 events with timestamp, location name, coordinates, alert area, alert type, and estimated origin attribution (Hamas, Hezbollah, Houthis, Iran). Auto-updated every 30 minutes from Israeli Home Front Command alert data aggregated by RocketAlert.live.",
+      "url": "https://alfierees.github.io/under-fire/",
+      "keywords": [
+        "Israel",
+        "rocket alerts",
+        "Tzeva Adom",
+        "Red Alert",
+        "Iron Dome",
+        "Hamas",
+        "Hezbollah",
+        "Houthis",
+        "Iran",
+        "October 7",
+        "missile attacks"
+      ],
+      "temporalCoverage": "2020-01-12/..",
+      "spatialCoverage": {
+        "@type": "Place",
+        "name": "Israel"
+      },
+      "creator": {
+        "@type": "Person",
+        "name": "Alfie Rees"
+      },
+      "isBasedOn": "https://rocketalert.live",
+      "isAccessibleForFree": true,
+      "distribution": [
+        {
+          "@type": "DataDownload",
+          "encodingFormat": "text/csv",
+          "contentUrl": "https://raw.githubusercontent.com/alfierees/under-fire/main/data/master/alerts.csv.gz"
+        }
+      ]
+    }
+  ]
+}
+</script>
 </head>
 <body>
 
