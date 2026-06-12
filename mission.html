@@ -313,10 +313,10 @@
     <!-- THE SUBJECT -->
     <section class="mission-section">
       <h2>02 — The Subject</h2>
-      <h3>142,837 alerts. 30 areas. Four actors. Six years.</h3>
+      <h3><span class="live-total">142,837</span> alerts. 30 areas. Four actors. Six years.</h3>
       <p>
         The dataset is a six-year sweep of every alert recorded across Israel between
-        January 2020 and March 2026 — every siren, every shelter, every 90-second
+        January 2020 and <span id="live-end-month">today</span> — every siren, every shelter, every 90-second
         sprint. Each event is attributed, where the evidence allows, to one of four
         actors: <strong>Hamas</strong>, <strong>Hezbollah</strong>,
         <strong>the Houthis</strong>, or <strong>Iran</strong>.
@@ -378,7 +378,7 @@
     <!-- WHY THIS MATTERS -->
     <section class="mission-section">
       <h2>04 — Why This Matters</h2>
-      <h3>Four actors. Four fronts. 142,837 alerts.</h3>
+      <h3>Four actors. Four fronts. <span class="live-total">142,837</span> alerts.</h3>
       <p>
         Tens of thousands of munitions. Arrow, David's Sling, Iron Dome, THAAD,
         Patriot, Aegis — a layered defence architecture that intercepted the vast
@@ -425,5 +425,16 @@
 </footer>
 
 <script src="src/js/shared.js?v=20260518"></script>
+<script>
+  // live figures from the auto-updating pipeline
+  fetchData('stats_summary.json').then(s => {
+    document.querySelectorAll('.live-total').forEach(el => {
+      el.textContent = fmtNum(s.total_alerts);
+    });
+    const end = new Date(s.date_range.end + 'T00:00:00');
+    const el = document.getElementById('live-end-month');
+    if (el) el.textContent = end.toLocaleString('en-GB', { month: 'long', year: 'numeric' });
+  }).catch(() => {});
+</script>
 </body>
 </html>

@@ -1,7 +1,7 @@
 // ── Shared utilities for all Under Fire pages ───────────────────────────────
 const DATA = 'data/processed/';
 
-const DATA_V = '20260518';
+const DATA_V = '20260612';
 async function fetchData(file) {
   const r = await fetch(DATA + file + '?v=' + DATA_V);
   if (!r.ok) throw new Error(`Failed to load ${file}`);

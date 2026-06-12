@@ -1,12 +1,12 @@
 {
-  "total_alerts": 142837,
+  "total_alerts": 160385,
   "busiest_day": {
     "date": "2026-02-28",
     "count": 10162
   },
   "busiest_hour": {
     "hour": 10,
-    "count": 10302
+    "count": 10686
   },
   "longest_quiet_streak": {
     "weeks": 6,
@@ -15,21 +15,12 @@
     "threshold": 5
   },
   "biggest_area_spike": {
-    "area": "Confrontation Line",
-    "date": "2026-02-28",
-    "count": 10162
+    "area": "Lakhish",
+    "date": "2023-10-07",
+    "count": 1263
   },
   "busiest_weekday": {
     "day": "Saturday",
-    "count": 29033
-  },
-  "days_under_attack": {
-    "days_with_alerts": 1007,
-    "total_days": 1239,
-    "pct": 81
-  },
-  "major_attack_days": {
-    "count": 207,
-    "threshold": 100
+    "count": 30778
   }
 }
