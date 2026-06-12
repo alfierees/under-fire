@@ -6,7 +6,8 @@ _Last updated: 2026-04-17 (late session — graphs/maps/patterns/stats overhaul)
 
 ## Repository
 **GitHub:** https://github.com/alfierees/under-fire  
-**Deploy:** GitHub Pages (Settings → Pages → main branch / root). Fully static — no build step needed.  
+**Live site:** https://under-fire.org (Cloudflare Worker `under-fire`, custom domains on apex + www, deployed via Workers Builds on push to `main`). GitHub Pages mirror still serves at alfierees.github.io/under-fire — canonical tags point to under-fire.org. `workers.dev` subdomain disabled. `_redirects` 301s www → apex.  
+**Deploy:** push to `main` → Cloudflare Workers Builds + GitHub Pages. Fully static — no build step needed.  
 **Local dev:** `python3 -m http.server 8000` then open `http://localhost:8000`
 
 > **Important:** Never open `index.html` directly via `file://` — the browser blocks `fetch()` and no charts will load. Always use the local server.

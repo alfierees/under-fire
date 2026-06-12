@@ -2,4 +2,4 @@ User-agent: *
 Allow: /
 Disallow: /design-brief.html
 
-Sitemap: https://alfierees.github.io/under-fire/sitemap.xml
+Sitemap: https://under-fire.org/sitemap.xml
