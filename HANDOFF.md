@@ -6,7 +6,7 @@ _Last updated: 2026-04-17 (late session — graphs/maps/patterns/stats overhaul)
 
 ## Repository
 **GitHub:** https://github.com/alfierees/under-fire  
-**Live site:** https://under-fire.org (Cloudflare Worker `under-fire`, custom domains on apex + www, deployed via Workers Builds on push to `main`). GitHub Pages mirror still serves at alfierees.github.io/under-fire — canonical tags point to under-fire.org. `workers.dev` subdomain disabled. `_redirects` 301s www → apex.  
+**Live site:** https://under-fire.org (Cloudflare Worker `under-fire`, custom domains on apex + www, deployed via Workers Builds on push to `main`). GitHub Pages mirror still serves at alfierees.github.io/under-fire — canonical tags point to under-fire.org. `workers.dev` subdomain disabled. Canonical/og/sitemap URLs are extensionless (`/timeline`, not `/timeline.html`) because Workers assets 307s `.html` → extensionless. Note: `_redirects` domain-level rules are NOT supported on Workers (Pages-only) — www→apex 301 and Always Use HTTPS still need zone-level config (dashboard or Cloudflare MCP session).  
 **Deploy:** push to `main` → Cloudflare Workers Builds + GitHub Pages. Fully static — no build step needed.  
 **Local dev:** `python3 -m http.server 8000` then open `http://localhost:8000`
 
