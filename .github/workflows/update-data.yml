@@ -1,0 +1,50 @@
+# ─────────────────────────────────────────────────────────────────
+# UNDER FIRE — Auto-update pipeline
+# ─────────────────────────────────────────────────────────────────
+# Every 30 minutes: fetch new Tzeva Adom alerts (RocketAlert.live,
+# tzevaadom fallback), attribute origin, append to the committed
+# master (data/master/alerts.csv.gz) and regenerate the 7 processed
+# JSON aggregates the site consumes. Commits only when something
+# changed; GitHub Pages redeploys on the commit.
+#
+# Scripts are stdlib-only — no pip install needed.
+# Manual run: Actions tab → "Update Alert Data" → Run workflow.
+# ─────────────────────────────────────────────────────────────────
+name: Update Alert Data
+
+on:
+  schedule:
+    - cron: "*/30 * * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: update-alert-data
+  cancel-in-progress: false
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Fetch new alerts and regenerate aggregates
+        run: python3 scripts/update_data.py
+
+      - name: Commit updated data
+        uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          commit_message: "data: auto-update alerts"
+          file_pattern: "data/master/*.gz data/processed/*.json src/js/shared.js"
+          commit_user_name: "under-fire-bot"
+          commit_user_email: "actions@github.com"

@@ -64,7 +64,19 @@ The 9 JSON files in `data/processed/` (~500KB total). Raw data is **gitignored**
 - `records.json` — precomputed extremes (busiest day/hour, longest quiet streak, biggest single-area spike)
 - `shower_probs.json` — legacy Poisson probabilities (page retired; file kept for archival)
 
-Regenerate aggregates with `python3 scripts/generate_extra_aggregates.py`.
+**All aggregates now regenerate automatically** — see Live data pipeline below. Manual: `python3 scripts/update_data.py` (fetch + everything) or `python3 scripts/process_data.py` (just the 7 base aggregates from the master).
+
+### Live data pipeline (added 2026-06-12)
+`.github/workflows/update-data.yml` runs every 20 minutes on GitHub Actions:
+1. `scripts/update_data.py` fetches new alerts since the master's last date from the RocketAlert.live API (public, no auth); falls back to `api.tzevaadom.co.il`
+2. New alert zones missing coords/English names are enriched from the Tzofar city DB; area assigned by nearest known city
+3. Origins attributed by `scripts/attribution.py` — salvo clustering + automatic Iran-barrage-day detection (93.1% agreement with historical labels; 95.5% post-Jun-2025). Historical labels never rewritten.
+4. `scripts/process_data.py` regenerates the 7 base aggregates from the committed master (`data/master/alerts.csv.gz`, 2.2MB) — verified to reproduce the originals by `scripts/verify_aggregates.py`
+5. `generate_extra_aggregates.py` + `generate_story_chapters.py` rebuild the derived files
+6. `DATA_V` in `src/js/shared.js` is bumped so browsers re-fetch
+7. Auto-commit → deploy (GitHub Pages / Cloudflare Workers build)
+
+Scripts are stdlib-only (no pip in CI). `scripts/build_master.py` rebuilds the master from the gitignored raw dumps if ever needed.
 
 ---
 
@@ -103,8 +115,8 @@ A SessionStart hook in `.claude/settings.json` auto-fetches and warns if the bra
 ---
 
 ## Data Notes
-- **Total alerts:** 142,837 (Jan 2020 – Mar 2026)
-- **Origin breakdown:** Iran 82,288 / Hezbollah 29,950 / Houthis 13,022 / Hamas 8,981 / Unknown 8,596
+- **Total alerts:** 160,385 at pipeline launch (Jan 2020 – Jun 2026) — auto-updating every 20 min; `stats_summary.json` is the source of truth
+- **Origin breakdown (live):** see `stats_summary.json` `origins`
 - Origin field is an *estimated* attribution based on location + timestamp
 - **Credit required:** Data from RocketAlert.live — credited in site footer
 
