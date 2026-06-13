@@ -16,11 +16,13 @@ function animateCounter(el, target, duration = 2000, suffix = '') {
 (async () => {
   try {
     const s = await fetchData('stats_summary.json');
+    const nYears = Math.floor(
+      (new Date(s.date_range.end) - new Date(s.date_range.start)) / (365.25 * 86400e3));
     animateCounter(document.getElementById('counter-alerts'), s.total_alerts, 2200, '+');
     animateCounter(document.getElementById('counter-actors'), 4, 1000);
-    animateCounter(document.getElementById('counter-years'), 6, 800);
+    animateCounter(document.getElementById('counter-years'), nYears, 800);
   } catch (e) {
-    document.getElementById('counter-alerts').textContent = '142,837+';
+    document.getElementById('counter-alerts').textContent = '160,000+';
     document.getElementById('counter-actors').textContent = '4';
     document.getElementById('counter-years').textContent = '6';
   }

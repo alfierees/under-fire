@@ -275,7 +275,7 @@
     <!-- HERO -->
     <div class="mission-hero">
       <div class="mission-eyebrow">Mission Statement</div>
-      <h1 class="mission-title">Structuring six years of alerts over Israel.</h1>
+      <h1 class="mission-title">Structuring <span data-live="years-word">six</span> years of alerts over Israel.</h1>
       <p class="mission-lead">
         Between 2020 and 2026, Israel was the target of an unprecedented sustained
         campaign of rocket, missile, and drone attacks from Hamas in Gaza, Hezbollah
@@ -313,7 +313,7 @@
     <!-- THE SUBJECT -->
     <section class="mission-section">
       <h2>02 — The Subject</h2>
-      <h3><span class="live-total">142,837</span> alerts. 30 areas. Four actors. Six years.</h3>
+      <h3><span class="live-total">160,000+</span> alerts. 30 areas. Four actors. <span data-live="years-word-cap">Six</span> years.</h3>
       <p>
         The dataset is a six-year sweep of every alert recorded across Israel between
         January 2020 and <span id="live-end-month">today</span> — every siren, every shelter, every 90-second
@@ -378,7 +378,7 @@
     <!-- WHY THIS MATTERS -->
     <section class="mission-section">
       <h2>04 — Why This Matters</h2>
-      <h3>Four actors. Four fronts. <span class="live-total">142,837</span> alerts.</h3>
+      <h3>Four actors. Four fronts. <span class="live-total">160,000+</span> alerts.</h3>
       <p>
         Tens of thousands of munitions. Arrow, David's Sling, Iron Dome, THAAD,
         Patriot, Aegis — a layered defence architecture that intercepted the vast
@@ -418,13 +418,13 @@
 </div>
 
 <footer>
-  <div class="footer-left">Under Fire — 2026</div>
+  <div class="footer-left">Under Fire — <span data-live="end-year">2026</span></div>
   <div class="footer-credit">
     Alert data from <a href="https://rocketalert.live" target="_blank">RocketAlert.live</a>.
   </div>
 </footer>
 
-<script src="src/js/shared.js?v=20260518"></script>
+<script src="src/js/shared.js?v=20260613a"></script>
 <script>
   // live figures from the auto-updating pipeline
   fetchData('stats_summary.json').then(s => {
