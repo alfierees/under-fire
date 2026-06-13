@@ -214,14 +214,13 @@ function renderTable(data) {
     const extra = ev.areas.length - 1;
     const where = (ev.areas[0] || 'Israel') +
       (extra > 0 ? ` <span class="recent-more">+${extra} more</span><span class="chev">▶</span>` : '');
-    const locs = ev.locations > 1 ? ` <span class="recent-more">(${ev.locations} locations)</span>` : '';
     const countCls = ev.count >= 100 ? ' big-count' : '';
     tr.innerHTML =
       `<td class="recent-when">${fmtWhen(ev.ts)}<span class="recent-rel">${relTime(ev.ts)}</span></td>` +
       `<td>${where}</td>` +
       `<td><span class="origin-pill" style="color:${col};border-color:${col}">${ev.origin === 'Unknown' ? 'Unattributed' : ev.origin}</span></td>` +
       `<td>${ev.type}</td>` +
-      `<td class="num"><span class="${countCls.trim()}">${ev.count.toLocaleString()}</span>${locs}</td>`;
+      `<td class="num"><span class="${countCls.trim()}">${ev.count.toLocaleString()}</span></td>`;
     if (extra > 0) {
       tr.classList.add('expandable');
       tr.addEventListener('click', () => {
