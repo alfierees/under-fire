@@ -15,12 +15,40 @@
   <meta name="twitter:card" content="summary_large_image">
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400;1,700&family=IBM+Plex+Mono:wght@300;400;500&family=IBM+Plex+Sans:wght@300;400;500&display=swap" rel="stylesheet">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.8.5/d3.min.js"></script>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   <link rel="stylesheet" href="src/css/shared.css">
   <style>
     #area-chart { width:100%; overflow-x:auto; }
     #area-chart svg { display:block; }
 
-
+    /* ── Choropleth map ── */
+    #map-container { position:relative; width:100%; height:74vh; min-height:520px; border:1px solid var(--border); border-radius:4px; overflow:hidden; margin-bottom:.6rem; }
+    #areas-map { width:100%; height:100%; background:#07070a; }
+    .leaflet-container { background:#07070a; }
+    /* info panel — hovered area's stats */
+    .map-info { position:absolute; z-index:1000; top:1.25rem; left:1.25rem; width:248px; max-width:calc(100% - 2.5rem);
+      background:rgba(7,7,10,.9); backdrop-filter:blur(10px); border:1px solid var(--border); border-radius:4px; padding:1.1rem 1.3rem; pointer-events:none; }
+    .map-info .mi-rank { font-family:'IBM Plex Mono',monospace; font-size:.55rem; letter-spacing:.14em; text-transform:uppercase; color:var(--muted); margin-bottom:.35rem; }
+    .map-info .mi-name { font-family:'Playfair Display',serif; font-weight:900; font-size:1.4rem; color:#fff; line-height:1.1; margin-bottom:.7rem; }
+    .map-info .mi-total { font-family:'Playfair Display',serif; font-weight:700; font-size:1.7rem; color:var(--red); line-height:1; }
+    .map-info .mi-total-lbl { font-family:'IBM Plex Mono',monospace; font-size:.52rem; letter-spacing:.1em; text-transform:uppercase; color:var(--muted); margin-bottom:.9rem; }
+    .map-info .mi-row { display:flex; justify-content:space-between; font-family:'IBM Plex Mono',monospace; font-size:.66rem; color:var(--text); padding:.22rem 0; border-top:1px solid rgba(255,255,255,.07); }
+    .map-info .mi-row span:last-child { color:var(--muted); }
+    .map-info.empty .mi-name { color:var(--muted); font-size:1rem; font-family:'IBM Plex Mono',monospace; font-weight:400; letter-spacing:.04em; }
+    .map-info.empty .mi-stats, .map-info.empty .mi-total, .map-info.empty .mi-total-lbl { display:none; }
+    /* colour legend */
+    .map-legend2 { position:absolute; z-index:1000; bottom:1.25rem; right:1.25rem; background:rgba(7,7,10,.85); border:1px solid var(--border); border-radius:4px; padding:.8rem 1rem; }
+    .map-legend2 .ml-lbl { font-family:'IBM Plex Mono',monospace; font-size:.5rem; letter-spacing:.12em; text-transform:uppercase; color:var(--muted); margin-bottom:.45rem; }
+    .map-legend2 .ml-bar { width:160px; height:9px; border-radius:2px; }
+    .map-legend2 .ml-ends { display:flex; justify-content:space-between; font-family:'IBM Plex Mono',monospace; font-size:.55rem; color:var(--muted); margin-top:.3rem; }
+    @media (max-width:640px) {
+      #map-container { height:60vh; min-height:420px; }
+      .map-info { width:auto; top:.8rem; left:.8rem; right:.8rem; padding:.8rem 1rem; }
+      .map-info .mi-name { font-size:1.1rem; }
+      .map-legend2 { bottom:.8rem; right:.8rem; padding:.6rem .7rem; }
+      .map-legend2 .ml-bar { width:110px; }
+    }
   </style>
   <!-- Google Analytics -->
   <script async src="https://www.googletagmanager.com/gtag/js?id=G-JXKX4MKJ8W"></script>
@@ -83,17 +111,40 @@
     <a href="index.html" class="back-link">← Back to all charts</a>
     <div class="section-label">05 — By Region</div>
     <h1 class="section-title">Area Vulnerability</h1>
-    <p class="section-desc">Total alerts received by each region of Israel, ranked. Every part of the country has been targeted. Some more than others.</p>
+    <p class="section-desc">Israel's Home Front Command divides the country into alert regions — the Gaza Envelope, the Confrontation Line, the Dan and Sharon blocks around Tel Aviv, and two dozen more. Hover any region to see where it is and how many alerts it has taken since <span data-live="year-range">2020</span>. Blue regions have been hit the least, red the most.</p>
 
-    <div id="runner"></div>
-
-    <div class="chart-gated-hint" id="areas-hint">
-      Press <span class="accent">▶ Run</span> in the code panel above to reveal the regional breakdown.
+    <div id="map-container">
+      <div id="areas-map"></div>
+      <div class="map-info empty" id="map-info">
+        <div class="mi-rank" id="mi-rank"></div>
+        <div class="mi-name" id="mi-name">Hover a region</div>
+        <div class="mi-total" id="mi-total"></div>
+        <div class="mi-total-lbl" id="mi-total-lbl"></div>
+        <div class="mi-stats" id="mi-stats"></div>
+      </div>
+      <div class="map-legend2">
+        <div class="ml-lbl">Total alerts</div>
+        <div class="ml-bar" id="ml-bar"></div>
+        <div class="ml-ends"><span id="ml-min">0</span><span id="ml-max"></span></div>
+      </div>
     </div>
+    <p class="chart-note">Region boundaries: Home Front Command alert polygons (tzevaadom.co.il). Colour scaled by total alerts (log). Hover for detail.</p>
 
-    <div id="areas-all" class="chart-gated">
-      <div id="area-chart"></div>
-      <p class="chart-note">Total alerts per region, <span data-live="year-range">2020–2026</span>.</p>
+    <div style="margin-top:3.5rem;">
+      <div class="section-label" style="margin-bottom:.5rem;">The exact ranking</div>
+      <h2 class="section-title" style="font-size:1.8rem;margin-bottom:.5rem;">Every region, ranked</h2>
+      <p class="section-desc" style="margin-bottom:1.25rem;max-width:620px;">The same totals as a leaderboard, for the precise order.</p>
+
+      <div id="runner"></div>
+
+      <div class="chart-gated-hint" id="areas-hint">
+        Press <span class="accent">▶ Run</span> in the code panel above to reveal the ranked breakdown.
+      </div>
+
+      <div id="areas-all" class="chart-gated">
+        <div id="area-chart"></div>
+        <p class="chart-note">Total alerts per region, <span data-live="year-range">2020–2026</span>.</p>
+      </div>
     </div>
 
   </div>
@@ -164,8 +215,72 @@ function drawAreas(data) {
     });
 }
 
+// ── Choropleth map ───────────────────────────────────────────────────────────
+// Matches the ranked-bar colour language: blue = least hit, amber = mid, red = most.
+const RAMP = d3.interpolateRgbBasis(['#4a9eff', '#5fb0d8', '#e8b84b', '#e0793c', '#d63031']);
+
+function buildAreaMap(areas, geo) {
+  const byName = new Map(areas.map(a => [a.area, a]));
+  const ranked = [...areas].sort((a, b) => b.total - a.total);
+  const rankOf = new Map(ranked.map((a, i) => [a.area, i + 1]));
+  const totals = areas.map(a => a.total).filter(t => t > 0);
+  const color = d3.scaleSequentialLog(RAMP).domain([Math.min(...totals), Math.max(...totals)]);
+
+  const map = L.map('areas-map', { zoomControl: true, attributionControl: true, scrollWheelZoom: false });
+  L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_nolabels/{z}/{x}/{y}{r}.png', {
+    attribution: '&copy; OpenStreetMap &copy; CARTO', subdomains: 'abcd', maxZoom: 19
+  }).addTo(map);
+
+  const info = document.getElementById('map-info');
+  function setInfo(a) {
+    if (!a) {
+      info.classList.add('empty');
+      document.getElementById('mi-rank').textContent = '';
+      document.getElementById('mi-name').textContent = 'Hover a region';
+      document.getElementById('mi-stats').innerHTML = '';
+      return;
+    }
+    info.classList.remove('empty');
+    const uavPct = a.total ? Math.round(a.uav / a.total * 100) : 0;
+    document.getElementById('mi-rank').textContent = `rank #${rankOf.get(a.area)} of ${areas.length} by total alerts`;
+    document.getElementById('mi-name').textContent = a.area;
+    document.getElementById('mi-total').textContent = fmtNum(a.total);
+    document.getElementById('mi-total-lbl').textContent = 'total alerts';
+    document.getElementById('mi-stats').innerHTML =
+      `<div class="mi-row"><span>Days with alerts</span><span>${fmtNum(a.active_days)}</span></div>` +
+      `<div class="mi-row"><span>Avg / active day</span><span>${a.avg_per_day.toFixed(1)}</span></div>` +
+      `<div class="mi-row"><span>Rocket / drone</span><span>${100 - uavPct}% / ${uavPct}%</span></div>` +
+      `<div class="mi-row"><span>Worst day</span><span>${fmtNum(a.peak_day_count)} on ${a.peak_day ? a.peak_day.slice(5) : '—'}</span></div>`;
+  }
+
+  function styleFor(feat) {
+    const a = byName.get(feat.properties.area);
+    return { fillColor: a ? color(Math.max(1, a.total)) : '#1a1a22', fillOpacity: 0.82,
+             color: 'rgba(7,7,10,0.85)', weight: 1 };
+  }
+
+  const layer = L.geoJSON(geo, {
+    style: styleFor,
+    onEachFeature: (feat, lyr) => {
+      lyr.on('mouseover', () => { lyr.setStyle({ weight: 2.5, color: '#fff', fillOpacity: 0.95 }); lyr.bringToFront(); setInfo(byName.get(feat.properties.area)); });
+      lyr.on('mouseout', () => { layer.resetStyle(lyr); setInfo(null); });
+    }
+  }).addTo(map);
+
+  map.fitBounds(layer.getBounds(), { padding: [20, 20] });
+
+  // legend gradient + range labels
+  const stops = d3.range(0, 1.01, 0.1).map(t => RAMP(t)).join(',');
+  document.getElementById('ml-bar').style.background = `linear-gradient(90deg, ${stops})`;
+  document.getElementById('ml-min').textContent = fmtNum(Math.min(...totals));
+  document.getElementById('ml-max').textContent = fmtNum(Math.max(...totals));
+}
+
 (async () => {
   const areas = await fetchData('areas_summary.json');
+  fetchData('area_polygons.json')
+    .then(geo => buildAreaMap(areas, geo))
+    .catch(e => { console.warn('area map', e); document.getElementById('map-container').style.display = 'none'; });
 
   const wrap = document.getElementById('areas-all');
   const hint = document.getElementById('areas-hint');

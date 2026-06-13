@@ -58,7 +58,8 @@ Files in `data/processed/`. Large raw data is gitignored. Regenerate with `pytho
 - `actor_hour.json` — flat `{ actor, hour, count }` for patterns heatmap.
 - `areas_summary.json` — per-region totals.
 - `records.json` — precomputed extremes (busiest day/hour, longest quiet, biggest area spike).
-- `recent_alerts.json` — last 20 alert events, salvo-grouped (same origin within 10 min). Feeds the "Most Recent Alerts" table on `areas.html`.
+- `recent_alerts.json` — last 30 alert events, salvo-grouped (same origin within 10 min) + `last14` real per-day counts. Feeds the live feed (`live.html`) and homepage ticker.
+- `area_polygons.json` — GeoJSON of the 30 Home Front Command alert regions, as a Voronoi tessellation of the ~1449 town seeds clipped to the national footprint (one region = nearest-town cells dissolved). Drawn as the choropleth on `areas.html`, joined at runtime to `areas_summary.json` for the per-region totals. Rebuild with `python3 scripts/build_area_polygons.py` (needs `shapely`, local only — not in CI; source auto-fetched from tzevaadom.co.il to gitignored `data/raw/`).
 
 **Story text:** edit chapter titles/descriptions in `scripts/generate_story_chapters.py`, NEVER in `story_chapters.json` — the pipeline regenerates the JSON every 30 min and overwrites manual edits (this bit us once already).
 
