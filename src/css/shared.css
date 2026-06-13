@@ -253,3 +253,7 @@ footer {
   .nav-links { gap: .5rem; }
   .nav-group-btn { font-size: .5rem; letter-spacing: .06em; }
 }
+
+/* nav badge is a link to the live feed */
+a.nav-badge { text-decoration: none; cursor: pointer; transition: background .15s; }
+a.nav-badge:hover { background: rgba(232,184,75,.22); }

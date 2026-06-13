@@ -171,3 +171,19 @@ h1.hero-title {
   .card { min-height: auto; padding: 1.2rem; }
   .card-title { font-size: 1.15rem; }
 }
+
+/* ─── LIVE TICKER ─── */
+.live-strip {
+  display: flex; align-items: center; gap: 12px;
+  padding: 12px clamp(1rem, 6vw, 5rem);
+  background: var(--surface); border-top: 1px solid var(--border); border-bottom: 1px solid var(--border);
+  font-family: 'IBM Plex Mono', monospace; font-size: 12px;
+  color: var(--text); text-decoration: none;
+}
+.live-strip:hover { background: var(--surface2); }
+.live-strip-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--red); animation: strip-pulse 1.6s ease-in-out infinite; flex: none; }
+@keyframes strip-pulse { 0%,100% { opacity: 1; } 50% { opacity: 0.25; } }
+.live-strip-label { color: var(--red); letter-spacing: .14em; font-size: 10.5px; flex: none; }
+.live-strip-text { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.live-strip-cta { margin-left: auto; color: var(--accent); flex: none; }
+@media (max-width: 640px) { .live-strip-cta { display: none; } }

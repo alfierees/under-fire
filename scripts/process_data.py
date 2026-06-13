@@ -179,29 +179,33 @@ def oct7_replay(rows):
 
 
 def recent_alerts(rows):
-    """Last 20 alert events, newest first. Consecutive alerts from the same
-    origin within 10 minutes of each other are grouped into one salvo event."""
+    """Last 30 alert events, newest first. Consecutive alerts from the same
+    origin within 10 minutes of each other are grouped into one salvo event.
+    A handful of alerts have a blank area/city — they still count, but blank
+    strings never appear in the lists."""
     events = []
     for r in reversed(rows):  # rows sorted ascending → walk newest first
         ts = datetime.strptime(r["timestamp"], "%Y-%m-%d %H:%M:%S")
+        area, city = r["area_en"].strip(), r["city_en"].strip()
         ev = events[-1] if events else None
         if (ev and ev["origin"] == r["origin"]
                 and (ev["_oldest"] - ts).total_seconds() <= 600):
             ev["count"] += 1
             ev["_oldest"] = ts
-            if r["area_en"] not in ev["areas"]:
-                ev["areas"].append(r["area_en"])
-            ev["_cities"].add(r["city_en"])
+            if area and area not in ev["areas"]:
+                ev["areas"].append(area)
+            if city:
+                ev["_cities"].add(city)
             ev["_types"].add(ALERT_TYPE_NAMES.get(r["alert_type_id"], "Other"))
         else:
-            if len(events) == 20:
+            if len(events) == 30:
                 break
             events.append({
                 "ts": r["timestamp"],
                 "origin": r["origin"],
-                "areas": [r["area_en"]],
+                "areas": [area] if area else [],
                 "count": 1,
-                "_cities": {r["city_en"]},
+                "_cities": {city} if city else set(),
                 "_types": {ALERT_TYPE_NAMES.get(r["alert_type_id"], "Other")},
                 "_oldest": ts,
             })
@@ -209,7 +213,17 @@ def recent_alerts(rows):
         ev["locations"] = len(ev.pop("_cities"))
         ev["type"] = " + ".join(sorted(ev.pop("_types")))
         del ev["_oldest"]
-    return {"generated": rows[-1]["timestamp"], "events": events}
+
+    # real per-day counts for the last 14 calendar days (daily_counts.json is
+    # an estimate spread from weekly totals — not suitable for a live feed)
+    last_day = datetime.strptime(rows[-1]["date"], "%Y-%m-%d").date()
+    window = [(last_day - timedelta(days=i)).strftime("%Y-%m-%d")
+              for i in range(13, -1, -1)]
+    by_day = Counter(r["date"] for r in rows)
+    last14 = [{"date": d, "count": by_day.get(d, 0)} for d in window]
+
+    return {"generated": rows[-1]["timestamp"], "events": events,
+            "last14": last14}
 
 
 GENERATORS = {

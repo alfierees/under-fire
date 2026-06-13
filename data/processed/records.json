@@ -1,12 +1,12 @@
 {
-  "total_alerts": 160387,
+  "total_alerts": 160152,
   "busiest_day": {
     "date": "2026-02-28",
     "count": 10162
   },
   "busiest_hour": {
     "hour": 10,
-    "count": 10686
+    "count": 10677
   },
   "longest_quiet_streak": {
     "weeks": 6,
@@ -15,12 +15,12 @@
     "threshold": 5
   },
   "biggest_area_spike": {
-    "area": "Lakhish",
-    "date": "2023-10-07",
-    "count": 1263
+    "area": "Sharon",
+    "date": "2026-02-28",
+    "count": 1262
   },
   "busiest_weekday": {
     "day": "Saturday",
-    "count": 30779
+    "count": 30722
   }
 }
