@@ -77,6 +77,43 @@ def main():
 
     area_by_name = {a['area']: a for a in areas_list}
 
+    # Real per-actor totals used in the guided-replay captions (never hardcode —
+    # these flow from the live aggregates so the 30-min pipeline keeps them true).
+    n_oct7 = len(oct7)
+    n_hamas = stats['origins'].get('Hamas', 0)
+    n_hez = stats['origins'].get('Hezbollah', 0)
+    n_hou = stats['origins'].get('Houthis', 0)
+
+    # ── Guided-replay captions ────────────────────────────────────────────────
+    # Short, ~8.5s-read beat captions for the chapter-by-chapter replay (story.html).
+    # EDIT THIS COPY HERE, never in the JSON — the pipeline regenerates the JSON.
+    REPLAY = {
+        "oct7": {
+            "time": "7 OCT 2023 · 06:29", "head": "It begins",
+            "body": f"A Shabbat morning, the quiet peak of the holiday season. At 06:29 Hamas opens a coordinated, multi-front assault — the heaviest single day Israel has ever recorded, {n_oct7:,} rocket alerts blanketing the Gaza Envelope, the Negev and the coastal heartland. As families ran for shelters, gunmen breached the border by land, sea and air.",
+        },
+        "gaza": {
+            "time": "OCT 2023 – OCT 2024", "head": "The grind",
+            "body": f"Even as the ground operation began, the sky over the south rarely cleared. For the year that followed, Hamas kept up a steady rhythm of fire over the Gaza Envelope, Lakhish and the Western Negev — {n_hamas:,} alerts in all. Not front-line statistics, but the daily soundtrack of a region that couldn't return to normal.",
+        },
+        "hezbollah": {
+            "time": "OCT 2023 · THE NORTH", "head": "The north ignites",
+            "body": f"On October 8 a second front opened in the north. Hezbollah's anti-tank fire and explosive drones turned the Galilee's kibbutzim and tourist towns into a combat zone — {n_hez:,} alerts along the Confrontation Line. By the following autumn more than 60,000 residents had been evacuated, leaving ghost towns behind.",
+        },
+        "houthis": {
+            "time": "NOV 2023 · FROM YEMEN", "head": "From 2,000 km away",
+            "body": f"In November 2023 the war reached a distance once thought impossible for a non-state actor. From nearly 2,000 km away in Yemen, the Houthis launched drones and ballistic missiles — first at Eilat, later at Tel Aviv — {n_hou:,} alerts in total. Some were intercepted in space by the Arrow system, half a continent from where they were fired.",
+        },
+        "iran-direct": {
+            "time": "APR & OCT 2024 · IRAN", "head": "Iran steps out of the shadows",
+            "body": "For decades the Iran–Israel conflict was fought in the shadows. On April 14, 2024 that ended: over 300 drones and missiles launched directly from Iranian soil, met by a five-nation coalition that intercepted more than 99%. Iran struck again on October 1 with nearly 200 ballistic missiles — the front line was now the whole country.",
+        },
+        "total-war": {
+            "time": "28 FEB 2026", "head": "Total war",
+            "body": "On February 28, 2026 the conflict became what many had feared for decades. In a single 24-hour window Iran launched the largest coordinated missile-and-drone barrage in modern history — 10,162 alerts in one day, every one of the 30 regions under fire from the Golan to Eilat. The war had moved from the borders into every home.",
+        },
+    }
+
     # Ch1: Oct 7 — real coordinates from replay data
     oct7_pts = [[round(a['lat'], 5), round(a['lon'], 5)] for a in oct7]
     random.shuffle(oct7_pts)
@@ -217,6 +254,10 @@ def main():
             "points_note": "Approximate positions within recorded alert areas",
         },
     ]
+
+    # Attach the short replay caption to each chapter (keyed by id).
+    for ch in chapters:
+        ch["replay"] = REPLAY[ch["id"]]
 
     out = {"generated": "2026-04-23", "chapters": chapters}
     out_path = PROCESSED / 'story_chapters.json'
