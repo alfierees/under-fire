@@ -54,13 +54,9 @@
     .beat-time { font-family:'IBM Plex Mono',monospace; font-size:.6rem; letter-spacing:.18em; color:var(--red); margin-bottom:.45rem; }
     .beat-head { font-family:'Playfair Display',serif; font-weight:900; font-size:1.25rem; color:#fff; line-height:1.15; margin-bottom:.45rem; }
     .beat-body { font-family:'IBM Plex Sans',sans-serif; font-weight:300; font-size:.82rem; color:var(--muted); line-height:1.55; }
-    .beat-continue { margin-top:.8rem; display:flex; align-items:center; gap:.8rem; }
-    .beat-btn { font-family:'IBM Plex Mono',monospace; font-size:.6rem; letter-spacing:.1em; text-transform:uppercase; padding:.4rem 1rem; border:1px solid var(--red); background:transparent; color:var(--red); cursor:pointer; border-radius:2px; }
+    .beat-continue { margin-top:1rem; display:flex; justify-content:flex-end; }
+    .beat-btn { font-family:'IBM Plex Mono',monospace; font-size:.62rem; letter-spacing:.1em; text-transform:uppercase; padding:.5rem 1.2rem; border:1px solid var(--red); background:transparent; color:var(--red); cursor:pointer; border-radius:2px; transition:all .2s; }
     .beat-btn:hover { background:var(--red); color:#fff; }
-    .beat-timer { flex:1; height:2px; background:rgba(255,255,255,.12); border-radius:1px; overflow:hidden; }
-    .beat-timer > div { height:100%; width:0; background:var(--red); }
-    .beat-card.show .beat-timer > div { animation: beat-fill var(--beat-secs, 8.5s) linear forwards; }
-    @keyframes beat-fill { to { width:100%; } }
 
     /* ── Chapter rail (scrub) ── */
     #chapter-rail { position:absolute; z-index:1050; left:0; right:0; bottom:0; height:3.4rem;
@@ -171,7 +167,6 @@
       <div class="beat-body" id="beat-body"></div>
       <div class="beat-continue">
         <button class="beat-btn" id="beat-continue-btn">Continue ▶</button>
-        <div class="beat-timer"><div></div></div>
       </div>
     </div>
     <div id="chapter-rail"></div>
@@ -195,7 +190,6 @@
 (function () {
   const REDUCED = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   const ACCUMULATE = true;       // false → clear each chapter instead of dimming
-  const BEAT_SECS = 8.5;         // read-hold per chapter
   const FLY_SECS = 1.2;          // fast fly-forward between fronts (oct7 feel)
 
   const ORIGINS = {
@@ -370,7 +364,6 @@
     const isEnd = idx === chaptersData.length - 1;
     const card = document.getElementById('beat-card');
     card.style.borderLeftColor = ch.color;
-    card.style.setProperty('--beat-secs', BEAT_SECS + 's');
     document.getElementById('beat-time').textContent = r.time || ch.eyebrow || '';
     document.getElementById('beat-time').style.color = ch.color;
     document.getElementById('beat-head').textContent = r.head || ch.title;
@@ -386,13 +379,10 @@
       document.getElementById('play-btn').textContent = '✓ Done';
     } else {
       document.getElementById('beat-continue-btn').textContent = 'Continue ▶';
-      document.getElementById('play-btn').textContent = '⏸ Pause';
+      document.getElementById('play-btn').textContent = '⏭ Next';
     }
-    // restart the timer-bar animation
-    const fill = card.querySelector('.beat-timer > div');
-    fill.style.animation = 'none'; void fill.offsetWidth; fill.style.animation = '';
     card.classList.add('show');
-    if (!isEnd) beatTimer = setTimeout(resumeFromBeat, BEAT_SECS * 1000);
+    // No timer — the replay holds here until the reader presses Continue.
   }
 
   function resumeFromBeat() {

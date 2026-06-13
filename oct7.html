@@ -48,13 +48,9 @@
     .beat-time { font-family:'IBM Plex Mono',monospace; font-size:.6rem; letter-spacing:.18em; color:var(--red); margin-bottom:.45rem; }
     .beat-head { font-family:'Playfair Display',serif; font-weight:900; font-size:1.25rem; color:#fff; line-height:1.15; margin-bottom:.45rem; }
     .beat-body { font-family:'IBM Plex Sans',sans-serif; font-weight:300; font-size:.82rem; color:var(--muted); line-height:1.55; }
-    .beat-continue { margin-top:.8rem; display:flex; align-items:center; gap:.8rem; }
-    .beat-btn { font-family:'IBM Plex Mono',monospace; font-size:.6rem; letter-spacing:.1em; text-transform:uppercase; padding:.4rem 1rem; border:1px solid var(--red); background:transparent; color:var(--red); cursor:pointer; border-radius:2px; }
+    .beat-continue { margin-top:1rem; display:flex; justify-content:flex-end; }
+    .beat-btn { font-family:'IBM Plex Mono',monospace; font-size:.62rem; letter-spacing:.1em; text-transform:uppercase; padding:.5rem 1.2rem; border:1px solid var(--red); background:transparent; color:var(--red); cursor:pointer; border-radius:2px; transition:all .2s; }
     .beat-btn:hover { background:var(--red); color:#fff; }
-    .beat-timer { flex:1; height:2px; background:rgba(255,255,255,.12); border-radius:1px; overflow:hidden; }
-    .beat-timer > div { height:100%; width:0; background:var(--red); }
-    .beat-card.show .beat-timer > div { animation: beat-fill var(--beat-secs, 5s) linear forwards; }
-    @keyframes beat-fill { to { width:100%; } }
 
     /* ── Guided replay: scrubbable timeline ── */
     #replay-bar { position:absolute; z-index:1050; left:0; right:0; bottom:0; height:46px; background:linear-gradient(transparent, rgba(7,7,10,.92) 30%); cursor:pointer; }
@@ -156,7 +152,6 @@
       <div class="beat-body" id="beat-body"></div>
       <div class="beat-continue">
         <button class="beat-btn" id="beat-continue-btn">Continue ▶</button>
-        <div class="beat-timer"><div></div></div>
       </div>
     </div>
     <div id="replay-bar" title="Click to scrub">
@@ -197,22 +192,22 @@ function setLeg() {
 const BEATS = [
   { at: 420,  view: [[31.42, 34.52], 9], secs: 9, time: '06:29 — SHABBAT MORNING',
     head: 'The opening barrage',
-    body: 'Out of a quiet holiday morning: hundreds of rockets in the first half-hour, blanketing the Gaza Envelope as the ground assault begins. {n} alerts already.' },
+    body: 'Out of a quiet holiday morning, hundreds of rockets fall in the first half-hour, blanketing the Gaza Envelope. The barrage is cover for a ground assault — gunmen are already breaching the border fence. {n} alerts before seven in the morning.' },
   { at: 458,  view: [[31.72, 34.78], 8], secs: 9, time: '07:38',
     head: 'The fire moves inland',
-    body: 'Lakhish and the Shfela come under sustained bombardment — rockets now reaching past Ashkelon toward the centre of the country.' },
+    body: 'The fire pushes north and east. Lakhish and the Shfela come under sustained bombardment, rockets now reaching past Ashkelon toward the centre of the country as the scale of the invasion becomes clear.' },
   { at: 556,  view: null, secs: 8, time: '09:16',
     head: 'A second wave',
-    body: 'Three hours in, the launch rate climbs again instead of fading. {n} alerts before ten in the morning.' },
+    body: 'Three hours in, the launch rate climbs again instead of fading — wave after wave rather than a single opening salvo. {n} alerts before ten in the morning, and it is still rising.' },
   { at: 668,  view: [[31.55, 34.95], 7], secs: 9, time: '11:08',
     head: 'The long afternoon',
-    body: 'While the battle rages inside the Envelope communities, rocket fire grinds on for eight more hours. The replay fast-forwards — watch the south stay lit.' },
+    body: 'While the battle rages inside the Envelope communities, rocket fire grinds on through the afternoon and into the evening — eight more hours of it. The replay fast-forwards from here; watch the south stay lit the whole way.' },
   { at: 1185, view: [[32.02, 34.82], 9], secs: 9, time: '19:45 — AFTER DARK',
     head: 'Evening: the centre under fire',
-    body: 'A final heavy barrage reaches Dan and the coastal plain — Tel Aviv\u2019s skyline of sirens. By now almost nowhere south of Haifa has stayed quiet.' },
+    body: 'After dark, a final heavy barrage reaches Dan and the coastal plain — Tel Aviv\u2019s skyline of sirens. By now almost nowhere south of Haifa has stayed quiet for long.' },
   { at: END,  view: [[31.55, 34.95], 7], secs: 30, end: true, time: '23:13 — THE DAY ENDS',
     head: '{n} alerts. 17 hours.',
-    body: 'The deadliest day in Israel\u2019s history, and the start of everything else this site measures. Read what happened next, front by front.' },
+    body: 'The deadliest day in Israel\u2019s history, and the start of everything else this site measures. From here the war would spread north to Lebanon, out to Yemen, and finally to Iran itself.' },
 ];
 const passed = new Set();
 
@@ -256,7 +251,6 @@ function showBeat(beat) {
   if (rAFId) cancelAnimationFrame(rAFId);
   rAFId = null; lastRafTime = null;
   const card = document.getElementById('beat-card');
-  card.style.setProperty('--beat-secs', beat.secs + 's');
   document.getElementById('beat-time').textContent = beat.time;
   document.getElementById('beat-head').textContent = beat.head.replace('{n}', fmtNum(alertIdx));
   const body = document.getElementById('beat-body');
@@ -266,13 +260,12 @@ function showBeat(beat) {
     document.getElementById('beat-continue-btn').textContent = '↺ Replay';
     finished = true;
     document.getElementById('play-btn').textContent = '✓ Done';
+  } else {
+    document.getElementById('play-btn').textContent = '⏭ Next';
   }
-  // restart the timer animation
-  const fill = card.querySelector('.beat-timer > div');
-  fill.style.animation = 'none'; void fill.offsetWidth; fill.style.animation = '';
   card.classList.add('show');
   if (beat.view) oct7Map.flyTo(beat.view[0], beat.view[1], { duration: 1.4 });
-  if (!beat.end) beatTimer = setTimeout(resumeFromBeat, beat.secs * 1000);
+  // No timer — the replay holds here until the reader presses Continue.
 }
 
 function resumeFromBeat() {
