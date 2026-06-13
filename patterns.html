@@ -98,12 +98,6 @@
       <div class="actor-tag"><div class="actor-swatch" style="background:var(--iran)"></div>Iran</div>
     </div>
 
-    <div id="runner"></div>
-
-    <div class="chart-gated-hint" id="patterns-hint">
-      Press <span class="accent">▶ Run</span> in the code panel above to reveal the clock, weekday bar, and actor heatmap.
-    </div>
-
     <div id="patterns-all" class="chart-gated">
       <div class="patterns-grid">
         <div>
@@ -135,8 +129,7 @@
   <div class="footer-credit">Alert data from <a href="https://rocketalert.live" target="_blank">RocketAlert.live</a>.</div>
 </footer>
 
-<script src="src/js/shared.js?v=20260613a"></script>
-<script src="src/js/code-runner.js"></script>
+<script src="src/js/shared.js?v=20260613e"></script>
 <script>
 const ACTORS = ['Hamas', 'Hezbollah', 'Houthis', 'Iran'];
 const ACTOR_COLORS = {
@@ -397,31 +390,7 @@ function drawActorHour(cells) {
   }
 
   const wrap = document.getElementById('patterns-all');
-  const hint = document.getElementById('patterns-hint');
-
-  mountCodeRunner({
-    mount: '#runner',
-    file: 'build_patterns.js',
-    lines: [
-      { text: '// 24h polar clock + weekday bar + actor signature heatmap', kind: 'cm' },
-      { text: 'const dow   = load("hourly_dow.json")' },
-      { text: 'const ah    = load("actor_hour.json")' },
-      { text: 'const stats = load("stats_summary.json")' },
-      { text: 'const ringOrder = ["Hamas","Houthis","Hezbollah","Iran"] // inside → outside' },
-      { text: '// Clock: rings ordered small-total → big-total' },
-      { text: 'bandWidth(actor) ∝ actor.total      // Iran widest, Hamas narrowest' },
-      { text: 'wedgeFill(hour, actor) = count / GLOBAL_MAX  // Iran 10:00 = 7,396' },
-      { text: 'sweep(duration: 2200).onPass(hour => fadeIn(hour))' },
-      { text: 'flare(10, color: red) // 10am is the global peak' },
-      { text: 'bars(dow.day_of_week).growFromZero(1200)' },
-      { text: 'heatmap(ah, rows: ringOrder, cols: 24).fade(30ms stagger)' },
-    ],
-    onRun: () => {
-      if (hint) hint.style.display = 'none';
-      wrap.classList.add('revealed');
-      renderAll();
-    }
-  });
+  revealOnScroll(wrap, () => { wrap.classList.add('revealed'); renderAll(); });
 })();
 </script>
 </body>

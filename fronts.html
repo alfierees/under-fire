@@ -95,10 +95,6 @@
       <div class="actor-tag" data-actor="Unknown"><div class="actor-swatch" style="background:var(--unknown)"></div><span class="actor-label">UNATTRIBUTED</span></div>
     </div>
 
-    <div id="runner"></div>
-    <div class="chart-gated-hint" id="fronts-hint">
-      Press <span class="accent">▶ Run</span> in the code panel above to build the chart.
-    </div>
     <div class="filter-bar chart-gated" id="scale-toggle">
       <span class="filter-label">Y axis:</span>
       <button class="filter-btn active" data-scale="sqrt">√ Square root</button>
@@ -124,8 +120,7 @@
   <div class="footer-credit">Alert data from <a href="https://rocketalert.live" target="_blank">RocketAlert.live</a>.</div>
 </footer>
 
-<script src="src/js/shared.js?v=20260613a"></script>
-<script src="src/js/code-runner.js"></script>
+<script src="src/js/shared.js?v=20260613e"></script>
 <script>
 const ACTORS = ['Iran', 'Hezbollah', 'Houthis', 'Hamas', 'Unknown'];
 const ACTOR_COLORS = { Iran:'var(--iran)', Hezbollah:'var(--hezbollah)', Houthis:'var(--houthis)', Hamas:'var(--hamas)', Unknown:'var(--unknown)' };
@@ -277,7 +272,6 @@ function updateLegendTotals(raw) {
 (async () => {
   const data = await fetchData('actors_monthly.json');
   const chart = document.getElementById('fronts-chart');
-  const hint = document.getElementById('fronts-hint');
   const toggle = document.getElementById('scale-toggle');
 
   updateLegendTotals(data);
@@ -292,31 +286,12 @@ function updateLegendTotals(raw) {
     });
   });
 
-  mountCodeRunner({
-    mount: '#runner',
-    file: 'build_fronts.js',
-    lines: [
-      { text: '// Monthly alerts broken down by estimated origin', kind: 'cm' },
-      { text: 'const data = load("actors_monthly.json")' },
-      { text: 'const actors = ["Iran","Hezbollah","Houthis","Hamas","Unknown"]' },
-      { text: 'const stack = d3.stack(data, actors)' },
-      { text: 'const x = scaleBand(data.month)' },
-      { text: 'const y = scaleSqrt(stack.total) // compress the Mar-2026 spike' },
-      { text: '// Build bars left → right, oldest month first', kind: 'cm' },
-      { text: 'data.forEach((m, i) => {' },
-      { text: '  bars(m).transition().delay(i * 55).duration(280)' },
-      { text: '    .attr("height", fromZero) // staircase reveal' },
-      { text: '})' },
-      { text: '// Actor share breakdown donut', kind: 'cm' },
-      { text: 'donut(actors).reveal()' },
-    ],
-    onRun: () => {
-      if (hint) hint.style.display = 'none';
-      chart.classList.add('revealed');
-      document.getElementById('donut-section').classList.add('revealed');
-      drawFronts(data, currentScale);
-      drawDonut(data);
-    }
+  revealOnScroll(chart, () => {
+    chart.classList.add('revealed');
+    toggle.classList.add('revealed');
+    document.getElementById('donut-section').classList.add('revealed');
+    drawFronts(data, currentScale);
+    drawDonut(data);
   });
 })();
 
