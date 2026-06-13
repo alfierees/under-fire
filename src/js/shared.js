@@ -49,6 +49,37 @@ function alertRelTime(ts) {
 
 function fmtPct(p) { return (p * 100).toFixed(1) + '%'; }
 
+// Run fn once, when `target` first scrolls into view (or immediately if the
+// browser lacks IntersectionObserver / the user prefers reduced motion). This
+// replaces the old press-to-run code panel: charts reveal themselves.
+function revealOnScroll(target, fn, threshold = 0.2) {
+  if (!target) return;
+  const reduced = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const inView = () => {
+    const r = target.getBoundingClientRect();
+    const vh = window.innerHeight || document.documentElement.clientHeight;
+    return r.top < vh * (1 - threshold * 0.5) && r.bottom > 0;
+  };
+  // already on screen (or reduced motion) → run immediately
+  if (reduced || inView()) { fn(); return; }
+  // otherwise reveal when it scrolls in. Use IntersectionObserver *and* a
+  // scroll-listener fallback so it never gets stuck if IO misfires.
+  let done = false, io;
+  const cleanup = () => {
+    if (io) io.disconnect();
+    window.removeEventListener('scroll', onScroll);
+    window.removeEventListener('resize', onScroll);
+  };
+  const run = () => { if (done) return; done = true; cleanup(); fn(); };
+  const onScroll = () => { if (inView()) run(); };
+  if ('IntersectionObserver' in window) {
+    io = new IntersectionObserver((e) => { if (e[0].isIntersecting) run(); }, { threshold });
+    io.observe(target);
+  }
+  window.addEventListener('scroll', onScroll, { passive: true });
+  window.addEventListener('resize', onScroll);
+}
+
 // File-protocol warning
 (function() {
   if (window.location.protocol === 'file:') {

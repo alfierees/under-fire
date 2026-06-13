@@ -133,12 +133,6 @@
       </div>
     </div>
 
-    <div id="runner"></div>
-
-    <div class="chart-gated-hint" id="timeline-hint">
-      Press <span class="accent">▶ Run</span> in the code panel above to build the per-actor sparklines and the combined chart.
-    </div>
-
     <div id="reveal-area" class="chart-gated">
       <div class="actor-cards">
         <div class="actor-card" data-actor="Iran">
@@ -202,8 +196,7 @@
   </div>
 </footer>
 
-<script src="src/js/shared.js?v=20260613a"></script>
-<script src="src/js/code-runner.js"></script>
+<script src="src/js/shared.js?v=20260613e"></script>
 <script src="src/js/salvo.js"></script>
 <script>
 // ── Timeline page ─────────────────────────────────────────────────────────
@@ -487,43 +480,19 @@ async function init() {
   const timelineData = await fetchData('timeline_weekly.json');
 
   const reveal = document.getElementById('reveal-area');
-  const hint = document.getElementById('timeline-hint');
 
-  mountCodeRunner({
-    mount: '#runner',
-    file: 'build_timeline.js',
-    lines: [
-      { text: '// Six years of weekly alerts, broken down by origin', kind: 'cm' },
-      { text: 'const data = load("timeline_weekly.json")' },
-      { text: 'const actors = ["Hamas","Hezbollah","Houthis","Iran"]' },
-      { text: '// One mini area per actor + a stacked combined chart', kind: 'cm' },
-      { text: 'mini.forEach(a => area(a).reveal({ dot: true, ms: 8000 }))' },
-      { text: 'const stack = d3.stack().keys([...actors, "Unknown"])' },
-      { text: 'draw(stack(data)).revealWithRadar({ ms: 8000 })' },
-      { text: '// Annual totals — stacked by actor share', kind: 'cm' },
-      { text: 'yearChart(data, actors).reveal()' },
-    ],
-    onRun: () => {
-      if (hint) hint.style.display = 'none';
-      reveal.classList.add('revealed');
-      document.getElementById('year-wrap').classList.add('revealed');
-      const charts = [
-        ...ACTORS.map(a => drawMini(a, timelineData)),
-        drawTimeline(timelineData),
-      ];
-      buildLegend(origins);
-      document.getElementById('click-hint').style.display = 'block';
-      salvo = mountSalvo({ mount: '#timeline-chart' });
-      runReveal(charts);
-      // fix actor card % to use full total incl. Unknown
-      const grand = Object.values(origins).reduce((s, v) => s + v, 0);
-      ACTORS.forEach(actor => {
-        const card = document.querySelector(`.actor-card[data-actor="${actor}"]`);
-        if (!card) return;
-        card.querySelector('.pct').textContent = ((origins[actor] || 0) / grand * 100).toFixed(1) + '%';
-      });
-      drawYearChart(timelineData);
-    }
+  revealOnScroll(reveal, () => {
+    reveal.classList.add('revealed');
+    document.getElementById('year-wrap').classList.add('revealed');
+    const charts = [
+      ...ACTORS.map(a => drawMini(a, timelineData)),
+      drawTimeline(timelineData),
+    ];
+    buildLegend(origins);
+    document.getElementById('click-hint').style.display = 'block';
+    salvo = mountSalvo({ mount: '#timeline-chart' });
+    runReveal(charts);
+    drawYearChart(timelineData);
   });
 }
 

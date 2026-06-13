@@ -135,12 +135,6 @@
       <h2 class="section-title" style="font-size:1.8rem;margin-bottom:.5rem;">Every region, ranked</h2>
       <p class="section-desc" style="margin-bottom:1.25rem;max-width:620px;">The same totals as a leaderboard, for the precise order.</p>
 
-      <div id="runner"></div>
-
-      <div class="chart-gated-hint" id="areas-hint">
-        Press <span class="accent">▶ Run</span> in the code panel above to reveal the ranked breakdown.
-      </div>
-
       <div id="areas-all" class="chart-gated">
         <div id="area-chart"></div>
         <p class="chart-note">Total alerts per region, <span data-live="year-range">2020–2026</span>.</p>
@@ -155,8 +149,7 @@
   <div class="footer-credit">Alert data from <a href="https://rocketalert.live" target="_blank">RocketAlert.live</a>.</div>
 </footer>
 
-<script src="src/js/shared.js?v=20260613a"></script>
-<script src="src/js/code-runner.js"></script>
+<script src="src/js/shared.js?v=20260613e"></script>
 <script>
 function drawAreas(data) {
   const c = document.getElementById('area-chart');
@@ -283,27 +276,7 @@ function buildAreaMap(areas, geo) {
     .catch(e => { console.warn('area map', e); document.getElementById('map-container').style.display = 'none'; });
 
   const wrap = document.getElementById('areas-all');
-  const hint = document.getElementById('areas-hint');
-
-  mountCodeRunner({
-    mount: '#runner',
-    file: 'build_areas.js',
-    lines: [
-      { text: '// ranked bar chart — total alerts per region of Israel', kind: 'cm' },
-      { text: 'const areas = load("areas_summary.json")' },
-      { text: 'areas.sort(by: "total", order: desc)' },
-      { text: '// colour: rank 1–3 → red, 4–10 → amber, rest → blue', kind: 'cm' },
-      { text: 'colourScale = [top3 → red, 4–10 → amber, rest → blue]' },
-      { text: 'for (area, i) in areas:' },
-      { text: '  bar(area.total).growFrom(0, dur: 350ms, delay: i × 65ms)' },
-      { text: '  label(area.total).fadeIn(after: bar)   // staircase reveal' },
-    ],
-    onRun: () => {
-      if (hint) hint.style.display = 'none';
-      wrap.classList.add('revealed');
-      drawAreas(areas);
-    }
-  });
+  revealOnScroll(wrap, () => { wrap.classList.add('revealed'); drawAreas(areas); });
 })();
 </script>
 </body>

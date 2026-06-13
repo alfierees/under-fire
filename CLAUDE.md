@@ -5,18 +5,17 @@ Data-vis site about rocket/missile/drone alerts over Israel (2020–2026). Stati
 
 ## Site structure (as of v3 overhaul — 2026-04-17)
 - `index.html` — hero (Iron Dome canvas + hero-bg.jpg + "UNDER FIRE" title) + card grid: **Graphs** (3), **Maps** (2), **Patterns** (2), **Stats** (1).
-- `timeline.html` — Six Years area chart. Code-runner UI, actor filter, salvo overlay on click.
-- `fronts.html` — Four Fronts **stacked monthly bars**, each actor layer grows from zero (attrTween). Code-runner UI, auto-plays on scroll-into-view.
+- `timeline.html` — Six Years area chart. Actor filter, salvo overlay on click. Charts auto-reveal on scroll.
+- `fronts.html` — Four Fronts **stacked monthly bars**, each actor layer grows from zero (attrTween). Auto-reveals on scroll-into-view.
 - `calendar.html` — Daily heatmap (GitHub-contributions style). One cell = one day 2020–present.
 - `oct7.html`, `patterns.html`, `areas.html` — individual chart pages.
-- `patterns.html` — 24h polar clock (concentric actor rings + sweep reveal), weekday bar, actor×hour heatmap, code-runner UI.
+- `patterns.html` — 24h polar clock (concentric actor rings + sweep reveal), weekday bar, actor×hour heatmap. Auto-reveals on scroll.
 - `arcs.html` — Schematic arcs from Gaza/Lebanon/Iran/Yemen into Israel. Width = attributed share. Toggle all-time/Oct 7.
 - `records.html` — Records & extremes: busiest day/hour, longest quiet streak, biggest area spike, Oct 7 minute-by-minute bars.
-- `src/css/shared.css` — tokens, nav, tooltip, footer, code-runner, filter bar.
+- `src/css/shared.css` — tokens, nav, tooltip, footer, filter bar.
 - `src/css/hub.css` — hero + card grid (index only).
 - `src/js/shared.js` — `fetchData`, tooltip helpers, nav-badge boot.
 - `src/js/iron-dome.js` — hero canvas animation (index only).
-- `src/js/code-runner.js` — `mountCodeRunner({ mount, file, lines, onRun })`. Press `Enter` or click `▶ Run`.
 - `src/js/salvo.js` — `mountSalvo({ mount }).fire({ count, label })` — missile-arc overlay scaled by alert count, capped at 80 missiles.
 - `src/js/hub.js` — card sparkline previews.
 
@@ -41,7 +40,7 @@ A SessionStart hook in `.claude/settings.json` runs `git fetch` automatically an
 Before pushing: run the local server and click through `index.html` → each card → each chart at least once. Pushes to any branch on `origin` are live on GitHub immediately; the `main` branch auto-deploys to GitHub Pages.
 
 ## Animation decisions
-- Timeline reveal: **10s** left-to-right clip-rect sweep via code-runner `onRun`.
+- Charts reveal on scroll-into-view via `revealOnScroll(el, fn)` in `shared.js` (IntersectionObserver + scroll fallback; fires immediately if already in view). The press-to-run code panel was removed 2026-06 — it hid content behind a non-obvious interaction.
 - Fronts reveal: per-actor stacked bars grow from zero, **1200ms each, staggered 450ms**. Auto-plays on IntersectionObserver.
 - Patterns clock: sweep hand **2.2s**, wedges fade in as hand passes. 10am flare.
 - Salvo animation cap: **80 missiles max**; label shows raw count only (no "N shown").
@@ -64,4 +63,4 @@ Files in `data/processed/`. Large raw data is gitignored. Regenerate with `pytho
 **Story text:** edit chapter titles/descriptions in `scripts/generate_story_chapters.py`, NEVER in `story_chapters.json` — the pipeline regenerates the JSON every 30 min and overwrites manual edits (this bit us once already).
 
 ## Not yet done (future work)
-See `HANDOFF.md`. Next candidates: zoomable timeline, code-runner on oct7/areas, mobile particle-count tweak.
+See `HANDOFF.md`. Next candidates: zoomable timeline, mobile particle-count tweak.
