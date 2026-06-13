@@ -174,46 +174,43 @@
 <script src="src/js/shared.js?v=20260613a"></script>
 <script>
 // ── Guided replay ────────────────────────────────────────────────────────────
-// The day plays in five chapters: variable playback speed (slow through the
-// barrages, fast through the lulls), auto-pausing beat captions at the
-// turning points, and a scrubbable density timeline along the bottom.
+// The day plays as a sequence of chapters: each beat caption holds on screen
+// to be read, then the map speeds through to the next turning point in about a
+// second. A scrubbable density timeline runs along the bottom.
 
 let oct7Map = null, oct7Data = [], alertIdx = 0, isPlaying = false, started = false, finished = false;
-let rAFId = null, lastRafTime = null, simMinutes = 0, beatTimer = null;
+let rAFId = null, lastRafTime = null, simMinutes = 0, beatTimer = null, legSpeed = 1;
 const START = 6 * 60 + 29, END = 23 * 60 + 13, TOTAL = END - START;
 
-// playback speed per phase: [fromMinuteOfDay, toMinuteOfDay, realSeconds]
-const SEGMENTS = [
-  [389,  420, 14],   // 06:29–07:00 the opening barrage
-  [420,  600, 22],   // 07:00–10:00 the morning bombardment
-  [600,  690,  6],   // 10:00–11:30 tapering
-  [690, 1170, 10],   // 11:30–19:30 the long afternoon (fast-forward)
-  [1170, 1290, 10],  // 19:30–21:30 the evening barrage
-  [1290, 1394,  4],  // 21:30–23:14 last fire
-];
-function speedAt(minOfDay) {
-  for (const [a, b, secs] of SEGMENTS) if (minOfDay < b) return (b - a) / secs;
-  return 60;
+// Wall-clock seconds to fast-forward from one chapter to the next, whatever
+// span of the day it covers — keeps every transition short and punchy.
+const LEG_SECS = 1.1;
+function setLeg() {
+  const cur = START + simMinutes;
+  let nextAt = END;
+  for (const b of BEATS) { if (!passed.has(b.at) && b.at > cur) { nextAt = b.at; break; } }
+  legSpeed = Math.max(1, (nextAt - cur) / LEG_SECS);
 }
 
 // beats: trigger minute, map view, caption. {n} = live alert count when shown.
+// secs = seconds the caption holds before it auto-advances.
 const BEATS = [
-  { at: 393,  view: [[31.42, 34.52], 9], secs: 6, time: '06:29 — SHABBAT MORNING',
+  { at: 420,  view: [[31.42, 34.52], 9], secs: 9, time: '06:29 — SHABBAT MORNING',
     head: 'The opening barrage',
-    body: 'Out of a quiet holiday morning: hundreds of rockets in the first minutes, blanketing the Gaza Envelope as the ground assault begins. {n} alerts already.' },
-  { at: 458,  view: [[31.72, 34.78], 8], secs: 6, time: '07:38',
+    body: 'Out of a quiet holiday morning: hundreds of rockets in the first half-hour, blanketing the Gaza Envelope as the ground assault begins. {n} alerts already.' },
+  { at: 458,  view: [[31.72, 34.78], 8], secs: 9, time: '07:38',
     head: 'The fire moves inland',
     body: 'Lakhish and the Shfela come under sustained bombardment — rockets now reaching past Ashkelon toward the centre of the country.' },
-  { at: 556,  view: null, secs: 5, time: '09:16',
+  { at: 556,  view: null, secs: 8, time: '09:16',
     head: 'A second wave',
     body: 'Three hours in, the launch rate climbs again instead of fading. {n} alerts before ten in the morning.' },
-  { at: 668,  view: [[31.55, 34.95], 7], secs: 6, time: '11:08',
+  { at: 668,  view: [[31.55, 34.95], 7], secs: 9, time: '11:08',
     head: 'The long afternoon',
     body: 'While the battle rages inside the Envelope communities, rocket fire grinds on for eight more hours. The replay fast-forwards — watch the south stay lit.' },
-  { at: 1185, view: [[32.02, 34.82], 9], secs: 6, time: '19:45 — AFTER DARK',
+  { at: 1185, view: [[32.02, 34.82], 9], secs: 9, time: '19:45 — AFTER DARK',
     head: 'Evening: the centre under fire',
     body: 'A final heavy barrage reaches Dan and the coastal plain — Tel Aviv\u2019s skyline of sirens. By now almost nowhere south of Haifa has stayed quiet.' },
-  { at: 1394, view: [[31.55, 34.95], 7], secs: 30, end: true, time: '23:13 — THE DAY ENDS',
+  { at: END,  view: [[31.55, 34.95], 7], secs: 30, end: true, time: '23:13 — THE DAY ENDS',
     head: '{n} alerts. 17 hours.',
     body: 'The deadliest day in Israel\u2019s history, and the start of everything else this site measures. Read what happened next, front by front.' },
 ];
@@ -282,7 +279,7 @@ function resumeFromBeat() {
   clearTimeout(beatTimer); beatTimer = null;
   document.getElementById('beat-card').classList.remove('show');
   if (finished) { resetReplay(); startReplay(); return; }
-  isPlaying = true; lastRafTime = null;
+  isPlaying = true; lastRafTime = null; setLeg();
   document.getElementById('play-btn').textContent = '⏸ Pause';
   rAFId = requestAnimationFrame(animate);
 }
@@ -293,7 +290,7 @@ function animate(ts) {
   if (lastRafTime === null) lastRafTime = ts;
   const dt = Math.min((ts - lastRafTime) / 1000, 0.1);
   lastRafTime = ts;
-  simMinutes += dt * speedAt(START + simMinutes);
+  simMinutes += dt * legSpeed;
 
   // clamp at the next un-passed beat so captions land exactly on cue
   let pendingBeat = null;
@@ -323,7 +320,7 @@ function animate(ts) {
 
 function startReplay() {
   if (!oct7Data.length || isPlaying) return;
-  started = true; isPlaying = true; lastRafTime = null;
+  started = true; isPlaying = true; lastRafTime = null; setLeg();
   document.getElementById('play-btn').textContent = '⏸ Pause';
   rAFId = requestAnimationFrame(animate);
 }
@@ -401,7 +398,7 @@ function seekTo(frac) {
   passed.clear();
   for (const b of BEATS) if (b.at <= cur) passed.add(b.at);
   updateUI();
-  started = true; isPlaying = true;
+  started = true; isPlaying = true; setLeg();
   document.getElementById('play-btn').textContent = '⏸ Pause';
   rAFId = requestAnimationFrame(animate);
 }
