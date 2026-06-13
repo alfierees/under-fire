@@ -414,12 +414,14 @@ document.getElementById('replay-bar').addEventListener('click', e => {
   try { oct7Data = await fetchData('oct7_replay.json'); }
   catch (e) { console.warn('oct7 load', e); return; }
   buildBar();
+  // Auto-start once the map scrolls into view. revealOnScroll (shared.js) fires
+  // immediately if it's already on screen and falls back from IO to a scroll
+  // listener, so the replay never gets stuck failing to start.
   const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-  if (!reduced && 'IntersectionObserver' in window) {
-    const io = new IntersectionObserver(entries => {
-      if (entries[0].isIntersecting && !started) { startReplay(); io.disconnect(); }
-    }, { threshold: 0.55 });
-    io.observe(document.getElementById('map-container'));
+  if (!reduced) {
+    revealOnScroll(document.getElementById('map-container'), () => {
+      if (!started) startReplay();
+    }, 0.45);
   }
 })();
 </script>

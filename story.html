@@ -6,292 +6,87 @@
   <link rel="canonical" href="https://under-fire.org/story">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Israel’s Multi-Front War, Chapter by Chapter — Under Fire</title>
-  <meta name="description" content="The war told through data: a scroll-driven map story from October 7 through the Hezbollah, Houthi, and Iran fronts.">
+  <meta name="description" content="A guided replay of the war front by front: October 7, the Gaza barrages, the northern front, the Houthis, Iran, and total war — the map flies to each front and reveals its alerts.">
   <meta property="og:type" content="website">
   <meta property="og:title" content="Israel’s Multi-Front War, Chapter by Chapter — Under Fire">
-  <meta property="og:description" content="The war told through data: a scroll-driven map story from October 7 through the Hezbollah, Houthi, and Iran fronts.">
+  <meta property="og:description" content="A guided replay of the war front by front: October 7, the Gaza barrages, the northern front, the Houthis, Iran, and total war.">
   <meta property="og:image" content="https://under-fire.org/images/og-card.png">
   <meta property="og:url" content="https://under-fire.org/story">
   <meta name="twitter:card" content="summary_large_image">
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400;1,700&family=IBM+Plex+Mono:wght@300;400;500&family=IBM+Plex+Sans:wght@300;400;500&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.8.5/d3.min.js"></script>
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   <link rel="stylesheet" href="src/css/shared.css">
   <style>
-    body { overflow-x: hidden; }
+    /* ── Map shell (mirrors oct7.html) ── */
+    #map-container { position:relative; width:100%; height:72vh; min-height:480px; margin-top:2rem; border:1px solid var(--border); border-radius:4px; overflow:hidden; }
+    #story-map { width:100%; height:100%; background:#07070a; }
 
-    /* ── Two-panel story layout ── */
-    #story-wrap {
-      display: flex;
-      position: relative;
-      padding-top: 52px;
-    }
+    .map-overlay { position:absolute; z-index:1000; top:1.4rem; left:1.4rem; background:rgba(7,7,10,.85); backdrop-filter:blur(10px); border:1px solid var(--border); padding:.9rem 1.2rem; border-radius:4px; pointer-events:none; }
+    .map-chapter { font-family:'Playfair Display',serif; font-size:1.5rem; font-weight:700; color:#fff; line-height:1; }
+    .map-chapter-label { font-family:'IBM Plex Mono',monospace; font-size:.55rem; letter-spacing:.14em; text-transform:uppercase; color:var(--muted); margin-top:.35rem; }
 
-    #narrative {
-      width: 40%;
-      min-width: 320px;
-      max-width: 500px;
-      position: relative;
-      z-index: 10;
-      background: linear-gradient(90deg, rgba(7,7,10,0.98) 0%, rgba(7,7,10,0.94) 80%, rgba(7,7,10,0) 100%);
-    }
+    .map-controls { position:absolute; z-index:1000; top:1.4rem; right:1.4rem; display:flex; gap:.6rem; }
+    .map-btn { font-family:'IBM Plex Mono',monospace; font-size:.62rem; letter-spacing:.1em; text-transform:uppercase; padding:.5rem 1.2rem; border:1px solid var(--border); background:rgba(7,7,10,.85); color:var(--text); cursor:pointer; border-radius:2px; transition:all .2s; }
+    .map-btn:hover, .map-btn.active { border-color:var(--accent); color:var(--accent); }
+    .map-btn.play-btn { border-color:var(--red); color:var(--red); }
+    .map-btn.play-btn:hover { background:var(--red); color:#fff; }
 
-    #story-map {
-      flex: 1;
-      position: sticky;
-      top: 52px;
-      height: calc(100vh - 52px);
-    }
-
-    /* ── Hero panel ── */
-    .story-hero {
-      min-height: calc(100vh - 52px);
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      padding: 64px 44px 80px;
-      border-bottom: 1px solid var(--border);
-    }
-    .story-hero .hero-eyebrow {
-      font-family: 'IBM Plex Mono', monospace;
-      font-size: .6rem;
-      letter-spacing: .22em;
-      text-transform: uppercase;
-      color: var(--red);
-      margin-bottom: 1.2rem;
-      display: flex;
-      align-items: center;
-      gap: .8rem;
-    }
-    .story-hero .hero-eyebrow::before {
-      content: '';
-      display: block;
-      width: 28px;
-      height: 1px;
-      background: var(--red);
-      flex-shrink: 0;
-    }
-    .story-hero h1 {
-      font-family: 'Playfair Display', serif;
-      font-size: clamp(2rem, 4vw, 3rem);
-      font-weight: 900;
-      color: #fff;
-      line-height: 1.08;
-      letter-spacing: -.02em;
-      margin-bottom: 1.2rem;
-    }
-    .story-hero .hero-sub {
-      font-family: 'IBM Plex Mono', monospace;
-      font-size: .72rem;
-      color: var(--muted);
-      line-height: 1.85;
-      max-width: 380px;
-      margin-bottom: 2.4rem;
-    }
-    .hero-meta {
-      display: flex;
-      gap: 2rem;
-      flex-wrap: wrap;
-      margin-bottom: 2.8rem;
-    }
-    .hero-meta-item {
-      display: flex;
-      flex-direction: column;
-      gap: 3px;
-    }
-    .hero-meta-val {
-      font-family: 'Playfair Display', serif;
-      font-size: 1.9rem;
-      font-weight: 900;
-      color: var(--accent);
-      line-height: 1;
-    }
-    .hero-meta-label {
-      font-family: 'IBM Plex Mono', monospace;
-      font-size: .52rem;
-      letter-spacing: .14em;
-      text-transform: uppercase;
-      color: var(--muted);
-    }
-    .scroll-cue {
-      display: flex;
-      align-items: center;
-      gap: .8rem;
-      font-family: 'IBM Plex Mono', monospace;
-      font-size: .6rem;
-      letter-spacing: .14em;
-      text-transform: uppercase;
-      color: rgba(200,200,216,.5);
-      animation: pulse-cue 2.4s ease-in-out infinite;
-    }
-    .scroll-cue .arrow { animation: bounce-arr 1.6s ease-in-out infinite; display: inline-block; }
-    @keyframes pulse-cue { 0%,100%{opacity:.5} 50%{opacity:1} }
-    @keyframes bounce-arr { 0%,100%{transform:translateY(0)} 50%{transform:translateY(5px)} }
-
-    /* ── Chapter cards ── */
-    .chapter {
-      min-height: 85vh;
-      padding: 64px 44px;
-      border-bottom: 1px solid var(--border);
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      opacity: 0.22;
-      transition: opacity 0.45s ease;
-    }
-    .chapter.active { opacity: 1; }
-
-    .ch-eyebrow {
-      font-family: 'IBM Plex Mono', monospace;
-      font-size: .58rem;
-      letter-spacing: .16em;
-      text-transform: uppercase;
-      margin-bottom: .5rem;
-    }
-    .ch-title {
-      font-family: 'Playfair Display', serif;
-      font-size: clamp(1.5rem, 2.4vw, 2.1rem);
-      font-weight: 700;
-      color: #fff;
-      line-height: 1.12;
-      letter-spacing: -.01em;
-      margin-bottom: .3rem;
-    }
-    .ch-date {
-      font-family: 'IBM Plex Mono', monospace;
-      font-size: .58rem;
-      color: var(--muted);
-      margin-bottom: 1.2rem;
-    }
-    .ch-desc {
-      font-size: .82rem;
-      color: #c8c8d8;
-      line-height: 1.8;
-      max-width: 390px;
-      margin-bottom: 1.4rem;
-    }
-    .ch-stats {
-      display: flex;
-      flex-direction: column;
-      gap: .55rem;
-    }
-    .ch-stat-row {
-      display: flex;
-      align-items: baseline;
-      gap: .8rem;
-      font-family: 'IBM Plex Mono', monospace;
-      font-size: .6rem;
-    }
-    .ch-stat-val {
-      font-weight: 500;
-      font-size: .82rem;
-      color: #fff;
-      min-width: 5rem;
-    }
-    .ch-stat-label {
-      color: var(--muted);
-      letter-spacing: .06em;
-      text-transform: uppercase;
-    }
-    .ch-actor-bar {
-      margin-top: 1.6rem;
-      height: 2px;
-      border-radius: 1px;
-      width: 48px;
-      opacity: .7;
-    }
-
-    /* ── Outro ── */
-    .story-outro {
-      min-height: 50vh;
-      padding: 64px 44px;
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-    }
-    .story-outro h2 {
-      font-family: 'Playfair Display', serif;
-      font-size: 1.4rem;
-      font-weight: 700;
-      color: #fff;
-      margin-bottom: 1rem;
-    }
-    .story-outro p {
-      font-family: 'IBM Plex Mono', monospace;
-      font-size: .65rem;
-      color: var(--muted);
-      line-height: 1.8;
-      max-width: 380px;
-      margin-bottom: .7rem;
-    }
-    .story-outro a {
-      color: var(--accent);
-      text-decoration: none;
-    }
-    .story-outro a:hover { text-decoration: underline; }
-
-    /* ── Map note overlay ── */
-    #map-note {
-      position: absolute;
-      bottom: 1.2rem;
-      left: 1.2rem;
-      z-index: 1000;
-      font-family: 'IBM Plex Mono', monospace;
-      font-size: .58rem;
-      letter-spacing: .05em;
-      color: rgba(236,238,246,.6);
-      pointer-events: none;
-      max-width: 260px;
-      line-height: 1.5;
-    }
+    #map-note { position:absolute; bottom:3.6rem; left:1.4rem; z-index:1000; font-family:'IBM Plex Mono',monospace; font-size:.55rem; letter-spacing:.05em; color:rgba(236,238,246,.5); pointer-events:none; max-width:260px; line-height:1.5; }
 
     /* ── Arc overlay above Leaflet tiles ── */
-    #arc-overlay {
-      position: absolute; inset: 0;
-      pointer-events: none;
-      z-index: 500;
-    }
-    #arc-overlay svg { width: 100%; height: 100%; display: block; }
-    #arc-overlay .arc-path { fill: none; stroke-linecap: round; }
-    #arc-overlay .origin-dot { filter: drop-shadow(0 0 6px currentColor); }
+    #arc-overlay { position:absolute; inset:0; pointer-events:none; z-index:500; }
+    #arc-overlay svg { width:100%; height:100%; display:block; }
+    #arc-overlay .arc-path { fill:none; stroke-linecap:round; }
+    #arc-overlay .origin-dot { filter:drop-shadow(0 0 6px currentColor); }
 
-    /* ── Chapter counter pill ── */
-    #chapter-counter {
-      position: absolute;
-      top: 1rem;
-      left: 1rem;
-      z-index: 1000;
-      font-family: 'IBM Plex Mono', monospace;
-      font-size: .58rem;
-      letter-spacing: .12em;
-      text-transform: uppercase;
-      color: rgba(200,200,216,.5);
-      background: rgba(7,7,10,.7);
-      border: 1px solid var(--border);
-      padding: .35rem .7rem;
-      border-radius: 3px;
-      pointer-events: none;
-      transition: color .3s;
+    /* ── Guided replay: beat caption card ── */
+    .beat-card {
+      position:absolute; z-index:1100; left:50%; bottom:4.4rem; transform:translateX(-50%) translateY(12px);
+      width:min(480px, calc(100% - 2rem));
+      background:rgba(7,7,10,.94); backdrop-filter:blur(12px);
+      border:1px solid var(--border); border-left:3px solid var(--red);
+      border-radius:4px; padding:1.1rem 1.4rem 1.2rem;
+      opacity:0; pointer-events:none; transition:opacity .35s, transform .35s;
     }
+    .beat-card.show { opacity:1; pointer-events:auto; transform:translateX(-50%) translateY(0); }
+    .beat-time { font-family:'IBM Plex Mono',monospace; font-size:.6rem; letter-spacing:.18em; color:var(--red); margin-bottom:.45rem; }
+    .beat-head { font-family:'Playfair Display',serif; font-weight:900; font-size:1.25rem; color:#fff; line-height:1.15; margin-bottom:.45rem; }
+    .beat-body { font-family:'IBM Plex Sans',sans-serif; font-weight:300; font-size:.82rem; color:var(--muted); line-height:1.55; }
+    .beat-continue { margin-top:.8rem; display:flex; align-items:center; gap:.8rem; }
+    .beat-btn { font-family:'IBM Plex Mono',monospace; font-size:.6rem; letter-spacing:.1em; text-transform:uppercase; padding:.4rem 1rem; border:1px solid var(--red); background:transparent; color:var(--red); cursor:pointer; border-radius:2px; }
+    .beat-btn:hover { background:var(--red); color:#fff; }
+    .beat-timer { flex:1; height:2px; background:rgba(255,255,255,.12); border-radius:1px; overflow:hidden; }
+    .beat-timer > div { height:100%; width:0; background:var(--red); }
+    .beat-card.show .beat-timer > div { animation: beat-fill var(--beat-secs, 8.5s) linear forwards; }
+    @keyframes beat-fill { to { width:100%; } }
 
-    /* ── Mobile ── */
-    @media (max-width: 860px) {
-      #story-wrap { flex-direction: column-reverse; }
-      #narrative {
-        width: 100%;
-        max-width: 100%;
-        min-width: unset;
-        background: rgba(7,7,10,0.98);
-      }
-      #story-map {
-        width: 100%;
-        height: 46vh;
-        position: sticky;
-        top: 52px;
-      }
-      .story-hero { min-height: 70vh; padding: 44px 24px 56px; }
-      .chapter { min-height: auto; padding: 48px 24px; }
-      .story-outro { padding: 48px 24px; }
-      #chapter-counter { display: none; }
+    /* ── Chapter rail (scrub) ── */
+    #chapter-rail { position:absolute; z-index:1050; left:0; right:0; bottom:0; height:3.4rem;
+      display:flex; align-items:stretch; gap:1px;
+      background:linear-gradient(transparent, rgba(7,7,10,.92) 40%); padding:0 .4rem .4rem; }
+    .rail-seg { flex:1; display:flex; flex-direction:column; justify-content:flex-end; gap:.25rem;
+      padding:.4rem .5rem .35rem; cursor:pointer; border-top:2px solid rgba(255,255,255,.12);
+      transition:border-color .25s, color .25s; min-width:0; }
+    .rail-seg:hover { border-top-color:rgba(255,255,255,.4); }
+    .rail-seg.active { border-top-width:2px; }
+    .rail-num { font-family:'IBM Plex Mono',monospace; font-size:.55rem; letter-spacing:.1em; color:var(--muted); }
+    .rail-seg.active .rail-num { color:#fff; }
+    .rail-title { font-family:'IBM Plex Mono',monospace; font-size:.52rem; letter-spacing:.04em;
+      color:rgba(236,238,246,.45); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+    .rail-seg.active .rail-title { color:rgba(236,238,246,.85); }
+
+    @media (max-width: 640px) {
+      #map-container { height:78vh; }
+      .map-overlay { padding:.6rem .8rem; }
+      .map-chapter { font-size:1.1rem; }
+      .map-controls { gap:.4rem; }
+      .map-btn { padding:.45rem .8rem; font-size:.58rem; }
+      .beat-card { bottom:3.8rem; padding:.9rem 1.1rem 1rem; }
+      .beat-head { font-size:1.1rem; }
+      .rail-title { display:none; }
+      #map-note { display:none; }
     }
   </style>
   <!-- Google Analytics -->
@@ -350,130 +145,114 @@
 
 <div id="tooltip"></div>
 
-<div id="story-wrap">
-
-  <!-- ── Left: scrollable narrative ── -->
-  <div id="narrative">
-
-    <div class="story-hero" id="hero-section">
-      <div class="hero-eyebrow">Data Narrative</div>
-      <h1>The Wars,<br>Chapter by Chapter</h1>
-      <p class="hero-sub">
-        From the first rockets of October 7 to the largest barrage in recorded history —
-        six chapters, six fronts, 142,000+ alerts.
-      </p>
-      <div class="hero-meta">
-        <div class="hero-meta-item">
-          <span class="hero-meta-val">6</span>
-          <span class="hero-meta-label">Chapters</span>
-        </div>
-        <div class="hero-meta-item">
-          <span class="hero-meta-val" id="hero-total">142k+</span>
-          <span class="hero-meta-label">Total alerts</span>
-        </div>
-        <div class="hero-meta-item">
-          <span class="hero-meta-val">4</span>
-          <span class="hero-meta-label">Actors</span>
-        </div>
-      </div>
-      <div class="scroll-cue">Scroll to begin <span class="arrow">↓</span></div>
-    </div>
-
-    <div id="chapters-container"></div>
-
-    <div class="story-outro">
-      <h2><span data-live="years-word-cap">Six</span> years of data</h2>
-      <p>Every dot on this map represents real alerts recorded by RocketAlert.live. Approximate positions are distributed within documented alert areas; counts are exact.</p>
-      <p><a href="timeline.html">Six-year timeline →</a></p>
-      <p><a href="oct7.html">October 7 replay →</a></p>
-      <p><a href="records.html">Records & extremes →</a></p>
-    </div>
-
+<div class="chart-page">
+  <div class="section-wrapper">
+    <a href="index.html" class="back-link">← Back to all charts</a>
+    <div class="section-label">06 — The Wars, Chapter by Chapter</div>
+    <h1 class="section-title">Six Fronts, One War</h1>
+    <p class="section-desc">A guided replay through the war front by front — from October 7 to total war. The map flies to each front, draws the fire from its source, and reveals the alerts; it pauses on each chapter long enough to read, then moves on. The fronts stack up as you go, so by the end the whole country is lit at once. Click any chapter on the rail to jump.</p>
   </div>
 
-  <!-- ── Right: sticky map ── -->
-  <div id="story-map">
+  <div id="map-container">
+    <div id="story-map"></div>
     <div id="arc-overlay"></div>
-    <div id="chapter-counter">— / 6</div>
+    <div class="map-overlay">
+      <div class="map-chapter" id="map-chapter">—</div>
+      <div class="map-chapter-label" id="map-chapter-label">Chapter — / 6</div>
+    </div>
+    <div class="map-controls">
+      <button class="map-btn" id="reset-btn">↺ Reset</button>
+      <button class="map-btn play-btn" id="play-btn">▶ Play</button>
+    </div>
     <div id="map-note"></div>
+    <div class="beat-card" id="beat-card" aria-live="polite">
+      <div class="beat-time" id="beat-time"></div>
+      <div class="beat-head" id="beat-head"></div>
+      <div class="beat-body" id="beat-body"></div>
+      <div class="beat-continue">
+        <button class="beat-btn" id="beat-continue-btn">Continue ▶</button>
+        <div class="beat-timer"><div></div></div>
+      </div>
+    </div>
+    <div id="chapter-rail"></div>
   </div>
-
 </div>
 
-<footer>
+<footer style="margin-top:3rem;">
   <div class="footer-left">Under Fire — <span data-live="end-year">2026</span></div>
-  <div class="footer-credit">Alert data from <a href="https://rocketalert.live" target="_blank">RocketAlert.live</a>. Dot positions within alert areas are approximate.</div>
+  <div class="footer-credit">Alert data from <a href="https://rocketalert.live" target="_blank">RocketAlert.live</a>. Dot positions within alert areas are approximate; counts are exact.</div>
 </footer>
 
-<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.8.5/d3.min.js"></script>
 <script src="src/js/shared.js?v=20260613e"></script>
 <script>
+// ── Guided replay: the war, chapter by chapter ───────────────────────────────
+// Adapted from the oct7.html engine. Instead of a clock, the playhead advances
+// through six chapters. Each chapter is a beat: the map flies to that front
+// (~1.2s), arcs draw the fire from its source, the alert field blooms in, and a
+// caption holds ~8.5s before auto-advancing. Earlier fronts stay on the map,
+// dimmed to grey, so the country fills up — by Chapter 6 it's all lit at once.
+
 (function () {
-  /* ── Map init ── */
-  const storyMap = L.map('story-map', {
-    center: [31.7, 35.2],
-    zoom: 6,
-    zoomControl: false,
-    attributionControl: false,
-  });
+  const REDUCED = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const ACCUMULATE = true;       // false → clear each chapter instead of dimming
+  const BEAT_SECS = 8.5;         // read-hold per chapter
+  const FLY_SECS = 1.2;          // fast fly-forward between fronts (oct7 feel)
 
-  L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
-    subdomains: 'abcd',
-    maxZoom: 19,
-  }).addTo(storyMap);
-
-  L.control.attribution({ prefix: false, position: 'bottomright' })
-    .addAttribution('© OpenStreetMap © CARTO')
-    .addTo(storyMap);
-
-  /* ── Origin coordinates per actor (rough approximations) ── */
   const ORIGINS = {
     Hamas:     { lat: 31.43, lon: 34.38, label: 'Gaza' },
     Hezbollah: { lat: 33.38, lon: 35.30, label: 'S. Lebanon' },
     Houthis:   { lat: 15.37, lon: 44.20, label: 'Sana’a, Yemen' },
     Iran:      { lat: 35.70, lon: 51.42, label: 'Tehran' },
   };
+  // Nationwide frame for the closing "total war" beat — Golan to Eilat.
+  const NATION = L.latLngBounds([[29.45, 34.20], [33.40, 35.95]]);
+  const HOME = { center: [31.7, 35.2], zoom: 6 };
 
-  /* ── State ── */
+  // ── State ──
   let chaptersData = [];
-  let activeChapterIdx = -1;
-  let currentChapter = null;
+  let curIdx = -1, started = false, playing = false, finished = false;
+  let beatTimer = null, currentChapter = null;
+  const dotLayers = [];          // dotLayers[i] = { group, markers:[], color }
 
-  /* ── Arc overlay (D3) ── */
+  // ── Map init ──
+  const storyMap = L.map('story-map', {
+    center: HOME.center, zoom: HOME.zoom,
+    zoomControl: false, attributionControl: false,
+  });
+  L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+    subdomains: 'abcd', maxZoom: 19,
+  }).addTo(storyMap);
+  L.control.attribution({ prefix: false, position: 'bottomright' })
+    .addAttribution('© OpenStreetMap © CARTO').addTo(storyMap);
+  const dotRenderer = L.canvas ? L.canvas({ padding: 0.5 }) : null;
+
+  // ── Arc overlay (D3) ──
   const overlayDiv = document.getElementById('arc-overlay');
-  const overlay = d3.select(overlayDiv).append('svg');
-  overlay.attr('preserveAspectRatio', 'none');
-
+  const overlay = d3.select(overlayDiv).append('svg').attr('preserveAspectRatio', 'none');
   function sizeOverlay() {
-    const rect = overlayDiv.getBoundingClientRect();
-    overlay.attr('width', rect.width).attr('height', rect.height);
+    const r = overlayDiv.getBoundingClientRect();
+    overlay.attr('width', r.width).attr('height', r.height);
   }
   sizeOverlay();
-  window.addEventListener('resize', sizeOverlay);
+  window.addEventListener('resize', () => { sizeOverlay(); if (currentChapter) renderArcs(currentChapter); });
+  function project(lat, lon) { const p = storyMap.latLngToContainerPoint([lat, lon]); return [p.x, p.y]; }
+  function clearOverlay() { overlay.selectAll('*').remove(); }
 
-  function project(lat, lon) {
-    const p = storyMap.latLngToContainerPoint([lat, lon]);
-    return [p.x, p.y];
-  }
-
-  function arcPathD(originLL, targetLL, bow = 0.28) {
-    const [x1, y1] = project(originLL.lat, originLL.lon);
-    const [x2, y2] = project(targetLL.lat, targetLL.lon);
-    const dx = x2 - x1, dy = y2 - y1;
-    const dist = Math.hypot(dx, dy) || 1;
-    const nx = -dy / dist, ny = dx / dist;
-    const mx = (x1 + x2) / 2 + nx * dist * bow;
-    const my = (y1 + y2) / 2 + ny * dist * bow;
+  function arcPathD(o, t, bow = 0.28) {
+    const [x1, y1] = project(o.lat, o.lon), [x2, y2] = project(t.lat, t.lon);
+    const dx = x2 - x1, dy = y2 - y1, d = Math.hypot(dx, dy) || 1;
+    const nx = -dy / d, ny = dx / d;
+    const mx = (x1 + x2) / 2 + nx * d * bow, my = (y1 + y2) / 2 + ny * d * bow;
     return `M ${x1} ${y1} Q ${mx} ${my} ${x2} ${y2}`;
   }
 
-  function clearOverlay() {
-    overlay.selectAll('*').remove();
+  // For Hezbollah, drop points above the border (~33.05–33.27) so impacts and
+  // bounds stay in clearly Israeli towns rather than bleeding into Lebanon.
+  function chapterPoints(ch) {
+    return ch.actor === 'Hezbollah' ? ch.points.filter(p => p[0] <= 32.95) : ch.points;
   }
 
-  /* ── Cluster impact points to a handful of main areas ── */
-  function clusterPoints(points, gridDeg = 0.15, topN = 6) {
+  function clusterPoints(points, gridDeg = 0.18, topN = 5) {
     const buckets = new Map();
     for (const [lat, lon] of points) {
       const key = `${Math.round(lat / gridDeg)}|${Math.round(lon / gridDeg)}`;
@@ -482,83 +261,94 @@
       else buckets.set(key, { latSum: lat, lonSum: lon, n: 1 });
     }
     return Array.from(buckets.values())
-      .sort((a, b) => b.n - a.n)
-      .slice(0, topN)
+      .sort((a, b) => b.n - a.n).slice(0, topN)
       .map(b => ({ lat: b.latSum / b.n, lon: b.lonSum / b.n, count: b.n }));
   }
 
-  /* ── Render a chapter: arcs first, impacts bloom at the end ── */
-  function renderChapter(ch) {
+  function chapterBounds(ch) {
+    if (ch.id === 'total-war') return NATION;   // pull back to the whole nation
+    const origin = ORIGINS[ch.actor];
+    const impactLL = [ch.map.center[1], ch.map.center[0]];   // stored [lon, lat]
+    const clusters = clusterPoints(chapterPoints(ch));
+    if (!origin) return L.latLngBounds([impactLL, impactLL]).pad(0.4);
+    const pts = [[origin.lat, origin.lon], impactLL].concat(clusters.map(c => [c.lat, c.lon]));
+    const bounds = L.latLngBounds(pts).pad(0.18);
+    if (ch.actor === 'Hezbollah') bounds.extend([32.4, bounds.getWest()]);
+    return bounds;
+  }
+
+  // ── Dot layers (the accumulating alert field) ──
+  function ensureDotLayer(i) {
+    if (dotLayers[i]) { if (!storyMap.hasLayer(dotLayers[i].group)) dotLayers[i].group.addTo(storyMap); return; }
+    const ch = chaptersData[i];
+    const group = L.layerGroup();
+    const markers = chapterPoints(ch).map(([lat, lon]) => {
+      const m = L.circleMarker([lat, lon], {
+        radius: 3, color: ch.color, fillColor: ch.color, fillOpacity: 0.7, weight: 0,
+        renderer: dotRenderer || undefined,
+      });
+      group.addLayer(m);
+      return m;
+    });
+    group.addTo(storyMap);
+    dotLayers[i] = { group, markers, color: ch.color };
+  }
+
+  function applyDimming(active) {
+    dotLayers.forEach((L0, j) => {
+      if (!L0) return;
+      if (j < active && !ACCUMULATE) { storyMap.removeLayer(L0.group); return; }
+      if (j < active && !storyMap.hasLayer(L0.group)) L0.group.addTo(storyMap);
+      // Earlier fronts stay in their actor colour, just faded — so the country
+      // fills up front by front. The active front is brighter and a touch larger.
+      const style = j < active
+        ? { color: L0.color, fillColor: L0.color, fillOpacity: 0.34, radius: 2.4, weight: 0 }
+        : { color: L0.color, fillColor: L0.color, fillOpacity: 0.82, radius: 3.2, weight: 0 };
+      L0.markers.forEach(m => m.setStyle(style));
+    });
+  }
+
+  // ── Arcs + blooms for the current chapter (transient — cleared on advance) ──
+  function renderArcs(ch) {
     clearOverlay();
     sizeOverlay();
-
-    const origin = ORIGINS[ch.actor];
-    if (!origin) return;
-    // For Hezbollah, drop points above lat 32.95 — the Lebanese border sits at ~33.05–33.27
-    // and the area bounding boxes bleed into Lebanese territory, so cluster centroids
-    // were landing in Tibnine, Rmeish etc. This keeps impacts in clearly Israeli towns.
-    const pts = ch.actor === 'Hezbollah'
-      ? ch.points.filter(p => p[0] <= 32.95)
-      : ch.points;
-    const clusters = clusterPoints(pts, 0.18, 6);
+    const clusters = clusterPoints(chapterPoints(ch));
     if (!clusters.length) return;
     const maxCount = d3.max(clusters, c => c.count) || 1;
 
-    // Origin marker — pulsing dot at launch site
+    // Closing nationwide beat: no single origin — just bloom the hotspots.
+    if (ch.id === 'total-war') { clusters.forEach(c => bloomAt(c, ch.color, maxCount)); return; }
+
+    const origin = ORIGINS[ch.actor];
+    if (!origin) { clusters.forEach(c => bloomAt(c, ch.color, maxCount)); return; }
+
     const [ox, oy] = project(origin.lat, origin.lon);
-    overlay.append('circle')
-      .attr('class', 'origin-dot')
-      .attr('cx', ox).attr('cy', oy)
-      .attr('r', 6).attr('fill', ch.color)
-      .style('color', ch.color)
-      .attr('opacity', 0.95);
-    overlay.append('circle')
-      .attr('cx', ox).attr('cy', oy)
-      .attr('r', 6).attr('fill', 'none')
-      .attr('stroke', ch.color).attr('stroke-width', 2)
-      .attr('opacity', 0.6)
-      .transition().duration(1400).ease(d3.easeCubicOut)
-      .attr('r', 22).attr('opacity', 0)
+    overlay.append('circle').attr('class', 'origin-dot')
+      .attr('cx', ox).attr('cy', oy).attr('r', 6)
+      .attr('fill', ch.color).style('color', ch.color).attr('opacity', 0.95);
+    overlay.append('circle').attr('cx', ox).attr('cy', oy).attr('r', 6)
+      .attr('fill', 'none').attr('stroke', ch.color).attr('stroke-width', 2).attr('opacity', 0.6)
+      .transition().duration(1400).ease(d3.easeCubicOut).attr('r', 22).attr('opacity', 0)
       .on('end', function repeat() {
         d3.select(this).attr('r', 6).attr('opacity', 0.6)
-          .transition().duration(1400).ease(d3.easeCubicOut)
-          .attr('r', 22).attr('opacity', 0)
-          .on('end', repeat);
+          .transition().duration(1400).ease(d3.easeCubicOut).attr('r', 22).attr('opacity', 0).on('end', repeat);
       });
-    overlay.append('text')
-      .attr('x', ox).attr('y', oy - 14)
-      .attr('text-anchor', 'middle')
-      .attr('fill', ch.color)
-      .attr('font-family', 'IBM Plex Mono')
-      .attr('font-size', 10)
-      .attr('letter-spacing', '.14em')
-      .text(origin.label.toUpperCase());
+    overlay.append('text').attr('x', ox).attr('y', oy - 14).attr('text-anchor', 'middle')
+      .attr('fill', ch.color).attr('font-family', 'IBM Plex Mono').attr('font-size', 10)
+      .attr('letter-spacing', '.14em').text(origin.label.toUpperCase());
 
-    // Arcs from origin to each cluster centroid
-    const ARC_DUR = 1100;
     clusters.forEach((c, i) => {
-      const pathD = arcPathD(origin, c);
-      const path = overlay.append('path')
-        .attr('class', 'arc-path')
-        .attr('d', pathD)
-        .attr('stroke', ch.color)
-        .attr('stroke-width', 1.6)
-        .attr('stroke-dasharray', '6 5')
-        .attr('opacity', 0.85);
+      const path = overlay.append('path').attr('class', 'arc-path')
+        .attr('d', arcPathD(origin, c)).attr('stroke', ch.color)
+        .attr('stroke-width', 1.5).attr('opacity', 0.8);
       const len = path.node().getTotalLength();
-      path.attr('stroke-dasharray', `${len} ${len}`)
-          .attr('stroke-dashoffset', len)
-          .transition()
-          .delay(i * 110)
-          .duration(ARC_DUR)
-          .ease(d3.easeCubicInOut)
-          .attr('stroke-dashoffset', 0)
-          .on('end', () => {
-            // Restore dashed look after draw-on finishes
-            path.attr('stroke-dasharray', '6 5').attr('stroke-dashoffset', 0);
-            // Bloom at the impact cluster
-            bloomAt(c, ch.color, maxCount);
-          });
+      path.attr('stroke-dasharray', `${len} ${len}`).attr('stroke-dashoffset', len)
+        .transition().delay(i * 120).duration(1100).ease(d3.easeCubicInOut)
+        .attr('stroke-dashoffset', 0)
+        .on('end', () => {
+          path.attr('stroke-dasharray', '6 5').attr('stroke-dashoffset', 0);
+          bloomAt(c, ch.color, maxCount);
+        });
     });
   }
 
@@ -566,161 +356,207 @@
     const [x, y] = project(cluster.lat, cluster.lon);
     const scale = Math.sqrt(cluster.count / maxCount);
     const maxR = 18 + scale * 32;
-
-    // Persistent impact dot (core)
-    overlay.append('circle')
-      .attr('cx', x).attr('cy', y)
-      .attr('r', 0).attr('fill', color).attr('opacity', 0.85)
-      .transition().duration(260).ease(d3.easeCubicOut)
-      .attr('r', 4 + scale * 3);
-
-    // Expanding shock ring
-    overlay.append('circle')
-      .attr('cx', x).attr('cy', y)
-      .attr('r', 2).attr('fill', 'none')
-      .attr('stroke', color).attr('stroke-width', 2)
-      .attr('opacity', 0.9)
-      .transition().duration(1100).ease(d3.easeCubicOut)
-      .attr('r', maxR).attr('opacity', 0)
-      .remove();
-
+    overlay.append('circle').attr('cx', x).attr('cy', y).attr('r', 0)
+      .attr('fill', color).attr('opacity', 0.85)
+      .transition().duration(260).ease(d3.easeCubicOut).attr('r', 4 + scale * 3);
+    overlay.append('circle').attr('cx', x).attr('cy', y).attr('r', 2)
+      .attr('fill', 'none').attr('stroke', color).attr('stroke-width', 2).attr('opacity', 0.9)
+      .transition().duration(1100).ease(d3.easeCubicOut).attr('r', maxR).attr('opacity', 0).remove();
   }
 
-  /* ── Compute bounds so both origin and impact area fit ── */
-  function chapterBounds(ch) {
-    const origin = ORIGINS[ch.actor];
-    const impactLL = [ch.map.center[1], ch.map.center[0]];
-    if (!origin) return L.latLngBounds([impactLL, impactLL]).pad(0.4);
-    const filteredPts = ch.actor === 'Hezbollah'
-      ? ch.points.filter(p => p[0] <= 32.95)
-      : ch.points;
-    const clusters = clusterPoints(filteredPts, 0.18, 6);
-    const pts = [[origin.lat, origin.lon], impactLL]
-      .concat(clusters.map(c => [c.lat, c.lon]));
-    const bounds = L.latLngBounds(pts).pad(0.18);
-    // For Hezbollah, force the view south to at least lat 32.4 so the
-    // Lebanon→Israel border crossing is clearly visible on screen.
-    if (ch.actor === 'Hezbollah') {
-      bounds.extend([32.4, bounds.getWest()]);
+  // ── Caption card ──
+  function showCaption(idx) {
+    const ch = chaptersData[idx], r = ch.replay || {};
+    const isEnd = idx === chaptersData.length - 1;
+    const card = document.getElementById('beat-card');
+    card.style.borderLeftColor = ch.color;
+    card.style.setProperty('--beat-secs', BEAT_SECS + 's');
+    document.getElementById('beat-time').textContent = r.time || ch.eyebrow || '';
+    document.getElementById('beat-time').style.color = ch.color;
+    document.getElementById('beat-head').textContent = r.head || ch.title;
+    const body = document.getElementById('beat-body');
+    body.textContent = r.body || ch.description;
+    document.querySelector('.beat-btn').style.borderColor = ch.color;
+    document.querySelector('.beat-btn').style.color = ch.color;
+
+    if (isEnd) {
+      body.innerHTML += ' <a href="timeline.html" style="color:var(--accent);">See the six-year timeline →</a>';
+      document.getElementById('beat-continue-btn').textContent = '↺ Replay';
+      finished = true;
+      document.getElementById('play-btn').textContent = '✓ Done';
+    } else {
+      document.getElementById('beat-continue-btn').textContent = 'Continue ▶';
+      document.getElementById('play-btn').textContent = '⏸ Pause';
     }
-    return bounds;
+    // restart the timer-bar animation
+    const fill = card.querySelector('.beat-timer > div');
+    fill.style.animation = 'none'; void fill.offsetWidth; fill.style.animation = '';
+    card.classList.add('show');
+    if (!isEnd) beatTimer = setTimeout(resumeFromBeat, BEAT_SECS * 1000);
   }
 
-  /* ── Fly to chapter, then render arcs once map settles ── */
-  function activateChapter(idx) {
-    if (idx === activeChapterIdx) return;
-    activeChapterIdx = idx;
+  function resumeFromBeat() {
+    clearTimeout(beatTimer); beatTimer = null;
+    document.getElementById('beat-card').classList.remove('show');
+    if (finished) { resetReplay(); startReplay(); return; }
+    if (curIdx < chaptersData.length - 1) { goToChapter(curIdx + 1, true); }
+  }
+  document.getElementById('beat-continue-btn').onclick = resumeFromBeat;
+
+  // ── Fly to a chapter, then render once the map settles ──
+  function flyAndThen(bounds, animate, cb) {
+    let done = false;
+    const fire = () => { if (done) return; done = true; cb(); };
+    if (animate) {
+      storyMap.flyToBounds(bounds, { duration: FLY_SECS, easeLinearity: 0.35 });
+      storyMap.once('moveend', fire);
+      setTimeout(fire, FLY_SECS * 1000 + 350);   // fallback if no moveend fires
+    } else {
+      storyMap.fitBounds(bounds, { animate: false });
+      fire();
+    }
+  }
+
+  function updateChrome(idx) {
     const ch = chaptersData[idx];
-    currentChapter = ch;
-    const counter = document.getElementById('chapter-counter');
-    const note = document.getElementById('map-note');
-    counter.textContent = `Chapter ${ch.chapter} / 6`;
-    counter.style.color = ch.color;
-    note.textContent = ch.points_note;
-
-    clearOverlay();
-    const bounds = chapterBounds(ch);
-    storyMap.flyToBounds(bounds, { duration: 1.6, easeLinearity: 0.35 });
-    // Rendering happens on the moveend listener below, once the map settles.
+    document.getElementById('map-chapter').textContent = ch.title;
+    const label = document.getElementById('map-chapter-label');
+    label.textContent = `Chapter ${ch.chapter} / ${chaptersData.length}`;
+    label.style.color = ch.color;
+    document.getElementById('map-note').textContent = ch.points_note || '';
+    document.querySelectorAll('.rail-seg').forEach((el, j) => {
+      const active = j === idx;
+      el.classList.toggle('active', active);
+      el.style.borderTopColor = active ? ch.color : '';
+    });
   }
 
-  /* ── Redraw overlay whenever the map settles ── */
-  storyMap.on('moveend', () => {
-    if (currentChapter) renderChapter(currentChapter);
-  });
+  function goToChapter(idx, animate) {
+    curIdx = idx;
+    currentChapter = chaptersData[idx];
+    playing = true;
+    for (let j = 0; j <= idx; j++) ensureDotLayer(j);
+    applyDimming(idx);
+    updateChrome(idx);
+    clearOverlay();   // drop previous chapter's arcs
+    flyAndThen(chapterBounds(currentChapter), animate, () => {
+      renderArcs(currentChapter);
+      showCaption(idx);
+    });
+  }
 
-  function resetMap() {
-    activeChapterIdx = -1;
-    currentChapter = null;
+  // ── Controls ──
+  function startReplay() {
+    if (!chaptersData.length || playing) return;
+    started = true; playing = true;
+    document.getElementById('play-btn').textContent = '⏸ Pause';
+    goToChapter(curIdx < 0 ? 0 : curIdx, true);
+  }
+
+  function resetReplay() {
+    playing = false; finished = false; curIdx = -1; currentChapter = null;
+    clearTimeout(beatTimer); beatTimer = null;
+    document.getElementById('beat-card').classList.remove('show');
     clearOverlay();
-    const counter = document.getElementById('chapter-counter');
-    counter.textContent = '— / 6';
-    counter.style.color = '';
+    dotLayers.forEach(L0 => { if (L0) storyMap.removeLayer(L0.group); });
+    dotLayers.length = 0;
+    document.getElementById('map-chapter').textContent = '—';
+    const label = document.getElementById('map-chapter-label');
+    label.textContent = `Chapter — / ${chaptersData.length}`;
+    label.style.color = '';
     document.getElementById('map-note').textContent = '';
-    storyMap.flyTo([31.7, 35.2], 6, { duration: 1.3 });
+    document.querySelectorAll('.rail-seg').forEach(el => { el.classList.remove('active'); el.style.borderTopColor = ''; });
+    document.getElementById('play-btn').textContent = '▶ Play';
+    document.getElementById('beat-continue-btn').textContent = 'Continue ▶';
+    storyMap.flyTo(HOME.center, HOME.zoom, { duration: 0.8 });
   }
 
-  /* ── Build chapter DOM ── */
-  function buildChapters(chapters) {
-    const container = document.getElementById('chapters-container');
+  document.getElementById('play-btn').onclick = () => {
+    if (!chaptersData.length) return;
+    if (document.getElementById('beat-card').classList.contains('show')) { resumeFromBeat(); return; }
+    if (playing) {
+      playing = false;
+      clearTimeout(beatTimer); beatTimer = null;
+      document.getElementById('play-btn').textContent = '▶ Play';
+    } else if (finished) {
+      resetReplay(); startReplay();
+    } else {
+      startReplay();
+    }
+  };
+  document.getElementById('reset-btn').onclick = resetReplay;
 
-    chapters.forEach((ch, i) => {
-      const div = document.createElement('div');
-      div.className = 'chapter';
-      div.dataset.idx = i;
-
-      const statsHtml = ch.stats.map(s => `
-        <div class="ch-stat-row">
-          <span class="ch-stat-val">${s.value}</span>
-          <span class="ch-stat-label">${s.label}</span>
-        </div>`).join('');
-
-      div.innerHTML = `
-        <div class="ch-eyebrow" style="color:${ch.color}">${ch.eyebrow}</div>
-        <div class="ch-title">${ch.title}</div>
-        <div class="ch-date">${ch.date}</div>
-        <p class="ch-desc">${ch.description}</p>
-        <div class="ch-stats">${statsHtml}</div>
-        <div class="ch-actor-bar" style="background:${ch.color}"></div>
-      `;
-
-      container.appendChild(div);
+  // ── Jump to a chapter via the rail (instant, then keep playing) ──
+  function scrubToChapter(idx) {
+    if (!chaptersData.length) return;
+    clearTimeout(beatTimer); beatTimer = null;
+    document.getElementById('beat-card').classList.remove('show');
+    finished = false; started = true;
+    curIdx = idx;
+    currentChapter = chaptersData[idx];
+    playing = true;
+    for (let j = 0; j <= idx; j++) ensureDotLayer(j);
+    // hide any chapters past the jump target
+    dotLayers.forEach((L0, j) => { if (L0 && j > idx) storyMap.removeLayer(L0.group); });
+    applyDimming(idx);
+    updateChrome(idx);
+    clearOverlay();
+    flyAndThen(chapterBounds(currentChapter), false, () => {
+      renderArcs(currentChapter);
+      showCaption(idx);
     });
   }
 
-  /* ── Intersection observer ── */
-  function setupObserver(chapters) {
-    const chapterEls = document.querySelectorAll('.chapter');
-
-    const chapterObs = new IntersectionObserver((entries) => {
-      entries.forEach(entry => {
-        if (entry.isIntersecting) {
-          chapterEls.forEach(el => el.classList.remove('active'));
-          entry.target.classList.add('active');
-          activateChapter(+entry.target.dataset.idx);
-        }
-      });
-    }, {
-      root: null,
-      rootMargin: '-28% 0px -28% 0px',
-      threshold: 0.08,
+  function buildRail() {
+    const rail = document.getElementById('chapter-rail');
+    rail.innerHTML = '';
+    chaptersData.forEach((ch, i) => {
+      const seg = document.createElement('div');
+      seg.className = 'rail-seg';
+      seg.dataset.idx = i;
+      seg.innerHTML = `<span class="rail-num">0${ch.chapter}</span><span class="rail-title">${ch.title}</span>`;
+      seg.onclick = () => scrubToChapter(i);
+      rail.appendChild(seg);
     });
-
-    chapterEls.forEach(el => chapterObs.observe(el));
-
-    // Hero observer — resets map when scrolled back to top
-    const heroObs = new IntersectionObserver((entries) => {
-      if (entries[0].isIntersecting) {
-        chapterEls.forEach(el => el.classList.remove('active'));
-        resetMap();
-      }
-    }, { threshold: 0.25 });
-
-    heroObs.observe(document.getElementById('hero-section'));
   }
 
-  /* ── Load data and boot ── */
+  // ── prefers-reduced-motion: static accumulated view, no auto-play ──
+  function renderStatic() {
+    chaptersData.forEach((_, j) => ensureDotLayer(j));
+    curIdx = chaptersData.length - 1;
+    currentChapter = chaptersData[curIdx];
+    applyDimming(curIdx);
+    updateChrome(curIdx);
+    storyMap.fitBounds(NATION, { animate: false });
+    const ch = currentChapter, r = ch.replay || {};
+    const card = document.getElementById('beat-card');
+    card.style.borderLeftColor = ch.color;
+    document.getElementById('beat-time').textContent = r.time || '';
+    document.getElementById('beat-time').style.color = ch.color;
+    document.getElementById('beat-head').textContent = r.head || ch.title;
+    document.getElementById('beat-body').textContent = r.body || ch.description;
+    document.querySelector('.beat-continue').style.display = 'none';
+    card.classList.add('show');
+    document.getElementById('play-btn').textContent = '✓ Done';
+  }
+
+  // ── Boot: load data, then auto-start when the map scrolls into view ──
   (async () => {
     try {
-      const [story, stats] = await Promise.all([
-        fetchData('story_chapters.json'),
-        fetchData('stats_summary.json'),
-      ]);
-
+      const story = await fetchData('story_chapters.json');
       chaptersData = story.chapters;
+    } catch (e) { console.warn('story load error', e); return; }
 
-      // Update hero total
-      const heroTotal = document.getElementById('hero-total');
-      if (heroTotal && stats.total_alerts) {
-        heroTotal.textContent = (stats.total_alerts / 1000).toFixed(0) + 'k+';
-      }
+    buildRail();
 
-      buildChapters(chaptersData);
-      setupObserver(chaptersData);
+    if (REDUCED) { renderStatic(); return; }
 
-    } catch (e) {
-      console.warn('story load error', e);
-    }
+    // Auto-start once the map scrolls into view. revealOnScroll (shared.js) fires
+    // immediately if it's already on screen and has an IO + scroll fallback, so
+    // it never gets stuck the way a bare IntersectionObserver can.
+    revealOnScroll(document.getElementById('map-container'), () => {
+      if (!started) startReplay();
+    }, 0.45);
   })();
 })();
 </script>

@@ -77,6 +77,43 @@ def main():
 
     area_by_name = {a['area']: a for a in areas_list}
 
+    # Real per-actor totals used in the guided-replay captions (never hardcode —
+    # these flow from the live aggregates so the 30-min pipeline keeps them true).
+    n_oct7 = len(oct7)
+    n_hamas = stats['origins'].get('Hamas', 0)
+    n_hez = stats['origins'].get('Hezbollah', 0)
+    n_hou = stats['origins'].get('Houthis', 0)
+
+    # ── Guided-replay captions ────────────────────────────────────────────────
+    # Short, ~8.5s-read beat captions for the chapter-by-chapter replay (story.html).
+    # EDIT THIS COPY HERE, never in the JSON — the pipeline regenerates the JSON.
+    REPLAY = {
+        "oct7": {
+            "time": "7 OCT 2023 · 06:29", "head": "It begins",
+            "body": f"A Shabbat morning. At 06:29 Hamas opens the war with the heaviest single day Israel has ever recorded — {n_oct7:,} alerts across the Gaza Envelope and the south.",
+        },
+        "gaza": {
+            "time": "OCT 2023 – OCT 2024", "head": "The grind",
+            "body": f"For the year that follows, the south never quiets. {n_hamas:,} Hamas alerts in all — a daily rhythm of sirens over the Envelope, Lakhish and the Negev.",
+        },
+        "hezbollah": {
+            "time": "OCT 2023 · THE NORTH", "head": "The north ignites",
+            "body": f"October 8: Hezbollah opens a second front. Anti-tank fire and drones empty the Galilee — {n_hez:,} alerts along the border, 60,000 driven from their homes.",
+        },
+        "houthis": {
+            "time": "NOV 2023 · FROM YEMEN", "head": "From 2,000 km away",
+            "body": f"From Yemen the Houthis reach across the region — first Eilat, then Tel Aviv. {n_hou:,} alerts from missiles intercepted in space.",
+        },
+        "iran-direct": {
+            "time": "APR & OCT 2024 · IRAN", "head": "Iran steps out of the shadows",
+            "body": "April 14 and October 1, 2024: the first direct strikes from Iranian soil. Hundreds of drones and ballistic missiles — a five-nation coalition holding the sky, over 99% intercepted.",
+        },
+        "total-war": {
+            "time": "28 FEB 2026", "head": "Total war",
+            "body": "February 28, 2026: 10,162 alerts in a single day. From the Golan to Eilat, all 30 regions under fire at once — the war in every home.",
+        },
+    }
+
     # Ch1: Oct 7 — real coordinates from replay data
     oct7_pts = [[round(a['lat'], 5), round(a['lon'], 5)] for a in oct7]
     random.shuffle(oct7_pts)
@@ -217,6 +254,10 @@ def main():
             "points_note": "Approximate positions within recorded alert areas",
         },
     ]
+
+    # Attach the short replay caption to each chapter (keyed by id).
+    for ch in chapters:
+        ch["replay"] = REPLAY[ch["id"]]
 
     out = {"generated": "2026-04-23", "chapters": chapters}
     out_path = PROCESSED / 'story_chapters.json'
