@@ -111,7 +111,7 @@
     <a href="index.html" class="back-link">← Back to all charts</a>
     <div class="section-label">05 — By Region</div>
     <h1 class="section-title">Area Vulnerability</h1>
-    <p class="section-desc">Israel's Home Front Command divides the country into alert regions — the Gaza Envelope, the Confrontation Line, the Dan and Sharon blocks around Tel Aviv, and two dozen more. Hover any region to see where it is and how many alerts it has taken since <span data-live="year-range">2020</span>. Darker red means more alerts.</p>
+    <p class="section-desc">Israel's Home Front Command divides the country into alert regions — the Gaza Envelope, the Confrontation Line, the Dan and Sharon blocks around Tel Aviv, and two dozen more. Hover any region to see where it is and how many alerts it has taken since <span data-live="year-range">2020</span>. Blue regions have been hit the least, red the most.</p>
 
     <div id="map-container">
       <div id="areas-map"></div>
@@ -216,7 +216,8 @@ function drawAreas(data) {
 }
 
 // ── Choropleth map ───────────────────────────────────────────────────────────
-const RAMP = d3.interpolateRgbBasis(['#241016', '#5e1a1e', '#a32226', '#d63031', '#ff7a68']);
+// Matches the ranked-bar colour language: blue = least hit, amber = mid, red = most.
+const RAMP = d3.interpolateRgbBasis(['#4a9eff', '#5fb0d8', '#e8b84b', '#e0793c', '#d63031']);
 
 function buildAreaMap(areas, geo) {
   const byName = new Map(areas.map(a => [a.area, a]));
@@ -240,17 +241,15 @@ function buildAreaMap(areas, geo) {
       return;
     }
     info.classList.remove('empty');
-    const origins = Object.entries(a.origins || {}).sort((x, y) => y[1] - x[1]);
-    const topOrigin = origins.length ? (origins[0][0] === 'Unknown' ? 'Unattributed' : origins[0][0]) : '—';
     const uavPct = a.total ? Math.round(a.uav / a.total * 100) : 0;
     document.getElementById('mi-rank').textContent = `rank #${rankOf.get(a.area)} of ${areas.length} by total alerts`;
     document.getElementById('mi-name').textContent = a.area;
     document.getElementById('mi-total').textContent = fmtNum(a.total);
     document.getElementById('mi-total-lbl').textContent = 'total alerts';
     document.getElementById('mi-stats').innerHTML =
+      `<div class="mi-row"><span>Days with alerts</span><span>${fmtNum(a.active_days)}</span></div>` +
       `<div class="mi-row"><span>Avg / active day</span><span>${a.avg_per_day.toFixed(1)}</span></div>` +
       `<div class="mi-row"><span>Rocket / drone</span><span>${100 - uavPct}% / ${uavPct}%</span></div>` +
-      `<div class="mi-row"><span>Mostly from</span><span>${topOrigin}</span></div>` +
       `<div class="mi-row"><span>Worst day</span><span>${fmtNum(a.peak_day_count)} on ${a.peak_day ? a.peak_day.slice(5) : '—'}</span></div>`;
   }
 
