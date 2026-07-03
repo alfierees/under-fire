@@ -7,6 +7,9 @@ data/processed/alerts_clean.xlsx
 # The 7 small processed files the website needs ARE committed (see data/processed/)
 
 
+# Node.js
+node_modules/
+
 # Python
 __pycache__/
 *.pyc
