@@ -1,0 +1,12 @@
+{
+  "name": "under-fire",
+  "version": "1.0.0",
+  "description": "Patterns in rocket, missile, and drone attacks on Israel — an interactive data journalism project",
+  "private": true,
+  "scripts": {
+    "serve": "python3 -m http.server 8000"
+  },
+  "dependencies": {
+    "@vercel/analytics": "^1.4.1"
+  }
+}
