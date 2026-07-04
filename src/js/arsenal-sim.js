@@ -37,18 +37,48 @@
     'SRBM': 500000, 'MRBM': 1000000, 'cruise missile': 900000,
     'OWA drone': 35000, 'ATGM': 120000,
   };
-  // Which defense layer engages which class, with interceptor cost (midpoint
-  // of documented ranges) and a base single-shot intercept probability
-  // anchored to claimed/reported rates.
-  const DEFENSE_FOR = {
-    'mortar': { name: 'Iron Dome', cost: 70000, p: 0.9 },
-    'artillery rocket': { name: 'Iron Dome', cost: 70000, p: 0.92 },
-    'heavy artillery rocket': { name: 'Iron Dome', cost: 70000, p: 0.9 },
-    'ATGM': { name: 'Iron Dome', cost: 70000, p: 0.82 },
-    'SRBM': { name: "David's Sling", cost: 1000000, p: 0.92 },
-    'cruise missile': { name: "David's Sling", cost: 1000000, p: 0.9 },
-    'OWA drone': { name: 'Iron Dome / fighters', cost: 70000, p: 0.95 },
-    'MRBM': { name: 'Arrow 3 / THAAD', cost: 3000000, p: 0.94 },
+  // The selectable defense layers. Per-class kill probabilities are anchored
+  // to claimed/reported rates; 0 means the system genuinely cannot engage
+  // that threat class (wrong envelope) — picking it teaches why the shield
+  // is layered. Costs are midpoints of documented per-interceptor figures.
+  const DEFENSE_CATALOG = {
+    'auto': { name: 'Auto — best layer for the threat', auto: true },
+    'iron-dome': {
+      name: 'Iron Dome', cost: 70000, beam: false,
+      note: 'Short-range rockets, mortars, drones',
+      p: { 'mortar': 0.9, 'artillery rocket': 0.93, 'heavy artillery rocket': 0.9,
+           'OWA drone': 0.94, 'cruise missile': 0.8, 'ATGM': 0.82, 'SRBM': 0, 'MRBM': 0 },
+    },
+    'davids-sling': {
+      name: "David's Sling", cost: 1000000, beam: false,
+      note: 'The middle layer — heavy rockets, SRBMs, cruise missiles',
+      p: { 'mortar': 0, 'artillery rocket': 0.75, 'heavy artillery rocket': 0.93,
+           'OWA drone': 0.92, 'cruise missile': 0.92, 'ATGM': 0, 'SRBM': 0.93, 'MRBM': 0.6 },
+    },
+    'arrow': {
+      name: 'Arrow 2 / 3', cost: 3000000, beam: false,
+      note: 'Ballistic missiles, up to the edge of space',
+      p: { 'mortar': 0, 'artillery rocket': 0, 'heavy artillery rocket': 0,
+           'OWA drone': 0, 'cruise missile': 0, 'ATGM': 0, 'SRBM': 0.9, 'MRBM': 0.94 },
+    },
+    'thaad': {
+      name: 'THAAD (US Army)', cost: 12500000, beam: false,
+      note: 'Terminal high-altitude ballistic-missile defense',
+      p: { 'mortar': 0, 'artillery rocket': 0, 'heavy artillery rocket': 0,
+           'OWA drone': 0, 'cruise missile': 0, 'ATGM': 0, 'SRBM': 0.92, 'MRBM': 0.96 },
+    },
+    'iron-beam': {
+      name: 'Iron Beam (laser)', cost: 5, beam: true,
+      note: '~10 km-class laser — rockets, mortars, drones at ~$5 a shot',
+      p: { 'mortar': 0.87, 'artillery rocket': 0.85, 'heavy artillery rocket': 0.7,
+           'OWA drone': 0.92, 'cruise missile': 0, 'ATGM': 0.8, 'SRBM': 0, 'MRBM': 0 },
+    },
+  };
+  const AUTO_LAYER = {
+    'mortar': 'iron-dome', 'artillery rocket': 'iron-dome',
+    'heavy artillery rocket': 'iron-dome', 'ATGM': 'iron-dome',
+    'OWA drone': 'iron-dome', 'SRBM': 'davids-sling',
+    'cruise missile': 'davids-sling', 'MRBM': 'arrow',
   };
 
   const fmtUsd = n => n >= 1e9 ? '$' + (n / 1e9).toFixed(2) + 'B'
@@ -179,6 +209,8 @@
     root.innerHTML = `
       <div class="duel-controls">
         <select id="duel-system" class="duel-select" aria-label="Weapon system"></select>
+        <span class="filter-label" style="margin:0 .2rem 0 .6rem;">vs</span>
+        <select id="duel-defense" class="duel-select" aria-label="Defense system"></select>
         <span class="filter-label" style="margin:0 .2rem 0 .6rem;">Salvo</span>
         <span id="duel-sizes">
           <button class="filter-btn active" data-n="1" type="button">×1</button>
@@ -207,6 +239,14 @@
       select.appendChild(grp);
     }
 
+    const defSelect = root.querySelector('#duel-defense');
+    for (const [key, d] of Object.entries(DEFENSE_CATALOG)) {
+      const o = document.createElement('option');
+      o.value = key;
+      o.textContent = d.name;
+      defSelect.appendChild(o);
+    }
+
     const canvas = root.querySelector('#duel-canvas');
     const ctx = canvas.getContext('2d');
     const readout = root.querySelector('#duel-readout');
@@ -224,24 +264,31 @@
 
     function currentSystem() { return systems.find(s => s.id === select.value) || systems[0]; }
 
-    // saturation-degraded intercept probability: base rate slides down as the
-    // salvo grows (anchored so ×80 lands near the ~86–90% reported for the
-    // June 2025 barrages)
-    function pIntercept(s, n) {
-      const d = DEFENSE_FOR[s.class];
-      return Math.max(0.78, d.p - Math.log2(Math.max(1, n)) * 0.017);
+    function currentDefense(s) {
+      const key = defSelect.value === 'auto' ? AUTO_LAYER[s.class] : defSelect.value;
+      return { key, ...DEFENSE_CATALOG[key], autoPicked: defSelect.value === 'auto' };
+    }
+
+    // per-threat kill probability: the chosen defense's base rate for this
+    // class, degraded gently as the salvo grows (anchored so ×80 lands near
+    // the ~86–90% reported across the June 2025 barrages)
+    function pIntercept(def, s, n) {
+      const base = (def.p || {})[s.class] || 0;
+      if (base === 0) return 0;
+      return Math.max(base - 0.07, base - Math.log2(Math.max(1, n)) * 0.012);
     }
 
     function summarize(s, n) {
       const tgt = targetFor(s);
-      const def = DEFENSE_FOR[s.class];
+      const def = currentDefense(s);
       const cost = unitCost(s);
-      const p = pIntercept(s, n);
-      const expLeak = Math.max(0, Math.round(n * (1 - p) * 10) / 10);
+      const p = pIntercept(def, s, n);
       const atk = cost.v * n;
-      // ~1.15 interceptors per engaged threat (re-engagements)
-      const defCost = Math.round(n * 1.15) * def.cost;
-      return { tgt, def, cost, p, expLeak, atk, defCost };
+      // ~1.15 interceptors per engaged threat (re-engagements); lasers fire
+      // one dwell per threat
+      const shots = def.beam ? n : Math.round(n * 1.15);
+      const defCost = p === 0 ? 0 : shots * def.cost;
+      return { tgt, def, cost, p, atk, defCost };
     }
 
     function updateStatic() {
@@ -252,8 +299,10 @@
         `<div class="dr-name" style="color:${ACTOR_COLOR[s.actor]}">${s.name}</div>` +
         `<div class="dr-row"><span>Launch → target</span><span>${ACTOR_LABEL[s.actor]} → ${tgt.name} (~${tgt.km.toLocaleString()} km)</span></div>` +
         `<div class="dr-row"><span>Est. flight time</span><span>${fmtDuration(secs)}</span></div>` +
-        `<div class="dr-row"><span>Defense layer</span><span>${def.name}</span></div>` +
-        `<div class="dr-row"><span>Intercept rate @ ×${salvoN}</span><span>~${Math.round(p * 100)}%</span></div>`;
+        `<div class="dr-row"><span>Defense</span><span>${def.name}${def.autoPicked ? ' (auto)' : ''}</span></div>` +
+        (p === 0
+          ? `<div class="dr-row"><span style="color:var(--red);">⚠ wrong layer</span><span style="color:var(--red);">${def.name} cannot engage a ${s.class}</span></div>`
+          : `<div class="dr-row"><span>Kill probability / threat</span><span>~${Math.round(p * 100)}%${salvoN > 1 ? ' at ×' + salvoN : ''}</span></div>`);
       countersEl.innerHTML =
         `<div class="duel-counter"><div class="dc-num">${salvoN}</div><div class="dc-lbl">to fire</div></div>` +
         `<div class="duel-counter"><div class="dc-num">—</div><div class="dc-lbl">intercepted</div></div>` +
@@ -263,10 +312,12 @@
         `<div class="duel-counter"><div class="dc-num">${(defCost / Math.max(1, atk)).toFixed(defCost / atk >= 10 ? 0 : 1)}×</div><div class="dc-lbl">cost asymmetry</div></div>`;
     }
     select.addEventListener('change', () => { if (!running) updateStatic(); });
+    defSelect.addEventListener('change', () => { if (!running) updateStatic(); });
 
     // ── animation ───────────────────────────────────────────────────────────
-    let running = false, rAF = null, missiles = [], interceptors = [], booms = [];
+    let running = false, rAF = null, missiles = [], interceptors = [], booms = [], beams = [];
     let tally = null;
+    const BATTERIES = [0.72, 0.785, 0.85]; // x-fractions of the batteries guarding the city
 
     function resize() {
       const r = canvas.getBoundingClientRect();
@@ -290,7 +341,7 @@
       const sim = summarize(s, salvoN);
       resize();
       running = true;
-      missiles = []; interceptors = []; booms = [];
+      missiles = []; interceptors = []; booms = []; beams = [];
       tally = { fired: salvoN, done: 0, hit: 0, stopped: 0, s, sim };
 
       const flightMs = 3600 + Math.min(2400, Math.log2(salvoN + 1) * 700);
@@ -303,6 +354,7 @@
           apex: apexFor(s.class) * (0.94 + Math.random() * 0.12),
           y0: 0.86 + jitterY, y1: 0.84,
           intercepted, intAt: 0.62 + Math.random() * 0.16,
+          batt: Math.floor(Math.random() * BATTERIES.length),
           trail: [], dead: false, leaked: false,
         });
       }
@@ -313,9 +365,9 @@
 
     function updateLiveCounters() {
       const { s, sim } = tally;
-      const firedSoFar = tally.done + missiles.filter(m => m.start !== null && !m.dead).length;
       const atk = unitCost(s).v * tally.fired;
-      const defSpend = Math.round(tally.stopped * 1.15) * sim.def.cost;
+      const shots = sim.def.beam ? tally.stopped : Math.round(tally.stopped * 1.15);
+      const defSpend = shots * sim.def.cost;
       countersEl.innerHTML =
         `<div class="duel-counter"><div class="dc-num">${tally.fired}</div><div class="dc-lbl">fired</div></div>` +
         `<div class="duel-counter"><div class="dc-num" style="color:#4a9eff">${tally.stopped}</div><div class="dc-lbl">intercepted</div></div>` +
@@ -346,10 +398,12 @@
       });
       const tgt = targetFor(s);
       ctx.fillText(tgt.name.toUpperCase(), Math.min(cityX, W - 90), H * 0.94);
-      // battery
+      // batteries guarding the approach
       ctx.fillStyle = '#4a9eff';
-      ctx.fillRect(W * 0.78, H * 0.865, 4, 9);
-      ctx.fillRect(W * 0.786, H * 0.855, 3, 7);
+      for (const bx of BATTERIES) {
+        ctx.fillRect(W * bx, H * 0.865, 4, 9);
+        ctx.fillRect(W * bx + 5, H * 0.855, 3, 7);
+      }
       ctx.globalAlpha = 1;
     }
 
@@ -388,12 +442,23 @@
         ctx.beginPath(); ctx.arc(px, py, 2.6, 0, Math.PI * 2);
         ctx.fillStyle = `rgb(${rgb})`; ctx.fill();
 
-        // interceptor rises to meet it
-        if (m.intercepted && m.t > m.intAt - 0.28 && !m.intLaunched) {
+        // defense engages: interceptor rises to meet it (or the laser dwells)
+        const isBeam = tally.sim.def.beam;
+        if (m.intercepted && m.t > m.intAt - (isBeam ? 0.03 : 0.28) && !m.intLaunched) {
           m.intLaunched = true;
           const ix = (0.045 + (0.9 - 0.045) * m.intAt) * W;
           const iy = (m.y0 - Math.sin(Math.PI * m.intAt) * m.apex * (m.y0 - 0.06)) * H;
-          interceptors.push({ x0: W * 0.785, y0: H * 0.86, x1: ix, y1: iy, cX: W * 0.8, cY: iy - 30, start: ts, dur: m.dur * 0.26, m });
+          const bx = W * BATTERIES[m.batt] + 2;
+          if (isBeam) {
+            beams.push({ x0: bx, y0: H * 0.855, x1: ix, y1: iy, start: ts });
+            m.dead = true;
+            tally.done++;
+            tally.stopped++;
+            booms.push({ x: ix, y: iy, start: ts, big: false });
+            updateLiveCounters();
+            continue;
+          }
+          interceptors.push({ x0: bx, y0: H * 0.86, x1: ix, y1: iy, cX: bx + 15, cY: iy - 30, start: ts, dur: m.dur * 0.26, m });
         }
 
         if (m.t >= endT) {
@@ -433,6 +498,14 @@
         }
       }
 
+      beams = beams.filter(b => ts - b.start < 240);
+      for (const b of beams) {
+        const a = 1 - (ts - b.start) / 240;
+        ctx.beginPath(); ctx.moveTo(b.x0, b.y0); ctx.lineTo(b.x1, b.y1);
+        ctx.strokeStyle = `rgba(255,140,90,${a * 0.9})`;
+        ctx.lineWidth = 1.6; ctx.stroke();
+      }
+
       booms = booms.filter(b => ts - b.start < 700);
       for (const b of booms) {
         const t = (ts - b.start) / 700;
@@ -445,7 +518,7 @@
         ctx.fillStyle = grad; ctx.fill();
       }
 
-      if (active > 0 || interceptors.length > 0 || booms.length > 0) {
+      if (active > 0 || interceptors.length > 0 || booms.length > 0 || beams.length > 0) {
         rAF = requestAnimationFrame(step);
       } else {
         running = false;

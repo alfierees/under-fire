@@ -1,19 +1,32 @@
 """
 UNDER FIRE — Extra aggregates
-Generates daily_counts.json, actor_hour.json, records.json
-from existing processed aggregates (no raw CSV required).
+Generates daily_counts.json, actor_hour.json, records.json from the
+processed aggregates, plus true per-day counts read from the committed
+master (records' day-level stats must not use the estimated daily spread).
 
 Run: python3 scripts/generate_extra_aggregates.py
 """
+import csv
+import gzip
 import json
+from collections import Counter
 from pathlib import Path
 from datetime import date, timedelta
 
-PROC = Path(__file__).resolve().parent.parent / "data" / "processed"
+ROOT = Path(__file__).resolve().parent.parent
+PROC = ROOT / "data" / "processed"
+MASTER = ROOT / "data" / "master" / "alerts.csv.gz"
 
 
 def load(name):
     return json.loads((PROC / name).read_text())
+
+
+def true_daily_counts():
+    """Real alerts-per-day from the master — daily_counts.json is an
+    estimated weekly spread and must not feed the records page."""
+    with gzip.open(MASTER, "rt", encoding="utf-8") as f:
+        return Counter(r["timestamp"][:10] for r in csv.DictReader(f))
 
 
 def build_daily(weekly, hourly_dow):
@@ -56,9 +69,14 @@ def build_actor_hour(hourly_dow):
     return cells
 
 
-def build_records(weekly, hourly_dow, areas, stats):
+def build_records(weekly, hourly_dow, areas, stats, by_day):
     busiest_day = stats["busiest_day"]
     peak_hour = max(hourly_dow["hourly"], key=lambda h: h["count"])
+
+    span_days = (date.fromisoformat(max(by_day))
+                 - date.fromisoformat(min(by_day))).days + 1
+    major_threshold = 100
+    major_days = sum(1 for c in by_day.values() if c >= major_threshold)
 
     quiet_threshold = 5
     longest = 0
@@ -105,6 +123,16 @@ def build_records(weekly, hourly_dow, areas, stats):
             "count": biggest["peak_day_count"],
         },
         "busiest_weekday": dow_sorted[0],
+        "days_under_attack": {
+            "days_with_alerts": len(by_day),
+            "total_days": span_days,
+            "pct": round(len(by_day) / span_days * 100),
+        },
+        "major_attack_days": {
+            "count": major_days,
+            "threshold": major_threshold,
+            "one_in_every": round(span_days / major_days, 1),
+        },
     }
 
 
@@ -123,7 +151,8 @@ def main():
     (PROC / "actor_hour.json").write_text(json.dumps(ah))
     print(f"actor_hour.json: {len(ah)} cells (4 actors x 24 hours)")
 
-    records = build_records(weekly, hourly_dow, areas, stats)
+    records = build_records(weekly, hourly_dow, areas, stats,
+                            true_daily_counts())
     (PROC / "records.json").write_text(json.dumps(records, indent=2))
     print(f"records.json: longest quiet streak = "
           f"{records['longest_quiet_streak']['weeks']} weeks; "
