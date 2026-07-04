@@ -20,8 +20,9 @@ Data-vis site about rocket/missile/drone alerts over Israel (2020–2026). Stati
 - `src/css/hub.css` — hero + card grid (index only).
 - `src/js/shared.js` — `fetchData`, tooltip helpers, nav-badge boot.
 - `src/js/iron-dome.js` — hero canvas animation (index only).
-- `src/js/salvo.js` — `mountSalvo({ mount }).fire({ count, label })` — missile-arc overlay scaled by alert count, capped at 80 missiles.
+- `src/js/salvo.js` — `mountSalvo({ mount }).fire({ count, label })` — missile-arc overlay scaled by alert count, capped at 80 missiles. Used on timeline (week-click) and compare (scatter-bubble click).
 - `src/js/hub.js` — card sparkline previews.
+- `src/js/arsenal-sim.js` — arsenal interactives: `renderHangar()` (schematic SVG silhouettes per weapon class; hover stats, click scrolls to `#sys-{id}` card) and `mountDuel()` (launch/saturation simulator with interceptors + live cost tally; intercept rates anchored to reported figures, degraded by log2(salvo)).
 
 ## Running locally
 ```

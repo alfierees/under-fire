@@ -59,6 +59,41 @@
       .ev-item { flex-direction:column; gap:.2rem; }
       .ev-date { flex:none; }
     }
+
+    /* ── Hangar ── */
+    .hangar-row { display:flex; gap:1.2rem; align-items:flex-start; padding:1rem 0; border-bottom:1px solid rgba(255,255,255,.05); }
+    .hangar-actor { flex:0 0 108px; font-family:'IBM Plex Mono',monospace; font-size:.56rem; letter-spacing:.13em; text-transform:uppercase; padding-top:.9rem; line-height:1.6; }
+    .hangar-rack { display:flex; flex-wrap:wrap; gap:.4rem 1.4rem; align-items:flex-end; }
+    .hangar-item { background:none; border:none; padding:.5rem .2rem .2rem; cursor:pointer; display:flex; flex-direction:column; align-items:center; gap:.3rem; border-radius:3px; transition:background .15s, transform .15s; }
+    .hangar-item:hover { background:rgba(255,255,255,.04); transform:translateY(-2px); }
+    .hangar-item svg { display:block; opacity:.9; }
+    .hangar-name { font-family:'IBM Plex Mono',monospace; font-size:.52rem; letter-spacing:.06em; color:var(--muted); white-space:nowrap; }
+    .hangar-item:hover .hangar-name { color:var(--text); }
+    @media (max-width:640px) { .hangar-row { flex-direction:column; gap:.3rem; } .hangar-actor { padding-top:0; } }
+
+    /* ── Duel simulator ── */
+    .duel-controls { display:flex; flex-wrap:wrap; gap:.5rem; align-items:center; margin-bottom:.8rem; }
+    .duel-select { font-family:'IBM Plex Mono',monospace; font-size:.66rem; letter-spacing:.04em; padding:.45rem .7rem;
+      background:#0b0b10; color:var(--text); border:1px solid var(--border); border-radius:3px; max-width:100%; }
+    .duel-fire { color:var(--red) !important; border-color:var(--red) !important; margin-left:.4rem; }
+    .duel-fire:hover { background:rgba(214,48,49,.12) !important; }
+    .duel-stage-wrap { position:relative; border:1px solid var(--border); border-radius:4px; background:#07070a; overflow:hidden; }
+    #duel-canvas { display:block; width:100%; height:340px; }
+    .duel-readout { position:absolute; top:.9rem; left:1rem; background:rgba(7,7,10,.88); border:1px solid var(--border); border-radius:4px; padding:.7rem .9rem; pointer-events:none; max-width:min(300px, 70%); }
+    .duel-readout .dr-name { font-family:'Playfair Display',serif; font-weight:900; font-size:1.05rem; margin-bottom:.4rem; }
+    .duel-readout .dr-row { display:flex; justify-content:space-between; gap:1rem; font-family:'IBM Plex Mono',monospace; font-size:.56rem; color:var(--muted); padding:.14rem 0; }
+    .duel-readout .dr-row span:last-child { color:var(--text); text-align:right; }
+    .duel-counters { display:grid; grid-template-columns:repeat(auto-fit,minmax(110px,1fr)); gap:1px; background:var(--border); border:1px solid var(--border); border-top:none; border-radius:0 0 4px 4px; overflow:hidden; }
+    .duel-counter { background:#0b0b10; padding:.7rem .8rem; text-align:center; }
+    .duel-counter .dc-num { font-family:'Playfair Display',serif; font-weight:900; font-size:1.15rem; color:#fff; }
+    .duel-counter .dc-lbl { font-family:'IBM Plex Mono',monospace; font-size:.5rem; letter-spacing:.1em; text-transform:uppercase; color:var(--muted); margin-top:.2rem; }
+    @media (max-width:640px) { #duel-canvas { height:250px; } .duel-readout { display:none; } }
+
+    .sys-card.flash { animation:cardflash 1.6s ease-out; }
+    @keyframes cardflash { 0% { border-color:var(--accent); box-shadow:0 0 0 1px var(--accent); } 100% { border-color:var(--border); box-shadow:none; } }
+    .sim-link { display:inline-block; margin-top:.6rem; font-family:'IBM Plex Mono',monospace; font-size:.58rem; letter-spacing:.1em; text-transform:uppercase;
+      color:var(--accent); background:none; border:1px solid rgba(232,184,75,.35); border-radius:3px; padding:.3rem .6rem; cursor:pointer; transition:border-color .15s; }
+    .sim-link:hover { border-color:var(--accent); }
   </style>
   <!-- Google Analytics -->
   <script async src="https://www.googletagmanager.com/gtag/js?id=G-JXKX4MKJ8W"></script>
@@ -151,6 +186,22 @@
     </div>
     <p class="chart-note">Cost asymmetry is the arithmetic of this war: attackers spend hundreds; defenders spend thousands to millions per interception. Sources: JINSA (2025), CSIS Missile Threat.</p>
 
+    <div style="margin-top:3.5rem;">
+      <div class="section-label" style="margin-bottom:.5rem;">The Hangar</div>
+      <h2 class="section-title" style="font-size:1.8rem;margin-bottom:.5rem;">Every system, to silhouette</h2>
+      <p class="section-desc" style="margin-bottom:.6rem;max-width:640px;">Schematic side profiles of each system, smallest to longest-ranged per front. Hover for the quick stats; click to jump to its full entry below.</p>
+      <div id="hangar"></div>
+      <p class="chart-note">Silhouettes are stylised by weapon class — illustrative, not engineering drawings.</p>
+    </div>
+
+    <div style="margin-top:3.5rem;">
+      <div class="section-label" style="margin-bottom:.5rem;">The Duel</div>
+      <h2 class="section-title" style="font-size:1.8rem;margin-bottom:.5rem;">Fire one. Then fire eighty.</h2>
+      <p class="section-desc" style="margin-bottom:1rem;max-width:660px;">Pick a system and launch it at the deepest target it can reach — watch the trajectory, the interceptor rising to meet it, and the bill both sides run up. Then stack the salvo: interception rates that look unbeatable at ×1 start leaking at ×80, which is the whole logic of saturation barrages.</p>
+      <div id="duel"></div>
+      <p class="chart-note">Illustrative simulation, not a model: intercept rates are anchored to publicly reported figures (~90%+ single-threat claims, ~86–90% across the June 2025 barrages), costs to the documented estimates above — * marks class-level cost estimates. Trajectories and timings are schematic; real flight times shown in the readout.</p>
+    </div>
+
     <div style="margin-top:3.5rem;" id="reach-section" class="chart-gated">
       <div class="section-label" style="margin-bottom:.5rem;">Reach</div>
       <h2 class="section-title" style="font-size:1.8rem;margin-bottom:.5rem;">How far each system can fly</h2>
@@ -209,6 +260,7 @@
 </footer>
 
 <script src="src/js/shared.js?v=20260613e"></script>
+<script src="src/js/arsenal-sim.js?v=20260704a"></script>
 <script>
 const ACTOR_META = {
   hamas:     { label: 'Gaza',    color: '#d63031' },
@@ -282,6 +334,27 @@ function drawReach(systems) {
   revealOnScroll(sec, () => { sec.classList.add('revealed'); drawReach(arsenal.systems); });
   let t;
   window.addEventListener('resize', () => { clearTimeout(t); t = setTimeout(() => drawReach(arsenal.systems), 150); });
+
+  // Hangar: hover = stats, click = jump to the full entry
+  renderHangar({
+    mount: '#hangar', arsenal,
+    onSelect: s => {
+      const card = document.getElementById('sys-' + s.id);
+      if (!card) return;
+      card.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      card.classList.remove('flash');
+      requestAnimationFrame(() => card.classList.add('flash'));
+    },
+  });
+
+  // Duel simulator + per-card "simulate" links
+  const duel = mountDuel({ mount: '#duel', arsenal });
+  document.querySelectorAll('.sim-link').forEach(btn => {
+    btn.addEventListener('click', () => {
+      if (duel) duel.select(btn.dataset.sim);
+      document.getElementById('duel').scrollIntoView({ behavior: 'smooth', block: 'center' });
+    });
+  });
 })().catch(e => console.warn('arsenal', e));
 </script>
 </body>

@@ -73,14 +73,18 @@ for actor in ORDER:
         rows.append(('First used vs Israel', escape(s['first_used_vs_israel'])))
         rows_html = ''.join(
             f'<div class="sys-row"><span>{k}</span><span>{v}</span></div>' for k, v in rows)
+        sim_btn = ('' if s['class'] == 'ATGM' else
+                   f'<button class="sim-link" type="button" data-sim="{s["id"]}">'
+                   f'▶ Fire it in the simulator</button>')
         parts.append(f'''
-        <article class="sys-card">
+        <article class="sys-card" id="sys-{s['id']}">
           <h3 class="sys-name">{escape(s['name'])}</h3>
           <div class="sys-aka">{escape(aka)}</div>
           <div class="sys-stats">{rows_html}</div>
           <p class="sys-notes"><strong>Warhead:</strong> {escape(s['warhead_notes'])}</p>
           <p class="sys-notes"><strong>In action:</strong> {escape(s['salvo_notes'])}</p>
           <p class="sys-notes">{escape(s['notes'])} {srcs(s['sources'])}</p>
+          {sim_btn}
         </article>''')
     parts.append('</div></div>')
 systems_html = ''.join(parts)

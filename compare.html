@@ -137,7 +137,7 @@
     <div id="intensity" class="chart-gated">
       <div class="section-label" style="margin-bottom:.5rem;">Duration × intensity</div>
       <h2 class="section-title" style="font-size:1.8rem;margin-bottom:.5rem;">A night of terror or a year of attrition</h2>
-      <p class="section-desc" style="margin-bottom:1.25rem;max-width:640px;">Each circle is one operation — the further right, the longer it lasted; the higher, the more intense the average day. Circle area = total alerts. Both axes are logarithmic.</p>
+      <p class="section-desc" style="margin-bottom:1.25rem;max-width:640px;">Each circle is one operation — the further right, the longer it lasted; the higher, the more intense the average day. Circle area = total alerts. Both axes are logarithmic. <strong style="color:var(--accent);font-weight:500;">Click a circle to fire that war's salvo across the chart.</strong></p>
       <div id="scatter-wrap"><svg id="scatter"></svg></div>
       <p class="chart-note">Intensity = alerts per calendar day across the window. Iran's single-night barrages sit top-left; the Houthi drip-campaign bottom-right; the 2026 war top-right.</p>
     </div>
@@ -165,7 +165,9 @@
 </footer>
 
 <script src="src/js/shared.js?v=20260613e"></script>
+<script src="src/js/salvo.js"></script>
 <script>
+let salvoScatter = null;
 const FRONT_COLORS = {
   'Gaza': '#d63031', 'Lebanon': '#f39c12', 'Yemen': '#4a9eff',
   'Iran': '#c678dd', 'All fronts': '#e8e8ea',
@@ -176,7 +178,7 @@ function fmtDate(d) {
   return MONTHS_ABBR[+d.slice(5, 7) - 1] + ' ' + (+d.slice(8)) + ', ' + d.slice(0, 4);
 }
 
-function drawScatter(ops) {
+function drawScatter(ops, animate) {
   const c = document.getElementById('scatter-wrap');
   const W = Math.max(c.clientWidth || 900, 560);
   const M = { top: 20, right: 90, bottom: 46, left: 64 };
@@ -217,24 +219,35 @@ function drawScatter(ops) {
   };
 
   const sorted = [...ops].sort((a, b) => b.total - a.total);
-  for (const o of sorted) {
+  sorted.forEach((o, i) => {
     const col = FRONT_COLORS[o.front] || '#aaa';
     const cx = x(o.days), cy = y(Math.max(o.per_day, 8.5));
-    g.append('circle').attr('cx', cx).attr('cy', cy).attr('r', r(o.total))
+    const circle = g.append('circle').attr('cx', cx).attr('cy', cy)
+      .attr('r', animate ? 0 : r(o.total))
       .attr('fill', col).attr('fill-opacity', 0.22).attr('stroke', col).attr('stroke-width', 1.5)
       .style('cursor', 'pointer')
       .on('mouseover', e => showTip(
-        `<b>${o.name}</b><br>${fmtDate(o.start)} → ${fmtDate(o.end)}<br>` +
+        `<b>${o.name}</b><br>${fmtDate(o.start)} → ${o.ongoing ? 'ongoing' : fmtDate(o.end)}<br>` +
         `Total: ${fmtNum(o.total)}<br>Days: ${fmtNum(o.days)}<br>` +
         `Avg/day: ${fmtNum(Math.round(o.per_day))}<br>` +
-        `Worst day: ${fmtNum(o.peak ? o.peak.count : 0)}`, e))
-      .on('mousemove', moveTip).on('mouseleave', hideTip);
+        `Worst day: ${fmtNum(o.peak ? o.peak.count : 0)}<br>` +
+        `<span style="color:var(--accent);">▶ click to fire the salvo</span>`, e))
+      .on('mousemove', moveTip).on('mouseleave', hideTip)
+      .on('click', () => { if (salvoScatter) salvoScatter.fire({ count: o.total, label: o.name }); });
+    if (animate) {
+      circle.transition().delay(200 + i * 110).duration(620).ease(d3.easeBackOut.overshoot(1.4))
+        .attr('r', r(o.total));
+    }
     const [dx, dy] = nudge[o.id] || [8, -8];
-    g.append('text').attr('x', cx + dx).attr('y', cy + dy - (nudge[o.id] ? 0 : r(o.total)))
+    const lbl = g.append('text').attr('x', cx + dx).attr('y', cy + dy - (nudge[o.id] ? 0 : r(o.total)))
       .attr('text-anchor', dx === 0 ? 'middle' : (dx > 0 ? 'start' : 'end'))
       .attr('font-family', 'IBM Plex Mono').attr('font-size', '9.5px').attr('fill', col)
       .text(o.name.replace(' — the 12-Day War', ''));
-  }
+    if (animate) {
+      lbl.attr('opacity', 0)
+        .transition().delay(200 + i * 110 + 480).duration(300).attr('opacity', 1);
+    }
+  });
 }
 
 function drawRank(ops) {
@@ -313,9 +326,10 @@ function buildCards(ops) {
 (async () => {
   const { operations } = await fetchData('operations.json');
   buildCards(operations);
+  salvoScatter = window.mountSalvo ? mountSalvo({ mount: '#scatter-wrap' }) : null;
   revealOnScroll(document.getElementById('intensity'), () => {
     document.getElementById('intensity').classList.add('revealed');
-    drawScatter(operations);
+    drawScatter(operations, true);
   });
   revealOnScroll(document.getElementById('ranked'), () => {
     document.getElementById('ranked').classList.add('revealed');
@@ -323,7 +337,7 @@ function buildCards(ops) {
   });
   let t;
   window.addEventListener('resize', () => { clearTimeout(t); t = setTimeout(() => {
-    drawScatter(operations); drawRank(operations);
+    drawScatter(operations, false); drawRank(operations);
   }, 150); });
 })().catch(e => console.warn('compare', e));
 </script>
