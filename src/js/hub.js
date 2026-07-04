@@ -328,6 +328,70 @@ async function drawPreviewDow(svgEl) {
   });
 }
 
+// Compare mini: operation totals as horizontal bars, coloured by front
+async function drawPreviewCompare(svgEl) {
+  const ops = (await getData('operations.json')).operations;
+  const FRONT = { 'Gaza': '#d63031', 'Lebanon': '#f39c12', 'Yemen': '#4a9eff',
+                  'Iran': '#c678dd', 'All fronts': '#e8e8ea' };
+  const data = [...ops].sort((a, b) => b.total - a.total).slice(0, 7);
+  const W = svgEl.clientWidth || 280, H = svgEl.clientHeight || 70;
+  const x = d3.scaleLinear().domain([0, data[0].total]).range([0, W]);
+  const y = d3.scaleBand().domain(data.map(d => d.id)).range([0, H]).padding(0.25);
+  const svg = d3.select(svgEl).attr('viewBox', `0 0 ${W} ${H}`);
+  data.forEach(d => {
+    svg.append('rect').attr('x', 0).attr('y', y(d.id))
+      .attr('width', Math.max(x(d.total), 2)).attr('height', y.bandwidth())
+      .attr('fill', FRONT[d.front] || '#aaa').attr('fill-opacity', 0.65).attr('rx', 1);
+  });
+}
+
+// Time-lapse mini: national monthly totals as an area chart
+async function drawPreviewTimelapse(svgEl) {
+  const am = await getData('area_monthly.json');
+  const W = svgEl.clientWidth || 280, H = svgEl.clientHeight || 70;
+  const x = d3.scaleLinear().domain([0, am.totals.length - 1]).range([0, W]);
+  const y = d3.scaleSymlog().domain([0, d3.max(am.totals)]).range([H, 4]).constant(30);
+  const svg = d3.select(svgEl).attr('viewBox', `0 0 ${W} ${H}`);
+  svg.append('path').datum(am.totals)
+    .attr('d', d3.area().x((d, i) => x(i)).y0(H).y1(d => y(d)).curve(d3.curveMonotoneX))
+    .attr('fill', 'rgba(214,48,49,0.3)').attr('stroke', '#d63031').attr('stroke-width', 1);
+}
+
+// Arsenal mini: weapon ranges as log-scale bars, coloured by actor
+async function drawPreviewArsenal(svgEl) {
+  const a = await getData('arsenal.json');
+  const ACTOR = { hamas: '#d63031', hezbollah: '#f39c12', houthis: '#4a9eff', iran: '#c678dd' };
+  const data = [...a.systems]
+    .map(s => ({ actor: s.actor, r: Array.isArray(s.range_km) ? s.range_km[1] : s.range_km }))
+    .filter(s => s.r > 0).sort((p, q) => q.r - p.r).slice(0, 9);
+  const W = svgEl.clientWidth || 280, H = svgEl.clientHeight || 70;
+  const x = d3.scaleLog().domain([1, d3.max(data, d => d.r)]).range([2, W]);
+  const y = d3.scaleBand().domain(d3.range(data.length)).range([0, H]).padding(0.3);
+  const svg = d3.select(svgEl).attr('viewBox', `0 0 ${W} ${H}`);
+  data.forEach((d, i) => {
+    svg.append('rect').attr('x', 0).attr('y', y(i))
+      .attr('width', x(d.r)).attr('height', y.bandwidth())
+      .attr('fill', ACTOR[d.actor] || '#aaa').attr('fill-opacity', 0.65).attr('rx', 1);
+  });
+}
+
+// Data mini: stylised file listing (static — no fetch)
+async function drawPreviewData(svgEl) {
+  const W = svgEl.clientWidth || 280, H = svgEl.clientHeight || 70;
+  const svg = d3.select(svgEl).attr('viewBox', `0 0 ${W} ${H}`);
+  const files = ['alerts.csv.gz', 'stats_summary.json', 'timeline_weekly.json',
+                 'operations.json', 'area_polygons.json'];
+  files.forEach((f, i) => {
+    const yPos = 10 + i * 13;
+    svg.append('text').attr('x', 2).attr('y', yPos)
+      .attr('font-family', 'IBM Plex Mono').attr('font-size', '8.5px')
+      .attr('fill', i === 0 ? '#e8b84b' : 'rgba(255,255,255,0.45)').text(f);
+    svg.append('text').attr('x', W - 2).attr('y', yPos).attr('text-anchor', 'end')
+      .attr('font-family', 'IBM Plex Mono').attr('font-size', '8.5px')
+      .attr('fill', 'rgba(255,255,255,0.25)').text('↓');
+  });
+}
+
 // Observer to draw on first scroll-into-view
 const previewMap = {
   timeline: drawPreviewTimeline,
@@ -339,6 +403,10 @@ const previewMap = {
   oct7:     drawPreviewOct7,
   story:    drawPreviewStory,
   records:  drawPreviewRecords,
+  compare:  drawPreviewCompare,
+  timelapse: drawPreviewTimelapse,
+  arsenal:  drawPreviewArsenal,
+  data:     drawPreviewData,
 };
 
 const previewObs = new IntersectionObserver((entries) => {

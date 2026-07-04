@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <link rel="icon" type="image/png" sizes="96x96" href="images/favicon.png">
+  <link rel="canonical" href="https://under-fire.org/data">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Download the Data — Israel Rocket Alert Dataset 2020–Present — Under Fire</title>
+  <meta name="description" content="Free download: every rocket, missile, and drone alert over Israel since January 2020 — 160,000+ events with timestamps, coordinates, regions, and origin attribution. CSV + JSON, updated every 30 minutes.">
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="Download the Data — Israel Rocket Alert Dataset 2020–Present — Under Fire">
+  <meta property="og:description" content="Free download: every rocket, missile, and drone alert over Israel since January 2020 — 160,000+ events with timestamps, coordinates, regions, and origin attribution. CSV + JSON, updated every 30 minutes.">
+  <meta property="og:image" content="https://under-fire.org/images/og-card.png">
+  <meta property="og:url" content="https://under-fire.org/data">
+  <meta name="twitter:card" content="summary_large_image">
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400;1,700&family=IBM+Plex+Mono:wght@300;400;500&family=IBM+Plex+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="src/css/shared.css">
+  <style>
+    .data-section { margin-top: 3rem; }
+    .file-table { width:100%; border-collapse:collapse; font-family:'IBM Plex Mono',monospace; font-size:.68rem; }
+    .file-table th { text-align:left; font-size:.55rem; letter-spacing:.14em; text-transform:uppercase; color:var(--muted); font-weight:400; padding:.5rem .8rem; border-bottom:1px solid var(--border); }
+    .file-table td { padding:.55rem .8rem; border-bottom:1px solid rgba(255,255,255,.05); color:var(--text); vertical-align:top; }
+    .file-table td.desc-col { color:var(--muted); line-height:1.55; font-family:'IBM Plex Sans',sans-serif; font-size:.74rem; }
+    .file-table a { color:var(--accent); text-decoration:none; border-bottom:1px solid rgba(232,184,75,.3); }
+    .file-table a:hover { border-color:var(--accent); }
+    .file-table .size { color:var(--muted); white-space:nowrap; }
+    .table-scroll { overflow-x:auto; border:1px solid var(--border); border-radius:4px; }
+    .schema-table { margin:0; }
+    .cite-block { border:1px solid var(--border); border-left:2px solid var(--accent); border-radius:4px; padding:1.2rem 1.4rem; margin-top:1rem;
+      font-family:'IBM Plex Mono',monospace; font-size:.7rem; color:var(--text); line-height:1.7; background:rgba(255,255,255,.015); }
+    .pill { display:inline-block; font-size:.52rem; letter-spacing:.1em; text-transform:uppercase; padding:.15rem .5rem; border:1px solid var(--border); border-radius:2px; color:var(--muted); margin-left:.5rem; vertical-align:middle; }
+    code.inline { background:rgba(255,255,255,.06); padding:.1rem .35rem; border-radius:2px; font-size:.92em; }
+  </style>
+  <!-- Google Analytics -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-JXKX4MKJ8W"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-JXKX4MKJ8W');
+  </script>
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@type": "Dataset",
+        "name": "Israel Red Alert (Tzeva Adom) Rocket Alert Dataset, 2020–present",
+        "description": "Every rocket, missile, and drone alert recorded across Israel since January 2020 — over 160,000 events with timestamp, location name, coordinates, Home Front Command alert area, alert type, and estimated origin attribution (Hamas, Hezbollah, Houthis, Iran). Auto-updated every 30 minutes.",
+        "url": "https://under-fire.org/data",
+        "keywords": ["Israel", "rocket alerts", "Tzeva Adom", "Red Alert", "Iron Dome", "Hamas", "Hezbollah", "Houthis", "Iran", "October 7", "missile attacks", "air raid sirens"],
+        "temporalCoverage": "2020-01-12/..",
+        "spatialCoverage": { "@type": "Place", "name": "Israel" },
+        "creator": { "@type": "Person", "name": "Alfie Rees" },
+        "isBasedOn": "https://rocketalert.live",
+        "isAccessibleForFree": true,
+        "distribution": [
+          { "@type": "DataDownload", "name": "Master alert dataset (CSV, gzip)", "encodingFormat": "text/csv", "contentUrl": "https://under-fire.org/data/master/alerts.csv.gz" },
+          { "@type": "DataDownload", "name": "Summary statistics (JSON)", "encodingFormat": "application/json", "contentUrl": "https://under-fire.org/data/processed/stats_summary.json" },
+          { "@type": "DataDownload", "name": "Weekly timeline per actor (JSON)", "encodingFormat": "application/json", "contentUrl": "https://under-fire.org/data/processed/timeline_weekly.json" },
+          { "@type": "DataDownload", "name": "Monthly totals per actor (JSON)", "encodingFormat": "application/json", "contentUrl": "https://under-fire.org/data/processed/actors_monthly.json" },
+          { "@type": "DataDownload", "name": "Per-area monthly counts (JSON)", "encodingFormat": "application/json", "contentUrl": "https://under-fire.org/data/processed/area_monthly.json" },
+          { "@type": "DataDownload", "name": "Operation comparison stats (JSON)", "encodingFormat": "application/json", "contentUrl": "https://under-fire.org/data/processed/operations.json" },
+          { "@type": "DataDownload", "name": "Alert-region polygons (GeoJSON)", "encodingFormat": "application/geo+json", "contentUrl": "https://under-fire.org/data/processed/area_polygons.json" }
+        ]
+      },
+      {
+        "@type": "BreadcrumbList",
+        "itemListElement": [
+          { "@type": "ListItem", "position": 1, "name": "Under Fire", "item": "https://under-fire.org/" },
+          { "@type": "ListItem", "position": 2, "name": "Data", "item": "https://under-fire.org/data" }
+        ]
+      }
+    ]
+  }
+  </script>
+</head>
+<body>
+
+<nav>
+  <a href="index.html" class="nav-brand">Under Fire</a>
+  <div class="nav-links">
+    <div class="nav-group">
+      <button class="nav-group-btn" type="button">Charts<span class="caret">▾</span></button>
+      <div class="nav-dropdown">
+        <a href="timeline.html">Timeline</a>
+        <a href="fronts.html">Fronts</a>
+        <a href="calendar.html">Calendar</a>
+        <a href="compare.html">Compare</a>
+      </div>
+    </div>
+    <div class="nav-group">
+      <button class="nav-group-btn" type="button">Maps<span class="caret">▾</span></button>
+      <div class="nav-dropdown">
+        <a href="oct7.html">Oct 7</a>
+        <a href="story.html">Story</a>
+        <a href="timelapse.html">Time-Lapse</a>
+      </div>
+    </div>
+    <div class="nav-group">
+      <button class="nav-group-btn" type="button">Patterns<span class="caret">▾</span></button>
+      <div class="nav-dropdown">
+        <a href="patterns.html">Patterns</a>
+        <a href="areas.html">By Area</a>
+      </div>
+    </div>
+    <div class="nav-group">
+      <button class="nav-group-btn" type="button">More<span class="caret">▾</span></button>
+      <div class="nav-dropdown">
+        <a href="live.html">Live Feed</a>
+        <a href="records.html">Records &amp; Stats</a>
+        <a href="arsenal.html">The Arsenal</a>
+        <a href="data.html">Data</a>
+        <a href="mission.html">Mission</a>
+      </div>
+    </div>
+  </div>
+  <a href="live.html" class="nav-badge" id="nav-badge">🔔 Loading…</a>
+</nav>
+
+<div id="tooltip"></div>
+
+<div class="chart-page">
+  <div class="section-wrapper">
+    <a href="index.html" class="back-link">← Back to all charts</a>
+    <div class="section-label">Open Data</div>
+    <h1 class="section-title">The Data</h1>
+    <p class="section-desc">Everything on this site is built from one dataset: every Home Front Command alert since January 12, 2020 — <span data-live="total">160,000+</span> events and counting, refreshed every 30 minutes. All of it is free to download, from this page or from the <a href="https://github.com/alfierees/under-fire" target="_blank" style="color:var(--accent);">GitHub repository</a>. If you use it, cite Under Fire and link back here.</p>
+
+    <div class="data-section">
+      <div class="section-label" style="margin-bottom:.5rem;">The master dataset</div>
+      <h2 class="section-title" style="font-size:1.8rem;margin-bottom:.5rem;">alerts.csv.gz <span class="pill">CSV · gzip · ~2.4 MB</span></h2>
+      <p class="section-desc" style="margin-bottom:1rem;max-width:640px;">One row per alert, per location. Timestamps are Israel local time. Origin is attributed from alert location and timing — see the <a href="mission.html" style="color:var(--accent);">mission page</a> for methodology and caveats. <a href="data/master/alerts.csv.gz" download style="color:var(--accent);">Download ↓</a></p>
+      <div class="table-scroll">
+        <table class="file-table schema-table">
+          <thead><tr><th>Column</th><th>Type</th><th>Description</th></tr></thead>
+          <tbody>
+            <tr><td>timestamp</td><td>datetime</td><td class="desc-col">Alert time, Israel local (e.g. 2023-10-07 06:29:59)</td></tr>
+            <tr><td>city_he</td><td>string</td><td class="desc-col">Location name in Hebrew, as issued by Home Front Command</td></tr>
+            <tr><td>city_en</td><td>string</td><td class="desc-col">Location name in English</td></tr>
+            <tr><td>lat / lon</td><td>float</td><td class="desc-col">Location coordinates (WGS 84)</td></tr>
+            <tr><td>area_en</td><td>string</td><td class="desc-col">Home Front Command alert region (30 regions, e.g. "Gaza Envelope", "Confrontation Line")</td></tr>
+            <tr><td>alert_type_id</td><td>int</td><td class="desc-col">1 = rocket/missile, 2 = hostile aircraft (UAV/drone)</td></tr>
+            <tr><td>origin</td><td>string</td><td class="desc-col">Estimated firing actor: Hamas, Hezbollah, Houthis, Iran, or Unknown</td></tr>
+            <tr><td>source</td><td>string</td><td class="desc-col">Ingestion source (rocketalert-live, tzevaadom-fallback, data1)</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="data-section">
+      <div class="section-label" style="margin-bottom:.5rem;">Processed aggregates</div>
+      <h2 class="section-title" style="font-size:1.8rem;margin-bottom:.5rem;">Ready-made JSON</h2>
+      <p class="section-desc" style="margin-bottom:1rem;max-width:640px;">The pre-computed files the site's charts consume, regenerated from the master every 30 minutes. All paths live under <code class="inline">data/processed/</code>.</p>
+      <div class="table-scroll">
+        <table class="file-table">
+          <thead><tr><th>File</th><th>Size</th><th>What's inside</th></tr></thead>
+          <tbody>
+            <tr><td><a href="data/processed/stats_summary.json">stats_summary.json</a></td><td class="size">&lt;1 KB</td><td class="desc-col">Headline totals: alert count, date range, per-origin breakdown, busiest day, unique locations/areas.</td></tr>
+            <tr><td><a href="data/processed/timeline_weekly.json">timeline_weekly.json</a></td><td class="size">~10 KB</td><td class="desc-col">Weekly alert totals since 2020, broken down by attributed actor.</td></tr>
+            <tr><td><a href="data/processed/actors_monthly.json">actors_monthly.json</a></td><td class="size">~3 KB</td><td class="desc-col">Monthly totals per actor — the "Four Fronts" chart data.</td></tr>
+            <tr><td><a href="data/processed/daily_counts.json">daily_counts.json</a></td><td class="size">~47 KB</td><td class="desc-col">Per-day national counts (estimated from weekly × day-of-week distribution before 2024; exact after).</td></tr>
+            <tr><td><a href="data/processed/hourly_dow.json">hourly_dow.json</a></td><td class="size">~2 KB</td><td class="desc-col">Alerts by hour of day (per actor) and by day of week.</td></tr>
+            <tr><td><a href="data/processed/actor_hour.json">actor_hour.json</a></td><td class="size">~4 KB</td><td class="desc-col">Flat actor × hour counts for the patterns heatmap.</td></tr>
+            <tr><td><a href="data/processed/areas_summary.json">areas_summary.json</a></td><td class="size">~6 KB</td><td class="desc-col">Per-region totals, rocket/drone split, active days, peak day, origin mix.</td></tr>
+            <tr><td><a href="data/processed/area_monthly.json">area_monthly.json</a></td><td class="size">~7 KB</td><td class="desc-col">Per-region counts for every calendar month — the time-lapse choropleth data.</td></tr>
+            <tr><td><a href="data/processed/area_polygons.json">area_polygons.json</a></td><td class="size">~70 KB</td><td class="desc-col">GeoJSON polygons of the 30 alert regions (Voronoi of ~1,449 town seeds, clipped to the national footprint).</td></tr>
+            <tr><td><a href="data/processed/operations.json">operations.json</a></td><td class="size">~12 KB</td><td class="desc-col">Stats per named operation/campaign: window, totals, peak day, intensity, actor mix, top areas, daily series.</td></tr>
+            <tr><td><a href="data/processed/oct7_replay.json">oct7_replay.json</a></td><td class="size">~385 KB</td><td class="desc-col">Every October 7, 2023 alert with timestamp and coordinates — the replay data.</td></tr>
+            <tr><td><a href="data/processed/records.json">records.json</a></td><td class="size">&lt;1 KB</td><td class="desc-col">Precomputed extremes: busiest day and hour, longest quiet streak, biggest single-area spike.</td></tr>
+            <tr><td><a href="data/processed/recent_alerts.json">recent_alerts.json</a></td><td class="size">~5 KB</td><td class="desc-col">The last 30 alert events, salvo-grouped, plus exact per-day counts for the last 14 days. Feeds the live feed.</td></tr>
+            <tr><td><a href="data/processed/story_chapters.json">story_chapters.json</a></td><td class="size">~61 KB</td><td class="desc-col">The scroll-story's chapters: text, per-chapter map points, and replay sequences.</td></tr>
+            <tr><td><a href="data/processed/arsenal.json">arsenal.json</a></td><td class="size">~30 KB</td><td class="desc-col">Curated reference data on the weapon systems fired at Israel — specs, ranges, salvo history, sources. Editorial, not derived from the alert data.</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="data-section">
+      <div class="section-label" style="margin-bottom:.5rem;">Provenance &amp; caveats</div>
+      <h2 class="section-title" style="font-size:1.8rem;margin-bottom:.5rem;">What this data is — and isn't</h2>
+      <p class="section-desc" style="max-width:680px;margin-bottom:.9rem;">
+        Alerts are Home Front Command (Pikud HaOref) "Tzeva Adom" warnings, aggregated by
+        <a href="https://rocketalert.live" target="_blank" style="color:var(--accent);">RocketAlert.live</a> with
+        <a href="https://www.tzevaadom.co.il" target="_blank" style="color:var(--accent);">tzevaadom.co.il</a> as fallback.
+        An alert is a <em>warning to a location</em>, not a projectile count: one missile over a dense
+        area can trigger dozens of location alerts, and one salvo can trigger hundreds. Counts here
+        measure how often Israelis were sent to shelters — a civilian-experience metric, not a military one.
+      </p>
+      <p class="section-desc" style="max-width:680px;">
+        Origin attribution is <em>estimated</em> from alert geography and timing (e.g. Confrontation Line
+        alerts during the northern war → Hezbollah; nationwide simultaneous barrages on known attack
+        dates → Iran). Alerts before mid-2023 are largely unattributed ("Unknown"). Treat attribution
+        as analytical convenience, not ground truth.
+      </p>
+    </div>
+
+    <div class="data-section">
+      <div class="section-label" style="margin-bottom:.5rem;">Reuse</div>
+      <h2 class="section-title" style="font-size:1.8rem;margin-bottom:.5rem;">How to cite</h2>
+      <div class="cite-block">
+        Under Fire — Israel Rocket Alert Dataset (2020–present).<br>
+        Alfie Rees, under-fire.org. Alert data via RocketAlert.live.<br>
+        https://under-fire.org/data
+      </div>
+      <p class="chart-note" style="margin-top:.8rem;">Free for journalism, research, and education with attribution. The underlying alert records originate from Israel's Home Front Command public warning system.</p>
+    </div>
+
+  </div>
+</div>
+
+<footer>
+  <div class="footer-left">Under Fire — <span data-live="end-year">2026</span></div>
+  <div class="footer-credit">Alert data from <a href="https://rocketalert.live" target="_blank">RocketAlert.live</a>.</div>
+</footer>
+
+<script src="src/js/shared.js?v=20260613e"></script>
+</body>
+</html>

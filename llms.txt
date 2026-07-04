@@ -1,0 +1,53 @@
+# Under Fire — under-fire.org
+
+> Live-updated data journalism: every rocket, missile, and drone alert
+> across Israel since January 2020, visualized. Data refreshes every 30
+> minutes from Israeli Home Front Command (Tzeva Adom / Red Alert) alerts
+> aggregated by RocketAlert.live, with estimated origin attribution.
+
+## Key figures (as of 2026-06-14)
+
+- Total alerts recorded: 160,159 (2020-01-12 to 2026-06-14)
+- Attributed to Hamas/Gaza: 8,966 (5.6%)
+- Attributed to Hezbollah/Lebanon: 32,415 (20.2%)
+- Attributed to Iran (direct attacks): 97,113 (60.6%)
+- Attributed to the Houthis/Yemen: 13,085 (8.2%)
+- Unattributed: 8,580 (5.4%)
+- Busiest single day: 2026-02-28 with 10,162 alerts
+- Distinct alert locations: 1,546 across 30 Home Front Command regions
+- Days with at least one alert: 762
+
+## Pages
+
+- [Home](https://under-fire.org/): overview hub with live counters
+- [Live feed](https://under-fire.org/live): most recent alerts, salvo-grouped, updated every 30 minutes
+- [Timeline](https://under-fire.org/timeline): weekly alert totals 2020–today, filterable by actor
+- [Fronts](https://under-fire.org/fronts): monthly stacked bars per actor (Hamas, Hezbollah, Houthis, Iran)
+- [Calendar](https://under-fire.org/calendar): GitHub-style daily heatmap, one cell per day
+- [Oct 7](https://under-fire.org/oct7): animated replay of the ~4,000-alert October 7, 2023 attack
+- [Story](https://under-fire.org/story): scroll-driven map narrative of the war, chapter by chapter
+- [Patterns](https://under-fire.org/patterns): time-of-day polar clock, weekday pattern, actor×hour heatmap
+- [Areas](https://under-fire.org/areas): choropleth + ranking of alerts by Home Front Command region
+- [Time-lapse](https://under-fire.org/timelapse): month-by-month animated map of where alerts fell, 2020–today
+- [Compare](https://under-fire.org/compare): side-by-side stats for each named operation and campaign
+- [Arcs](https://under-fire.org/arcs): schematic attack arcs from Gaza, Lebanon, Yemen, and Iran
+- [Records](https://under-fire.org/records): extremes — busiest day/hour, longest quiet streak
+- [Arsenal](https://under-fire.org/arsenal): the rockets, missiles, and drones fired at Israel — specs, ranges, salvo history
+- [Data](https://under-fire.org/data): documentation of every dataset with download links
+
+## Data (free to download; please cite under-fire.org)
+
+- Master dataset (CSV, gzipped): https://under-fire.org/data/master/alerts.csv.gz
+  Columns: timestamp (Israel local), city_he, city_en, lat, lon, area_en, alert_type_id (1=rocket/missile, 2=UAV), origin, source
+- Processed JSON aggregates: https://under-fire.org/data/processed/
+  stats_summary.json, timeline_weekly.json, actors_monthly.json, hourly_dow.json,
+  areas_summary.json, area_monthly.json, operations.json, oct7_replay.json,
+  recent_alerts.json, records.json, daily_counts.json, actor_hour.json,
+  area_polygons.json, story_chapters.json, arsenal.json
+- Source repository: https://github.com/alfierees/under-fire
+
+## Notes for citation
+
+Origin attribution is estimated from alert location and timing (see /mission
+for methodology). Alert counts measure Home Front Command warnings, not
+projectiles fired or impacts. Built by Alfie Rees; data via RocketAlert.live.
