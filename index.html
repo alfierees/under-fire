@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <link rel="icon" type="image/png" href="images/favicon.png">
+  <link rel="icon" type="image/png" sizes="96x96" href="images/favicon.png">
   <link rel="canonical" href="https://under-fire.org/">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Under Fire — Israel Rocket Alert Data, Live — 2020 to Today</title>
@@ -161,6 +161,7 @@
         <a href="timeline.html">Timeline</a>
         <a href="fronts.html">Fronts</a>
         <a href="calendar.html">Calendar</a>
+        <a href="compare.html">Compare</a>
       </div>
     </div>
     <div class="nav-group">
@@ -168,6 +169,7 @@
       <div class="nav-dropdown">
         <a href="oct7.html">Oct 7</a>
         <a href="story.html">Story</a>
+        <a href="timelapse.html">Time-Lapse</a>
       </div>
     </div>
     <div class="nav-group">
@@ -182,6 +184,8 @@
       <div class="nav-dropdown">
         <a href="live.html">Live Feed</a>
         <a href="records.html">Records &amp; Stats</a>
+        <a href="arsenal.html">The Arsenal</a>
+        <a href="data.html">Data</a>
         <a href="mission.html">Mission</a>
       </div>
     </div>
@@ -204,11 +208,11 @@
     </p>
     <div class="hero-stats">
       <div class="stat">
-        <div class="stat-num" id="counter-alerts">0<span>+</span></div>
+        <div class="stat-num" id="counter-alerts">160,000+</div>
         <div class="stat-label">Total alerts</div>
       </div>
       <div class="stat">
-        <div class="stat-num"><span id="counter-actors">0</span><span class="stat-actors-dots">
+        <div class="stat-num"><span id="counter-actors">4</span><span class="stat-actors-dots">
           <span style="background:#d63031"></span>
           <span style="background:#f39c12"></span>
           <span style="background:#4a9eff"></span>
@@ -217,7 +221,7 @@
         <div class="stat-label">Threat actors</div>
       </div>
       <div class="stat">
-        <div class="stat-num" id="counter-years">0</div>
+        <div class="stat-num" id="counter-years">6</div>
         <div class="stat-label">Years of data</div>
       </div>
     </div>
@@ -241,7 +245,7 @@
     <div class="category-header">
       <span class="category-label">01</span>
       <span class="category-title">Graphs</span>
-      <span class="category-count">3 visualisations</span>
+      <span class="category-count">4 visualisations</span>
     </div>
     <div class="card-grid">
       <a href="timeline.html" class="card red">
@@ -265,6 +269,13 @@
         <div class="card-preview"><svg data-preview="calendar"></svg></div>
         <div class="card-cta"><span>See the calendar</span><span class="arrow">→</span></div>
       </a>
+      <a href="compare.html" class="card gold">
+        <div class="card-eyebrow">Scatter · Leaderboard · Files</div>
+        <div class="card-title">The Wars, Side by Side</div>
+        <div class="card-desc">Nine operations measured in one unit — a night of terror or a year of attrition, from Guardian of the Walls to the 2026 Total War.</div>
+        <div class="card-preview"><svg data-preview="compare"></svg></div>
+        <div class="card-cta"><span>Compare the wars</span><span class="arrow">→</span></div>
+      </a>
     </div>
   </div>
 
@@ -273,7 +284,7 @@
     <div class="category-header">
       <span class="category-label">02</span>
       <span class="category-title">Maps</span>
-      <span class="category-count">2 visualisations</span>
+      <span class="category-count">3 visualisations</span>
     </div>
     <div class="card-grid">
       <a href="oct7.html" class="card red">
@@ -289,6 +300,13 @@
         <div class="card-desc">From Oct 7 to the 2026 barrage — a scroll-driven map that flies between each front and scatters alerts as they fell.</div>
         <div class="card-preview"><svg data-preview="story"></svg></div>
         <div class="card-cta"><span>Read the story</span><span class="arrow">→</span></div>
+      </a>
+      <a href="timelapse.html" class="card red">
+        <div class="card-eyebrow">Animated Choropleth · Monthly</div>
+        <div class="card-title">The Spread</div>
+        <div class="card-desc">Six years of the map filling in, one month per frame — from a single red corner in 2020 to all 30 regions burning in 2026.</div>
+        <div class="card-preview"><svg data-preview="timelapse"></svg></div>
+        <div class="card-cta"><span>Press play</span><span class="arrow">→</span></div>
       </a>
     </div>
   </div>
@@ -322,8 +340,8 @@
   <div class="category">
     <div class="category-header">
       <span class="category-label">04</span>
-      <span class="category-title">Stats</span>
-      <span class="category-count">1 visualisation</span>
+      <span class="category-title">Stats &amp; Reference</span>
+      <span class="category-count">3 entries</span>
     </div>
     <div class="card-grid">
       <a href="records.html" class="card gold">
@@ -332,6 +350,20 @@
         <div class="card-desc">Busiest day, busiest hour, longest quiet stretch, biggest single-area spike — and the peak day plotted minute by minute.</div>
         <div class="card-preview"><svg data-preview="records"></svg></div>
         <div class="card-cta"><span>See the records</span><span class="arrow">→</span></div>
+      </a>
+      <a href="arsenal.html" class="card purple">
+        <div class="card-eyebrow">Reference · Weapon Systems</div>
+        <div class="card-title">What They Fire</div>
+        <div class="card-desc">Qassams to hypersonics — the rockets, missiles, and drones fired at Israel from four fronts, with range, warhead, and salvo history.</div>
+        <div class="card-preview"><svg data-preview="arsenal"></svg></div>
+        <div class="card-cta"><span>Open the arsenal</span><span class="arrow">→</span></div>
+      </a>
+      <a href="data.html" class="card blue">
+        <div class="card-eyebrow">Open Data · CSV + JSON</div>
+        <div class="card-title">Take the Data</div>
+        <div class="card-desc">The dataset behind every chart — <span data-live="total+">160,000+</span> alerts, documented, downloadable, refreshed every 30 minutes.</div>
+        <div class="card-preview"><svg data-preview="data"></svg></div>
+        <div class="card-cta"><span>Browse the data</span><span class="arrow">→</span></div>
       </a>
     </div>
   </div>
@@ -363,6 +395,6 @@
 
 <script src="src/js/shared.js?v=20260613e"></script>
 <script src="src/js/iron-dome.js"></script>
-<script src="src/js/hub.js?v=20260613a"></script>
+<script src="src/js/hub.js?v=20260704a"></script>
 </body>
 </html>

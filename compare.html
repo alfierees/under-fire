@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <link rel="icon" type="image/png" sizes="96x96" href="images/favicon.png">
+  <link rel="canonical" href="https://under-fire.org/compare">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Israel's Wars Compared — Operation by Operation — Under Fire</title>
+  <meta name="description" content="Guardian of the Walls vs Iron Swords vs the 12-Day War vs the 2026 Total War: every operation and campaign against Israel compared — duration, alert totals, peak days, intensity.">
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="Israel's Wars Compared — Operation by Operation — Under Fire">
+  <meta property="og:description" content="Guardian of the Walls vs Iron Swords vs the 12-Day War vs the 2026 Total War: every operation and campaign against Israel compared — duration, alert totals, peak days, intensity.">
+  <meta property="og:image" content="https://under-fire.org/images/og-card.png">
+  <meta property="og:url" content="https://under-fire.org/compare">
+  <meta name="twitter:card" content="summary_large_image">
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400;1,700&family=IBM+Plex+Mono:wght@300;400;500&family=IBM+Plex+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.8.5/d3.min.js"></script>
+  <link rel="stylesheet" href="src/css/shared.css">
+  <style>
+    #scatter-wrap { width:100%; overflow-x:auto; }
+    #scatter { display:block; }
+    #rank-chart { width:100%; overflow-x:auto; }
+    #rank-chart svg { display:block; }
+
+    .op-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(300px,1fr)); gap:1rem; margin-top:1.4rem; }
+    .op-card { border:1px solid var(--border); border-radius:4px; padding:1.3rem 1.4rem; background:rgba(255,255,255,.015); position:relative; overflow:hidden; }
+    .op-card::before { content:''; position:absolute; top:0; left:0; right:0; height:2px; background:var(--op-color,#666); }
+    .op-eyebrow { font-family:'IBM Plex Mono',monospace; font-size:.55rem; letter-spacing:.14em; text-transform:uppercase; color:var(--muted); margin-bottom:.4rem; }
+    .op-name { font-family:'Playfair Display',serif; font-weight:900; font-size:1.25rem; color:#fff; line-height:1.15; margin-bottom:.15rem; }
+    .op-dates { font-family:'IBM Plex Mono',monospace; font-size:.6rem; color:var(--op-color,#aaa); margin-bottom:.75rem; }
+    .op-desc { font-size:.8rem; color:var(--muted); line-height:1.65; margin-bottom:.9rem; }
+    .op-stats { border-top:1px solid rgba(255,255,255,.07); }
+    .op-row { display:flex; justify-content:space-between; font-family:'IBM Plex Mono',monospace; font-size:.63rem; padding:.3rem 0; border-bottom:1px solid rgba(255,255,255,.05); }
+    .op-row span:first-child { color:var(--muted); }
+    .op-row span:last-child { color:var(--text); }
+    .op-row.hero-row span:last-child { color:var(--op-color,#fff); font-weight:500; }
+    .ongoing-dot { display:inline-block; width:6px; height:6px; border-radius:50%; background:var(--red); margin-right:.35rem; animation:pulse 1.6s infinite; }
+    @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.25} }
+  </style>
+  <!-- Google Analytics -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-JXKX4MKJ8W"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-JXKX4MKJ8W');
+  </script>
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@type": "WebPage",
+        "name": "Israel's Wars Compared — Operation by Operation",
+        "url": "https://under-fire.org/compare",
+        "description": "Side-by-side statistics for every major operation and campaign against Israel since 2020, measured in Home Front Command alerts: Guardian of the Walls, Breaking Dawn, Shield and Arrow, Iron Swords, the Northern War, the Houthi campaign, Iran's direct attacks, and the 2026 Total War.",
+        "isPartOf": { "@type": "WebSite", "name": "Under Fire", "url": "https://under-fire.org/" }
+      },
+      {
+        "@type": "BreadcrumbList",
+        "itemListElement": [
+          { "@type": "ListItem", "position": 1, "name": "Under Fire", "item": "https://under-fire.org/" },
+          { "@type": "ListItem", "position": 2, "name": "Compare", "item": "https://under-fire.org/compare" }
+        ]
+      }
+    ]
+  }
+  </script>
+</head>
+<body>
+
+<div id="file-protocol-warning">
+  <strong>⚠ CHARTS WON'T LOAD VIA FILE://</strong>
+  Run: <code>python3 -m http.server 8000</code>
+  <span class="close-x" onclick="this.parentElement.style.display='none'">✕</span>
+</div>
+
+<nav>
+  <a href="index.html" class="nav-brand">Under Fire</a>
+  <div class="nav-links">
+    <div class="nav-group">
+      <button class="nav-group-btn" type="button">Charts<span class="caret">▾</span></button>
+      <div class="nav-dropdown">
+        <a href="timeline.html">Timeline</a>
+        <a href="fronts.html">Fronts</a>
+        <a href="calendar.html">Calendar</a>
+        <a href="compare.html">Compare</a>
+      </div>
+    </div>
+    <div class="nav-group">
+      <button class="nav-group-btn" type="button">Maps<span class="caret">▾</span></button>
+      <div class="nav-dropdown">
+        <a href="oct7.html">Oct 7</a>
+        <a href="story.html">Story</a>
+        <a href="timelapse.html">Time-Lapse</a>
+      </div>
+    </div>
+    <div class="nav-group">
+      <button class="nav-group-btn" type="button">Patterns<span class="caret">▾</span></button>
+      <div class="nav-dropdown">
+        <a href="patterns.html">Patterns</a>
+        <a href="areas.html">By Area</a>
+      </div>
+    </div>
+    <div class="nav-group">
+      <button class="nav-group-btn" type="button">More<span class="caret">▾</span></button>
+      <div class="nav-dropdown">
+        <a href="live.html">Live Feed</a>
+        <a href="records.html">Records &amp; Stats</a>
+        <a href="arsenal.html">The Arsenal</a>
+        <a href="data.html">Data</a>
+        <a href="mission.html">Mission</a>
+      </div>
+    </div>
+  </div>
+  <a href="live.html" class="nav-badge" id="nav-badge">🔔 Loading…</a>
+</nav>
+
+<div id="tooltip"></div>
+
+<div class="chart-page">
+  <div class="section-wrapper">
+    <a href="index.html" class="back-link">← Back to all charts</a>
+    <div class="section-label">09 — Compare</div>
+    <h1 class="section-title">The Wars, Side by Side</h1>
+    <p class="section-desc">Nine named operations and campaigns, measured in the same unit — Home Front Command alerts. Some wars are a violent night; some are a two-year grind. The May 2021 Gaza war, the biggest of its era, produced 6,325 alerts in twelve days. The June 2025 Israel–Iran war produced three times that in the same span — and the war that began in February 2026 has passed 83,000, more than every previous round combined.</p>
+
+    <div class="filter-bar">
+      <span class="filter-label">Fronts</span>
+      <span style="font-family:'IBM Plex Mono',monospace;font-size:.62rem;color:#d63031;">■ Gaza</span>
+      <span style="font-family:'IBM Plex Mono',monospace;font-size:.62rem;color:#f39c12;">■ Lebanon</span>
+      <span style="font-family:'IBM Plex Mono',monospace;font-size:.62rem;color:#4a9eff;">■ Yemen</span>
+      <span style="font-family:'IBM Plex Mono',monospace;font-size:.62rem;color:#c678dd;">■ Iran</span>
+      <span style="font-family:'IBM Plex Mono',monospace;font-size:.62rem;color:#e8e8ea;">■ All fronts</span>
+    </div>
+
+    <div id="intensity" class="chart-gated">
+      <div class="section-label" style="margin-bottom:.5rem;">Duration × intensity</div>
+      <h2 class="section-title" style="font-size:1.8rem;margin-bottom:.5rem;">A night of terror or a year of attrition</h2>
+      <p class="section-desc" style="margin-bottom:1.25rem;max-width:640px;">Each circle is one operation — the further right, the longer it lasted; the higher, the more intense the average day. Circle area = total alerts. Both axes are logarithmic. <strong style="color:var(--accent);font-weight:500;">Click a circle to fire that war's salvo across the chart.</strong></p>
+      <div id="scatter-wrap"><svg id="scatter"></svg></div>
+      <p class="chart-note">Intensity = alerts per calendar day across the window. Iran's single-night barrages sit top-left; the Houthi drip-campaign bottom-right; the 2026 war top-right.</p>
+    </div>
+
+    <div style="margin-top:3.5rem;" id="ranked" class="chart-gated">
+      <div class="section-label" style="margin-bottom:.5rem;">The leaderboard</div>
+      <h2 class="section-title" style="font-size:1.8rem;margin-bottom:.5rem;">Total alerts per operation</h2>
+      <p class="section-desc" style="margin-bottom:1.25rem;max-width:620px;">Every operation ranked by total alerts in its window. The marker on each bar is its single worst day.</p>
+      <div id="rank-chart"></div>
+      <p class="chart-note">Windows overlap after Oct 7, 2023 — front-specific campaigns count only that actor's attributed alerts; Iron Swords and the 2026 war count everything inside their dates.</p>
+    </div>
+
+    <div style="margin-top:3.5rem;">
+      <div class="section-label" style="margin-bottom:.5rem;">Operation files</div>
+      <h2 class="section-title" style="font-size:1.8rem;margin-bottom:.5rem;">Every operation, on one card each</h2>
+      <div class="op-grid" id="op-grid"></div>
+    </div>
+
+  </div>
+</div>
+
+<footer>
+  <div class="footer-left">Under Fire — <span data-live="end-year">2026</span></div>
+  <div class="footer-credit">Alert data from <a href="https://rocketalert.live" target="_blank">RocketAlert.live</a>.</div>
+</footer>
+
+<script src="src/js/shared.js?v=20260613e"></script>
+<script src="src/js/salvo.js"></script>
+<script>
+let salvoScatter = null;
+const FRONT_COLORS = {
+  'Gaza': '#d63031', 'Lebanon': '#f39c12', 'Yemen': '#4a9eff',
+  'Iran': '#c678dd', 'All fronts': '#e8e8ea',
+};
+const MONTHS_ABBR = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+function fmtDate(d) {
+  if (!d) return 'ongoing';
+  return MONTHS_ABBR[+d.slice(5, 7) - 1] + ' ' + (+d.slice(8)) + ', ' + d.slice(0, 4);
+}
+
+function drawScatter(ops, animate) {
+  const c = document.getElementById('scatter-wrap');
+  const W = Math.max(c.clientWidth || 900, 560);
+  const M = { top: 20, right: 90, bottom: 46, left: 64 };
+  const H = 430;
+  const w = W - M.left - M.right, h = H - M.top - M.bottom;
+  const svg = d3.select('#scatter').attr('width', W).attr('height', H);
+  svg.selectAll('*').remove();
+  const g = svg.append('g').attr('transform', `translate(${M.left},${M.top})`);
+
+  const x = d3.scaleLog().domain([1.5, d3.max(ops, o => o.days) * 1.6]).range([0, w]);
+  const y = d3.scaleLog().domain([8, d3.max(ops, o => o.per_day) * 2.2]).range([h, 0]);
+  const r = d3.scaleSqrt().domain([0, d3.max(ops, o => o.total)]).range([0, 46]);
+
+  g.append('g').attr('transform', `translate(0,${h})`)
+    .call(d3.axisBottom(x).ticks(5, d => d >= 365 ? Math.round(d / 365) + 'y' : d + 'd'))
+    .call(s => { s.select('.domain').attr('stroke', 'var(--border)');
+      s.selectAll('text').attr('fill', 'var(--muted)').attr('font-family', 'IBM Plex Mono').attr('font-size', '10px');
+      s.selectAll('line').attr('stroke', 'var(--border)'); });
+  g.append('g')
+    .call(d3.axisLeft(y).ticks(4, d3.format('~s')))
+    .call(s => { s.select('.domain').attr('stroke', 'var(--border)');
+      s.selectAll('text').attr('fill', 'var(--muted)').attr('font-family', 'IBM Plex Mono').attr('font-size', '10px');
+      s.selectAll('line').attr('stroke', 'var(--border)'); });
+
+  g.append('text').attr('x', w / 2).attr('y', h + 38).attr('text-anchor', 'middle')
+    .attr('font-family', 'IBM Plex Mono').attr('font-size', '9.5px').attr('fill', 'var(--muted)')
+    .attr('letter-spacing', '.12em').text('DURATION (LOG)');
+  g.append('text').attr('transform', 'rotate(-90)').attr('x', -h / 2).attr('y', -46)
+    .attr('text-anchor', 'middle').attr('font-family', 'IBM Plex Mono').attr('font-size', '9.5px')
+    .attr('fill', 'var(--muted)').attr('letter-spacing', '.12em').text('ALERTS / DAY (LOG)');
+
+  // hand-tuned label offsets so nothing collides
+  const nudge = {
+    'guardian-walls': [10, -12], 'breaking-dawn': [8, 16], 'shield-arrow': [10, -4],
+    'iron-swords': [0, -30], 'northern-war': [0, 26], 'houthi-campaign': [-6, 24],
+    'true-promise-1': [10, 6], 'true-promise-2': [12, -8], 'rising-lion': [4, -26],
+    'total-war': [0, -34],
+  };
+
+  const sorted = [...ops].sort((a, b) => b.total - a.total);
+  sorted.forEach((o, i) => {
+    const col = FRONT_COLORS[o.front] || '#aaa';
+    const cx = x(o.days), cy = y(Math.max(o.per_day, 8.5));
+    const circle = g.append('circle').attr('cx', cx).attr('cy', cy)
+      .attr('r', animate ? 0 : r(o.total))
+      .attr('fill', col).attr('fill-opacity', 0.22).attr('stroke', col).attr('stroke-width', 1.5)
+      .style('cursor', 'pointer')
+      .on('mouseover', e => showTip(
+        `<b>${o.name}</b><br>${fmtDate(o.start)} → ${o.ongoing ? 'ongoing' : fmtDate(o.end)}<br>` +
+        `Total: ${fmtNum(o.total)}<br>Days: ${fmtNum(o.days)}<br>` +
+        `Avg/day: ${fmtNum(Math.round(o.per_day))}<br>` +
+        `Worst day: ${fmtNum(o.peak ? o.peak.count : 0)}<br>` +
+        `<span style="color:var(--accent);">▶ click to fire the salvo</span>`, e))
+      .on('mousemove', moveTip).on('mouseleave', hideTip)
+      .on('click', () => { if (salvoScatter) salvoScatter.fire({ count: o.total, label: o.name }); });
+    if (animate) {
+      circle.transition().delay(200 + i * 110).duration(620).ease(d3.easeBackOut.overshoot(1.4))
+        .attr('r', r(o.total));
+    }
+    const [dx, dy] = nudge[o.id] || [8, -8];
+    const lbl = g.append('text').attr('x', cx + dx).attr('y', cy + dy - (nudge[o.id] ? 0 : r(o.total)))
+      .attr('text-anchor', dx === 0 ? 'middle' : (dx > 0 ? 'start' : 'end'))
+      .attr('font-family', 'IBM Plex Mono').attr('font-size', '9.5px').attr('fill', col)
+      .text(o.name.replace(' — the 12-Day War', ''));
+    if (animate) {
+      lbl.attr('opacity', 0)
+        .transition().delay(200 + i * 110 + 480).duration(300).attr('opacity', 1);
+    }
+  });
+}
+
+function drawRank(ops) {
+  const c = document.getElementById('rank-chart');
+  c.innerHTML = '';
+  const data = [...ops].sort((a, b) => b.total - a.total);
+  const W = c.clientWidth || 900;
+  const barH = 30, barPad = 8;
+  const M = { top: 6, right: 110, bottom: 30, left: 170 };
+  const H = data.length * (barH + barPad) + M.top + M.bottom;
+  const w = W - M.left - M.right;
+  const svg = d3.select('#rank-chart').append('svg').attr('width', W).attr('height', H);
+  const g = svg.append('g').attr('transform', `translate(${M.left},${M.top})`);
+  const x = d3.scaleLinear().domain([0, d3.max(data, d => d.total)]).range([0, w]);
+
+  data.forEach((d, i) => {
+    const yPos = i * (barH + barPad);
+    const col = FRONT_COLORS[d.front] || '#aaa';
+    g.append('rect').attr('x', 0).attr('y', yPos).attr('width', 0).attr('height', barH)
+      .attr('fill', col).attr('fill-opacity', 0.55).attr('rx', 2)
+      .on('mouseover', e => showTip(`<b>${d.name}</b><br>Total: ${fmtNum(d.total)}<br>Worst day: ${fmtNum(d.peak ? d.peak.count : 0)} (${d.peak ? d.peak.date : '—'})`, e))
+      .on('mousemove', moveTip).on('mouseleave', hideTip)
+      .transition().delay(i * 70).duration(420).ease(d3.easeCubicOut)
+      .attr('width', Math.max(x(d.total), 2));
+    // worst-day marker
+    if (d.peak) {
+      g.append('line').attr('x1', x(d.peak.count)).attr('x2', x(d.peak.count))
+        .attr('y1', yPos + 3).attr('y2', yPos + barH - 3)
+        .attr('stroke', '#fff').attr('stroke-width', 1.4).attr('opacity', 0)
+        .transition().delay(i * 70 + 420).duration(220).attr('opacity', .85);
+    }
+    g.append('text').attr('x', -8).attr('y', yPos + barH / 2 + 4)
+      .attr('text-anchor', 'end').attr('font-family', 'IBM Plex Mono').attr('font-size', '10.5px')
+      .attr('fill', i < 3 ? '#fff' : 'var(--muted)')
+      .text(d.name.length > 24 ? d.name.slice(0, 23) + '…' : d.name);
+    g.append('text').attr('x', x(d.total) + 8).attr('y', yPos + barH / 2 + 4)
+      .attr('font-family', 'IBM Plex Mono').attr('font-size', '10px').attr('fill', 'var(--muted)')
+      .attr('opacity', 0).text(fmtNum(d.total))
+      .transition().delay(i * 70 + 420).duration(200).attr('opacity', 1);
+  });
+
+  g.append('g').attr('transform', `translate(0,${H - M.top - M.bottom})`)
+    .call(d3.axisBottom(x).ticks(5).tickFormat(d => d >= 1000 ? (d / 1000) + 'k' : d))
+    .call(s => { s.select('.domain').attr('stroke', 'var(--border)');
+      s.selectAll('text').attr('fill', 'var(--muted)').attr('font-family', 'IBM Plex Mono').attr('font-size', '10px');
+      s.selectAll('line').attr('stroke', 'var(--border)'); });
+}
+
+function buildCards(ops) {
+  const grid = document.getElementById('op-grid');
+  const chrono = [...ops].sort((a, b) => a.start.localeCompare(b.start));
+  for (const o of chrono) {
+    const col = FRONT_COLORS[o.front] || '#aaa';
+    const el = document.createElement('div');
+    el.className = 'op-card';
+    el.style.setProperty('--op-color', col);
+    const uavPct = Math.round(o.uav_share * 100);
+    const topArea = o.top_areas && o.top_areas[0];
+    el.innerHTML =
+      `<div class="op-eyebrow">${o.front} · ${o.label}</div>` +
+      `<div class="op-name">${o.name}</div>` +
+      `<div class="op-dates">${o.ongoing ? '<span class="ongoing-dot"></span>' : ''}${fmtDate(o.start)} → ${o.ongoing ? 'ongoing' : fmtDate(o.end)}</div>` +
+      `<div class="op-desc">${o.desc}</div>` +
+      `<div class="op-stats">` +
+      `<div class="op-row hero-row"><span>Total alerts</span><span>${fmtNum(o.total)}</span></div>` +
+      `<div class="op-row"><span>Duration</span><span>${fmtNum(o.days)} days</span></div>` +
+      `<div class="op-row"><span>Average / day</span><span>${fmtNum(Math.round(o.per_day))}</span></div>` +
+      (o.peak ? `<div class="op-row"><span>Worst day</span><span>${fmtNum(o.peak.count)} · ${fmtDate(o.peak.date)}</span></div>` : '') +
+      `<div class="op-row"><span>Rocket / drone</span><span>${100 - uavPct}% / ${uavPct}%</span></div>` +
+      (topArea ? `<div class="op-row"><span>Most-hit region</span><span>${topArea.area}</span></div>` : '') +
+      `</div>`;
+    grid.appendChild(el);
+  }
+}
+
+(async () => {
+  const { operations } = await fetchData('operations.json');
+  buildCards(operations);
+  salvoScatter = window.mountSalvo ? mountSalvo({ mount: '#scatter-wrap' }) : null;
+  revealOnScroll(document.getElementById('intensity'), () => {
+    document.getElementById('intensity').classList.add('revealed');
+    drawScatter(operations, true);
+  });
+  revealOnScroll(document.getElementById('ranked'), () => {
+    document.getElementById('ranked').classList.add('revealed');
+    drawRank(operations);
+  });
+  let t;
+  window.addEventListener('resize', () => { clearTimeout(t); t = setTimeout(() => {
+    drawScatter(operations, false); drawRank(operations);
+  }, 150); });
+})().catch(e => console.warn('compare', e));
+</script>
+</body>
+</html>

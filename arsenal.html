@@ -1,0 +1,783 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <link rel="icon" type="image/png" sizes="96x96" href="images/favicon.png">
+  <link rel="canonical" href="https://under-fire.org/arsenal">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>The Rockets, Missiles &amp; Drones Fired at Israel — The Arsenal — Under Fire</title>
+  <meta name="description" content="Every major weapon system fired at Israel from Gaza, Lebanon, Yemen, and Iran — Qassams to Shahed drones to hypersonic-class ballistic missiles. Ranges, warheads, costs, salvo history, and the defenses that meet them.">
+  <meta property="og:type" content="article">
+  <meta property="og:title" content="The Rockets, Missiles &amp; Drones Fired at Israel — The Arsenal — Under Fire">
+  <meta property="og:description" content="Every major weapon system fired at Israel from Gaza, Lebanon, Yemen, and Iran — Qassams to Shahed drones to hypersonic-class ballistic missiles. Ranges, warheads, costs, salvo history, and the defenses that meet them.">
+  <meta property="og:image" content="https://under-fire.org/images/og-card.png">
+  <meta property="og:url" content="https://under-fire.org/arsenal">
+  <meta name="twitter:card" content="summary_large_image">
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400;1,700&family=IBM+Plex+Mono:wght@300;400;500&family=IBM+Plex+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.8.5/d3.min.js"></script>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <link rel="stylesheet" href="src/css/shared.css">
+  <style>
+    #reach-wrap { width:100%; overflow-x:auto; }
+    #reach { display:block; }
+
+    .actor-section { margin-top: 3.5rem; }
+    .sys-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(320px,1fr)); gap:1rem; }
+    .sys-card { border:1px solid var(--border); border-radius:4px; padding:1.25rem 1.35rem; background:rgba(255,255,255,.015); position:relative; overflow:hidden; }
+    .sys-card::before { content:''; position:absolute; top:0; left:0; right:0; height:2px; background:var(--actor-color,#666); }
+    .sys-name { font-family:'Playfair Display',serif; font-weight:900; font-size:1.2rem; color:#fff; line-height:1.15; margin:0 0 .15rem; }
+    .sys-aka { font-family:'IBM Plex Mono',monospace; font-size:.58rem; letter-spacing:.1em; text-transform:uppercase; color:var(--muted); margin-bottom:.8rem; }
+    .sys-stats { border-top:1px solid rgba(255,255,255,.07); margin-bottom:.8rem; }
+    .sys-row { display:flex; justify-content:space-between; gap:1rem; font-family:'IBM Plex Mono',monospace; font-size:.63rem; padding:.3rem 0; border-bottom:1px solid rgba(255,255,255,.05); }
+    .sys-row span:first-child { color:var(--muted); flex-shrink:0; }
+    .sys-row span:last-child { color:var(--text); text-align:right; }
+    .sys-row span.wrap { text-align:right; line-height:1.5; }
+    .sys-notes { font-size:.76rem; color:var(--muted); line-height:1.65; margin:.55rem 0 0; }
+    .sys-notes strong { color:var(--text); font-weight:500; }
+    .src-links { white-space:nowrap; }
+    .src-links a { color:var(--accent); text-decoration:none; font-size:.68rem; opacity:.75; }
+    .src-links a:hover { opacity:1; }
+
+    .def-card::before { background:#4a9eff; }
+    .def-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(320px,1fr)); gap:1rem; }
+
+    .est-block { padding:.9rem 1.2rem; margin-bottom:1rem; background:rgba(255,255,255,.015); border-radius:0 4px 4px 0; }
+    .est-actor { font-family:'IBM Plex Mono',monospace; font-size:.6rem; letter-spacing:.14em; text-transform:uppercase; margin-bottom:.4rem; }
+    .est-block p { font-size:.82rem; color:var(--muted); line-height:1.7; margin:0; }
+
+    .ev-list { list-style:none; margin:1.2rem 0 0; padding:0; border-left:1px solid var(--border); }
+    .ev-item { display:flex; gap:1.2rem; padding:.7rem 0 .7rem 1.4rem; position:relative; }
+    .ev-item::before { content:''; position:absolute; left:-3.5px; top:1.15rem; width:6px; height:6px; border-radius:50%; background:var(--red); }
+    .ev-date { font-family:'IBM Plex Mono',monospace; font-size:.62rem; color:var(--accent); flex:0 0 92px; padding-top:.1rem; }
+    .ev-text { font-size:.8rem; color:var(--muted); line-height:1.65; }
+
+    .fact-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(200px,1fr)); gap:1px; background:var(--border); border:1px solid var(--border); border-radius:4px; overflow:hidden; margin:1.4rem 0 .6rem; }
+    .fact { background:#0b0b10; padding:1.1rem 1.25rem; }
+    .fact .f-num { font-family:'Playfair Display',serif; font-weight:900; font-size:1.45rem; color:#fff; }
+    .fact .f-lbl { font-family:'IBM Plex Mono',monospace; font-size:.56rem; letter-spacing:.12em; text-transform:uppercase; color:var(--muted); margin-top:.3rem; line-height:1.5; }
+
+    @media (max-width:640px) {
+      .ev-item { flex-direction:column; gap:.2rem; }
+      .ev-date { flex:none; }
+    }
+
+    /* ── Hangar ── */
+    .hangar-row { display:flex; gap:1.2rem; align-items:flex-start; padding:1rem 0; border-bottom:1px solid rgba(255,255,255,.05); }
+    .hangar-actor { flex:0 0 108px; font-family:'IBM Plex Mono',monospace; font-size:.56rem; letter-spacing:.13em; text-transform:uppercase; padding-top:.9rem; line-height:1.6; }
+    .hangar-rack { display:flex; flex-wrap:wrap; gap:.4rem 1.4rem; align-items:flex-end; }
+    .hangar-item { background:none; border:none; padding:.5rem .2rem .2rem; cursor:pointer; display:flex; flex-direction:column; align-items:center; gap:.3rem; border-radius:3px; transition:background .15s, transform .15s; }
+    .hangar-item:hover { background:rgba(255,255,255,.04); transform:translateY(-2px); }
+    .hangar-item svg { display:block; opacity:.9; }
+    .hangar-name { font-family:'IBM Plex Mono',monospace; font-size:.52rem; letter-spacing:.06em; color:var(--muted); white-space:nowrap; }
+    .hangar-item:hover .hangar-name { color:var(--text); }
+    @media (max-width:640px) { .hangar-row { flex-direction:column; gap:.3rem; } .hangar-actor { padding-top:0; } }
+
+    /* ── Duel simulator ── */
+    .duel-controls { display:flex; flex-wrap:wrap; gap:.5rem; align-items:center; margin-bottom:.8rem; }
+    .duel-select { font-family:'IBM Plex Mono',monospace; font-size:.66rem; letter-spacing:.04em; padding:.45rem .7rem;
+      background:#0b0b10; color:var(--text); border:1px solid var(--border); border-radius:3px; max-width:100%; }
+    .duel-fire { color:var(--red) !important; border-color:var(--red) !important; margin-left:.4rem; }
+    .duel-fire:hover { background:rgba(214,48,49,.12) !important; }
+    #duel-views { display:inline-flex; gap:.3rem; }
+    .duel-stage-wrap { position:relative; height:360px; border:1px solid var(--border); border-radius:4px; background:#07070a; overflow:hidden; }
+    #duel-canvas { position:absolute; inset:0; width:100%; height:100%; }
+    #duel-map-stage { position:absolute; inset:0; }
+    #duel-map { position:absolute; inset:0; background:#07070a; }
+    #duel-map-canvas { position:absolute; inset:0; pointer-events:none; z-index:400; }
+    #duel-map .leaflet-control-attribution { font-size:8px; background:rgba(7,7,10,.6); color:var(--muted); }
+    .duel-readout { position:absolute; top:.9rem; left:1rem; z-index:410; background:rgba(7,7,10,.88); border:1px solid var(--border); border-radius:4px; padding:.7rem .9rem; pointer-events:none; max-width:min(300px, 70%); }
+    .duel-readout .dr-name { font-family:'Playfair Display',serif; font-weight:900; font-size:1.05rem; margin-bottom:.4rem; }
+    .duel-readout .dr-row { display:flex; justify-content:space-between; gap:1rem; font-family:'IBM Plex Mono',monospace; font-size:.56rem; color:var(--muted); padding:.14rem 0; }
+    .duel-readout .dr-row span:last-child { color:var(--text); text-align:right; }
+    .duel-counters { display:grid; grid-template-columns:repeat(auto-fit,minmax(110px,1fr)); gap:1px; background:var(--border); border:1px solid var(--border); border-top:none; border-radius:0 0 4px 4px; overflow:hidden; }
+    .duel-counter { background:#0b0b10; padding:.7rem .8rem; text-align:center; }
+    .duel-counter .dc-num { font-family:'Playfair Display',serif; font-weight:900; font-size:1.15rem; color:#fff; }
+    .duel-counter .dc-lbl { font-family:'IBM Plex Mono',monospace; font-size:.5rem; letter-spacing:.1em; text-transform:uppercase; color:var(--muted); margin-top:.2rem; }
+    @media (max-width:640px) { .duel-stage-wrap { height:270px; } .duel-readout { display:none; } }
+
+    .sys-card.flash { animation:cardflash 1.6s ease-out; }
+    @keyframes cardflash { 0% { border-color:var(--accent); box-shadow:0 0 0 1px var(--accent); } 100% { border-color:var(--border); box-shadow:none; } }
+    .sim-link { display:inline-block; margin-top:.6rem; font-family:'IBM Plex Mono',monospace; font-size:.58rem; letter-spacing:.1em; text-transform:uppercase;
+      color:var(--accent); background:none; border:1px solid rgba(232,184,75,.35); border-radius:3px; padding:.3rem .6rem; cursor:pointer; transition:border-color .15s; }
+    .sim-link:hover { border-color:var(--accent); }
+  </style>
+  <!-- Google Analytics -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-JXKX4MKJ8W"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-JXKX4MKJ8W');
+  </script>
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@type": "Article",
+        "headline": "The Arsenal — the rockets, missiles, and drones fired at Israel",
+        "url": "https://under-fire.org/arsenal",
+        "description": "Reference guide to the weapon systems fired at Israel from Gaza, Lebanon, Yemen, and Iran since 2020: specifications, ranges, warheads, salvo history, arsenal size estimates, and Israel's layered air defenses.",
+        "author": { "@type": "Person", "name": "Alfie Rees" },
+        "isPartOf": { "@type": "WebSite", "name": "Under Fire", "url": "https://under-fire.org/" }
+      },
+      {
+        "@type": "BreadcrumbList",
+        "itemListElement": [
+          { "@type": "ListItem", "position": 1, "name": "Under Fire", "item": "https://under-fire.org/" },
+          { "@type": "ListItem", "position": 2, "name": "The Arsenal", "item": "https://under-fire.org/arsenal" }
+        ]
+      }
+    ]
+  }
+  </script>
+</head>
+<body>
+
+<nav>
+  <a href="index.html" class="nav-brand">Under Fire</a>
+  <div class="nav-links">
+    <div class="nav-group">
+      <button class="nav-group-btn" type="button">Charts<span class="caret">▾</span></button>
+      <div class="nav-dropdown">
+        <a href="timeline.html">Timeline</a>
+        <a href="fronts.html">Fronts</a>
+        <a href="calendar.html">Calendar</a>
+        <a href="compare.html">Compare</a>
+      </div>
+    </div>
+    <div class="nav-group">
+      <button class="nav-group-btn" type="button">Maps<span class="caret">▾</span></button>
+      <div class="nav-dropdown">
+        <a href="oct7.html">Oct 7</a>
+        <a href="story.html">Story</a>
+        <a href="timelapse.html">Time-Lapse</a>
+      </div>
+    </div>
+    <div class="nav-group">
+      <button class="nav-group-btn" type="button">Patterns<span class="caret">▾</span></button>
+      <div class="nav-dropdown">
+        <a href="patterns.html">Patterns</a>
+        <a href="areas.html">By Area</a>
+      </div>
+    </div>
+    <div class="nav-group">
+      <button class="nav-group-btn" type="button">More<span class="caret">▾</span></button>
+      <div class="nav-dropdown">
+        <a href="live.html">Live Feed</a>
+        <a href="records.html">Records &amp; Stats</a>
+        <a href="arsenal.html">The Arsenal</a>
+        <a href="data.html">Data</a>
+        <a href="mission.html">Mission</a>
+      </div>
+    </div>
+  </div>
+  <a href="live.html" class="nav-badge" id="nav-badge">🔔 Loading…</a>
+</nav>
+
+<div id="tooltip"></div>
+
+<div class="chart-page">
+  <div class="section-wrapper">
+    <a href="index.html" class="back-link">← Back to all charts</a>
+    <div class="section-label">10 — Reference</div>
+    <h1 class="section-title">The Arsenal</h1>
+    <p class="section-desc">Behind every alert in this dataset is a physical object: a pipe rocket welded in a Gaza workshop, a Soviet-designed Katyusha, a Shahed drone droning at 185 km/h, or a six-tonne ballistic missile arriving from Iran at two kilometres per second. This is a field guide to all of them — what they are, how far they fly, what they carry, and what it costs to shoot them down. A $500 Qassam can force a $50,000 interceptor shot; Iran's June 2025 barrage cost it an estimated $1–6 billion, and defending against it cost more.</p>
+
+    <div class="fact-grid">
+      <div class="fact"><div class="f-num">$300–800</div><div class="f-lbl">Cost of one Qassam rocket</div></div>
+      <div class="fact"><div class="f-num">$40–100k</div><div class="f-lbl">Cost of one Iron Dome interceptor</div></div>
+      <div class="fact"><div class="f-num">~$12M</div><div class="f-lbl">Cost of one THAAD interceptor</div></div>
+      <div class="fact"><div class="f-num">~$5</div><div class="f-lbl">Cost of one Iron Beam laser shot</div></div>
+    </div>
+    <p class="chart-note">Cost asymmetry is the arithmetic of this war: attackers spend hundreds; defenders spend thousands to millions per interception. Sources: JINSA (2025), CSIS Missile Threat.</p>
+
+    <div style="margin-top:3.5rem;">
+      <div class="section-label" style="margin-bottom:.5rem;">The Hangar</div>
+      <h2 class="section-title" style="font-size:1.8rem;margin-bottom:.5rem;">Every system, to silhouette</h2>
+      <p class="section-desc" style="margin-bottom:.6rem;max-width:640px;">Schematic side profiles of each system, smallest to longest-ranged per front. Hover for the quick stats; click to jump to its full entry below.</p>
+      <div id="hangar"></div>
+      <p class="chart-note">Silhouettes are stylised by weapon class — illustrative, not engineering drawings.</p>
+    </div>
+
+    <div style="margin-top:3.5rem;">
+      <div class="section-label" style="margin-bottom:.5rem;">The Duel</div>
+      <h2 class="section-title" style="font-size:1.8rem;margin-bottom:.5rem;">Fire one. Then fire eighty.</h2>
+      <p class="section-desc" style="margin-bottom:1rem;max-width:660px;">Pick a system and launch it at the deepest target it can reach — watch the trajectory, the interceptor rising to meet it, and the bill both sides run up. Then stack the salvo: interception rates that look unbeatable at ×1 start leaking at ×80, which is the whole logic of saturation barrages.</p>
+      <div id="duel"></div>
+      <p class="chart-note">Illustrative simulation, not a model: intercept rates are anchored to publicly reported figures (~90%+ single-threat claims, ~86–90% across the June 2025 barrages), costs to the documented estimates above — * marks class-level cost estimates. Trajectories and timings are schematic; real flight times shown in the readout.</p>
+    </div>
+
+    <div style="margin-top:3.5rem;" id="reach-section" class="chart-gated">
+      <div class="section-label" style="margin-bottom:.5rem;">Reach</div>
+      <h2 class="section-title" style="font-size:1.8rem;margin-bottom:.5rem;">How far each system can fly</h2>
+      <p class="section-desc" style="margin-bottom:1.25rem;max-width:640px;">Maximum documented range of every system, on a logarithmic scale — from mortars that cross the fence to missiles that cross the Middle East. Reference lines mark real distances to Tel Aviv.</p>
+      <div id="reach-wrap"><svg id="reach"></svg></div>
+      <p class="chart-note">Bar = documented range envelope (log scale). Hover for detail. Distances to Tel Aviv are approximate straight-line figures.</p>
+    </div>
+
+    
+    <div class="actor-section" id="hamas" style="--actor-color:#d63031;">
+      <div class="section-label" style="margin-bottom:.5rem;color:#d63031;">Gaza — Hamas &amp; PIJ</div>
+      <h2 class="section-title" style="font-size:1.8rem;margin-bottom:1rem;">8 systems</h2>
+      <div class="sys-grid">
+        <article class="sys-card" id="sys-qassam">
+          <h3 class="sys-name">Qassam family</h3>
+          <div class="sys-aka">Qassam-1/2/3 · al-Qassam rocket</div>
+          <div class="sys-stats"><div class="sys-row"><span>Class</span><span>artillery rocket</span></div><div class="sys-row"><span>Range</span><span>3–16 km</span></div><div class="sys-row"><span>Warhead</span><span>5–20 kg</span></div><div class="sys-row"><span>Guidance</span><span>unguided</span></div><div class="sys-row"><span>Est. cost / round</span><span>$300–$800</span></div><div class="sys-row"><span>First used vs Israel</span><span>2001 (first launches; first deep hit on Sderot 2002)</span></div></div>
+          <p class="sys-notes"><strong>Warhead:</strong> Improvised HE (scavenged TNT / urea-nitrate fertilizer mixes) packed with shrapnel; earliest Qassam-1 carried under 1 kg, typical later rounds 5-10 kg, Qassam-3 up to ~20 kg.</p>
+          <p class="sys-notes"><strong>In action:</strong> October 7, 2023: 2,200-5,000 rockets (largely Qassam/Grad types plus mortars) fired from Gaza in the opening ~20-30 minutes — the largest rocket barrage ever fired at Israel.</p>
+          <p class="sys-notes">The archetypal Gaza rocket: made in workshops from pipe steel and fertilizer, wildly inaccurate but launched in enormous numbers. Its sub-$1,000 cost against ~$50,000 Iron Dome interceptors is the classic cost-asymmetry example. <span class="src-links">Sources: <a href="https://en.wikipedia.org/wiki/Qassam_rocket" target="_blank" rel="noopener">[1]</a> <a href="https://www.washingtoninstitute.org/policy-analysis/weapon-terror-development-and-impact-qassam-rocket" target="_blank" rel="noopener">[2]</a> <a href="https://www.timesofisrael.com/liveblog_entry/idf-9500-rockets-fired-at-israel-since-oct-7-including-3000-in-1st-hours-of-onslaught/" target="_blank" rel="noopener">[3]</a></span></p>
+          <button class="sim-link" type="button" data-sim="qassam">▶ Fire it in the simulator</button>
+        </article>
+        <article class="sys-card" id="sys-grad-122">
+          <h3 class="sys-name">122mm Grad</h3>
+          <div class="sys-aka">Katyusha · BM-21 Grad</div>
+          <div class="sys-stats"><div class="sys-row"><span>Class</span><span>artillery rocket</span></div><div class="sys-row"><span>Range</span><span>20–40 km</span></div><div class="sys-row"><span>Warhead</span><span>18–30 kg</span></div><div class="sys-row"><span>Guidance</span><span>unguided (spin/fin stabilized)</span></div><div class="sys-row"><span>First used vs Israel</span><span>Katyusha fire from Lebanon since the 1970s; Grad-type fire from Gaza documented from 2006-2008</span></div></div>
+          <p class="sys-notes"><strong>Warhead:</strong> HE-fragmentation; standard rounds ~18-21 kg, extended-range and Hezbollah variants documented up to ~30 kg.</p>
+          <p class="sys-notes"><strong>In action:</strong> 2006 Lebanon war: Hezbollah fired 3,970-4,228 rockets in 34 days, ~95% of them 122mm Katyushas. November 24, 2024: ~250 projectiles from Lebanon in one day. The workhorse of Gaza barrages incl. May 2021 (4,360 rockets in 11 days).</p>
+          <p class="sys-notes">The single most-fired weapon family behind Israel&#x27;s red-alert sirens across every front — Hamas, PIJ and Hezbollah all use the same Soviet-designed 122mm round. <span class="src-links">Sources: <a href="https://en.wikipedia.org/wiki/2006_Lebanon_War" target="_blank" rel="noopener">[1]</a> <a href="https://www.hrw.org/report/2007/08/28/civilians-under-assault/hezbollahs-rocket-attacks-israel-2006-war" target="_blank" rel="noopener">[2]</a> <a href="https://missilethreat.csis.org/country/hezbollahs-rocket-arsenal/" target="_blank" rel="noopener">[3]</a> <a href="https://www.globalsecurity.org/military/library/news/2024/11/mil-241124-voa01.htm" target="_blank" rel="noopener">[4]</a></span></p>
+          <button class="sim-link" type="button" data-sim="grad-122">▶ Fire it in the simulator</button>
+        </article>
+        <article class="sys-card" id="sys-mortars">
+          <h3 class="sys-name">Mortars (60/81/120mm)</h3>
+          <div class="sys-aka">mortar bombs</div>
+          <div class="sys-stats"><div class="sys-row"><span>Class</span><span>mortar</span></div><div class="sys-row"><span>Range</span><span>1–9 km</span></div><div class="sys-row"><span>Warhead</span><span>undisclosed</span></div><div class="sys-row"><span>Guidance</span><span>unguided</span></div><div class="sys-row"><span>First used vs Israel</span><span>Early 2000s (Second Intifada, from Gaza)</span></div></div>
+          <p class="sys-notes"><strong>Warhead:</strong> Standard HE-fragmentation mortar bombs; a 120mm bomb weighs ~13-16 kg with a few kg of explosive fill.</p>
+          <p class="sys-notes"><strong>In action:</strong> October 7, 2023: IDF counted ~3,000 rockets and mortar bombs fired in the first four hours; mortars blanketed Gaza-envelope communities throughout the war.</p>
+          <p class="sys-notes">The shortest-range threat in the dataset: too fast and low for many Iron Dome engagements close to the fence, mortars caused a large share of casualties in Gaza-border communities in 2014 and 2023. <span class="src-links">Sources: <a href="https://en.wikipedia.org/wiki/Palestinian_rocket_arsenal" target="_blank" rel="noopener">[1]</a> <a href="https://www.timesofisrael.com/liveblog_entry/idf-9500-rockets-fired-at-israel-since-oct-7-including-3000-in-1st-hours-of-onslaught/" target="_blank" rel="noopener">[2]</a></span></p>
+          <button class="sim-link" type="button" data-sim="mortars">▶ Fire it in the simulator</button>
+        </article>
+        <article class="sys-card" id="sys-m-75">
+          <h3 class="sys-name">M-75</h3>
+          <div class="sys-aka">M75</div>
+          <div class="sys-stats"><div class="sys-row"><span>Class</span><span>heavy artillery rocket</span></div><div class="sys-row"><span>Range</span><span>75–80 km</span></div><div class="sys-row"><span>Warhead</span><span>undisclosed</span></div><div class="sys-row"><span>Guidance</span><span>unguided</span></div><div class="sys-row"><span>First used vs Israel</span><span>November 2012 (Operation Pillar of Defense — first rockets to reach Tel Aviv and Jerusalem)</span></div></div>
+          <p class="sys-notes"><strong>Warhead:</strong> Fajr-5-class HE warhead; exact weight not reliably documented.</p>
+          <p class="sys-notes"><strong>In action:</strong> Fired at Tel Aviv/Jerusalem in small numbers in Nov 2012; mass-employed alongside J-80/R-160-class rockets in 2014, May 2021 and from October 7, 2023.</p>
+          <p class="sys-notes">The M-75 marked Hamas&#x27;s leap from border-area rockets to holding metropolitan Tel Aviv at risk with an indigenized Iranian design. Hamas even released a perfume called &#x27;M75&#x27; to celebrate it. <span class="src-links">Sources: <a href="https://www.france24.com/en/20140710-rockets-hamas-israel-gaza-strip" target="_blank" rel="noopener">[1]</a> <a href="https://www.newsweek.com/what-we-know-about-hamas-huge-rocket-arsenal-1839746" target="_blank" rel="noopener">[2]</a></span></p>
+          <button class="sim-link" type="button" data-sim="m-75">▶ Fire it in the simulator</button>
+        </article>
+        <article class="sys-card" id="sys-fajr-5">
+          <h3 class="sys-name">Fajr-5</h3>
+          <div class="sys-aka">Fadjr-5</div>
+          <div class="sys-stats"><div class="sys-row"><span>Class</span><span>heavy artillery rocket</span></div><div class="sys-row"><span>Range</span><span>~75 km</span></div><div class="sys-row"><span>Warhead</span><span>90–175 kg</span></div><div class="sys-row"><span>Guidance</span><span>unguided (a later Iranian Fajr-5C variant adds satnav guidance)</span></div><div class="sys-row"><span>First used vs Israel</span><span>November 15, 2012 (Hamas/PIJ launches at Tel Aviv)</span></div></div>
+          <p class="sys-notes"><strong>Warhead:</strong> HE-fragmentation; CSIS lists a 90 kg HE warhead, other references cite up to 175 kg — sources disagree.</p>
+          <p class="sys-notes"><strong>In action:</strong> Fired in ones and twos at Tel Aviv in Nov 2012; Hezbollah holds thousands of Fajr-3/Fajr-5s as the mid-range tier of its arsenal.</p>
+          <p class="sys-notes">Iran&#x27;s signature proxy rocket: the transfer of Fajr-5s to both Hezbollah and Gaza was the first big step in extending proxy reach from border towns to Israel&#x27;s population centers. <span class="src-links">Sources: <a href="https://missilethreat.csis.org/country/hezbollahs-rocket-arsenal/" target="_blank" rel="noopener">[1]</a> <a href="https://www.france24.com/en/20140710-rockets-hamas-israel-gaza-strip" target="_blank" rel="noopener">[2]</a></span></p>
+          <button class="sim-link" type="button" data-sim="fajr-5">▶ Fire it in the simulator</button>
+        </article>
+        <article class="sys-card" id="sys-r-160">
+          <h3 class="sys-name">R-160</h3>
+          <div class="sys-aka">M-302 · Khaibar-1</div>
+          <div class="sys-stats"><div class="sys-row"><span>Class</span><span>heavy artillery rocket</span></div><div class="sys-row"><span>Range</span><span>90–180 km</span></div><div class="sys-row"><span>Warhead</span><span>100–175 kg</span></div><div class="sys-row"><span>Guidance</span><span>unguided</span></div><div class="sys-row"><span>First used vs Israel</span><span>July 2014 (Operation Protective Edge — fired toward the Haifa area)</span></div></div>
+          <p class="sys-notes"><strong>Warhead:</strong> HE-fragmentation; M-302 variants carry ~100-175 kg depending on version.</p>
+          <p class="sys-notes"><strong>In action:</strong> July 2014: the deepest Gaza strikes to that date (~116 km); the Iranian arms ship Klos-C, seized in March 2014, carried 40 M-302s bound for Gaza. Hezbollah&#x27;s Khaibar-1 version hit Afula in 2006.</p>
+          <p class="sys-notes">Its 2014 debut forced alert coverage as far north as Haifa and showed Syrian-produced heavy rockets had reached Gaza by sea. <span class="src-links">Sources: <a href="https://www.timesofisrael.com/from-tunnels-to-r-160s-a-primer-on-hamas-and-its-deadly-capabilities/" target="_blank" rel="noopener">[1]</a> <a href="https://missilethreat.csis.org/country/hezbollahs-rocket-arsenal/" target="_blank" rel="noopener">[2]</a></span></p>
+          <button class="sim-link" type="button" data-sim="r-160">▶ Fire it in the simulator</button>
+        </article>
+        <article class="sys-card" id="sys-ayyash-250">
+          <h3 class="sys-name">Ayyash-250</h3>
+          <div class="sys-aka">A-250</div>
+          <div class="sys-stats"><div class="sys-row"><span>Class</span><span>heavy artillery rocket</span></div><div class="sys-row"><span>Range</span><span>220–250 km</span></div><div class="sys-row"><span>Warhead</span><span>undisclosed</span></div><div class="sys-row"><span>Guidance</span><span>unguided</span></div><div class="sys-row"><span>First used vs Israel</span><span>May 2021 (single launch toward Ramon Airport, ~220 km)</span></div></div>
+          <p class="sys-notes"><strong>Warhead:</strong> Heavy HE warhead of undocumented weight; accuracy very poor at full range.</p>
+          <p class="sys-notes"><strong>In action:</strong> Fired singly: one at Ramon Airport in May 2021; small numbers launched again after October 7, 2023 toward deep targets.</p>
+          <p class="sys-notes">Longest-range weapon known in Hamas&#x27;s arsenal, named for bombmaker Yahya Ayyash. Its 250 km claim puts essentially all of Israel inside Gaza rocket range on paper. <span class="src-links">Sources: <a href="https://www.israeldefense.co.il/en/node/60088" target="_blank" rel="noopener">[1]</a> <a href="https://observers.france24.com/en/middle-east/20231013-inside-the-arsenal-iranian-sourced-weapons-used-in-hamas-and-islamic-jihad-s-israel-assault" target="_blank" rel="noopener">[2]</a></span></p>
+          <button class="sim-link" type="button" data-sim="ayyash-250">▶ Fire it in the simulator</button>
+        </article>
+        <article class="sys-card" id="sys-badr-3">
+          <h3 class="sys-name">Badr-3</h3>
+          <div class="sys-aka">Badr 3</div>
+          <div class="sys-stats"><div class="sys-row"><span>Class</span><span>heavy artillery rocket</span></div><div class="sys-row"><span>Range</span><span>13–160 km</span></div><div class="sys-row"><span>Warhead</span><span>250–400 kg</span></div><div class="sys-row"><span>Guidance</span><span>unguided</span></div><div class="sys-row"><span>First used vs Israel</span><span>May 5, 2019 (PIJ launches at the Ashkelon area)</span></div></div>
+          <p class="sys-notes"><strong>Warhead:</strong> Very heavy HE warhead for a Gaza rocket — 250 kg of explosive per PIJ, 300-400 kg total per analyst Fabian Hinz; airbursts ~20 m up for wide fragmentation. Range claims disagree sharply: ~13 km as verified in use, 150-160 km claimed.</p>
+          <p class="sys-notes"><strong>In action:</strong> Debuted during the ~700-rocket May 2019 escalation; fired again in the May 2021 war and 2022-23 Gaza rounds; IDF captured Badr-3 stocks inside Gaza in 2024.</p>
+          <p class="sys-notes">PIJ&#x27;s showcase Iranian-designed heavy rocket — what it lacks in range and accuracy it makes up in warhead mass, several times heavier than typical Palestinian rockets. <span class="src-links">Sources: <a href="https://en.wikipedia.org/wiki/Badr-3" target="_blank" rel="noopener">[1]</a> <a href="https://metis.fenixinsight.com/munition/rocket/badr-3-rocket" target="_blank" rel="noopener">[2]</a></span></p>
+          <button class="sim-link" type="button" data-sim="badr-3">▶ Fire it in the simulator</button>
+        </article></div></div>
+    <div class="actor-section" id="hezbollah" style="--actor-color:#f39c12;">
+      <div class="section-label" style="margin-bottom:.5rem;color:#f39c12;">Lebanon — Hezbollah</div>
+      <h2 class="section-title" style="font-size:1.8rem;margin-bottom:1rem;">7 systems</h2>
+      <div class="sys-grid">
+        <article class="sys-card" id="sys-fajr-3">
+          <h3 class="sys-name">Fajr-3</h3>
+          <div class="sys-aka">Fadjr-3</div>
+          <div class="sys-stats"><div class="sys-row"><span>Class</span><span>heavy artillery rocket</span></div><div class="sys-row"><span>Range</span><span>~43 km</span></div><div class="sys-row"><span>Warhead</span><span>~45 kg</span></div><div class="sys-row"><span>Guidance</span><span>unguided</span></div><div class="sys-row"><span>First used vs Israel</span><span>2006 Lebanon War (Fajr-class rockets struck the Haifa area)</span></div></div>
+          <p class="sys-notes"><strong>Warhead:</strong> 45 kg HE warhead (CSIS); 240mm caliber, 407 kg launch weight.</p>
+          <p class="sys-notes"><strong>In action:</strong> Part of Hezbollah&#x27;s 100+/day deep-strike fire in 2006; the Fajr tier sits between Katyushas and Zelzal-class heavy rockets in Hezbollah&#x27;s range ladder.</p>
+          <p class="sys-notes">Iran began transferring Fajr-3/Fajr-5 to Hezbollah in the early 2000s — the first rockets that put Haifa within reach from southern Lebanon. <span class="src-links">Sources: <a href="https://missilethreat.csis.org/country/hezbollahs-rocket-arsenal/" target="_blank" rel="noopener">[1]</a> <a href="https://csis-website-prod.s3.amazonaws.com/s3fs-public/publication/180705_Williams_HezbollahMissiles_v3.pdf" target="_blank" rel="noopener">[2]</a></span></p>
+          <button class="sim-link" type="button" data-sim="fajr-3">▶ Fire it in the simulator</button>
+        </article>
+        <article class="sys-card" id="sys-falaq">
+          <h3 class="sys-name">Falaq-1 / Falaq-2</h3>
+          <div class="sys-aka">Falagh</div>
+          <div class="sys-stats"><div class="sys-row"><span>Class</span><span>heavy artillery rocket</span></div><div class="sys-row"><span>Range</span><span>10–11 km</span></div><div class="sys-row"><span>Warhead</span><span>50–120 kg</span></div><div class="sys-row"><span>Guidance</span><span>unguided</span></div><div class="sys-row"><span>First used vs Israel</span><span>Heavy documented use from late 2023 in the border war; first claimed Falaq-2 combat launch August 2024</span></div></div>
+          <p class="sys-notes"><strong>Warhead:</strong> Falaq-1: ~50 kg HE; Falaq-2: 120 kg improved warhead per CSIS — heavy blast effect at short range.</p>
+          <p class="sys-notes"><strong>In action:</strong> Near-daily Falaq-1 strikes on border positions and towns like Kiryat Shmona during Oct 2023 – Nov 2024; Hezbollah publicized its first Falaq-2 launches in August 2024.</p>
+          <p class="sys-notes">Hezbollah&#x27;s preferred heavy hammer for the first kilometers over the border — big warheads on short-flight rockets that give defenses minimal engagement time. <span class="src-links">Sources: <a href="https://en.wikipedia.org/wiki/Falaq-1" target="_blank" rel="noopener">[1]</a> <a href="https://missilethreat.csis.org/country/hezbollahs-rocket-arsenal/" target="_blank" rel="noopener">[2]</a></span></p>
+          <button class="sim-link" type="button" data-sim="falaq">▶ Fire it in the simulator</button>
+        </article>
+        <article class="sys-card" id="sys-burkan">
+          <h3 class="sys-name">Burkan</h3>
+          <div class="sys-aka">Borkan · Volcano</div>
+          <div class="sys-stats"><div class="sys-row"><span>Class</span><span>heavy artillery rocket</span></div><div class="sys-row"><span>Range</span><span>1–10 km</span></div><div class="sys-row"><span>Warhead</span><span>100–500 kg</span></div><div class="sys-row"><span>Guidance</span><span>unguided</span></div><div class="sys-row"><span>First used vs Israel</span><span>Late 2023 (border war)</span></div></div>
+          <p class="sys-notes"><strong>Warhead:</strong> Oversized HE warhead of 100-500 kg on a short-range rocket body; destruction radius up to ~150 m (Alma Center).</p>
+          <p class="sys-notes"><strong>In action:</strong> Used repeatedly in multi-rocket strikes on IDF border posts through 2024; footage of Burkan impacts became a Hezbollah propaganda staple.</p>
+          <p class="sys-notes">A weapon born of Syria&#x27;s siege warfare adopted against Israeli border fortifications — trades range for one of the heaviest warheads of any rocket fired at Israel. <span class="src-links">Sources: <a href="https://israel-alma.org/heavy-missiles-and-rockets-in-hezbollahs-arsenal/" target="_blank" rel="noopener">[1]</a></span></p>
+          <button class="sim-link" type="button" data-sim="burkan">▶ Fire it in the simulator</button>
+        </article>
+        <article class="sys-card" id="sys-zelzal-2">
+          <h3 class="sys-name">Zelzal-2</h3>
+          <div class="sys-aka">Zilzal-2</div>
+          <div class="sys-stats"><div class="sys-row"><span>Class</span><span>heavy artillery rocket</span></div><div class="sys-row"><span>Range</span><span>~210 km</span></div><div class="sys-row"><span>Warhead</span><span>~600 kg</span></div><div class="sys-row"><span>Guidance</span><span>unguided (spin-stabilized); Iranian kits convert it into a Fateh-110-class guided missile</span></div><div class="sys-row"><span>First used vs Israel</span><span>Not documented as fired — held as a strategic stockpile (Israel destroyed Zelzal launchers on the ground in the 2006 war&#x27;s opening strikes)</span></div></div>
+          <p class="sys-notes"><strong>Warhead:</strong> 600 kg HE warhead (CSIS); unguided, so useful mainly against city-sized targets or as feedstock for guidance conversion.</p>
+          <p class="sys-notes"><strong>In action:</strong> No documented salvo use; Iranian suitcase-sized kits reportedly convert a Zelzal-2 into a ~300 km guided missile in 2-3 hours at $5,000-$10,000 per conversion (BICOM).</p>
+          <p class="sys-notes">The heart of Hezbollah&#x27;s &#x27;precision project&#x27;: from 2016 Iran smuggled GPS-guidance conversion kits for Zelzal-2s — a program Israel repeatedly bombed. <span class="src-links">Sources: <a href="https://missilethreat.csis.org/country/hezbollahs-rocket-arsenal/" target="_blank" rel="noopener">[1]</a> <a href="https://www.bicom.org.uk/wp-content/uploads/2024/12/Precision-Project-Paper-Oct-2019-1.pdf" target="_blank" rel="noopener">[2]</a></span></p>
+          <button class="sim-link" type="button" data-sim="zelzal-2">▶ Fire it in the simulator</button>
+        </article>
+        <article class="sys-card" id="sys-fateh-110-m600">
+          <h3 class="sys-name">Fateh-110 / M-600</h3>
+          <div class="sys-aka">M-600 Tishreen · Qader-1 (Hezbollah variant)</div>
+          <div class="sys-stats"><div class="sys-row"><span>Class</span><span>SRBM</span></div><div class="sys-row"><span>Range</span><span>190–300 km</span></div><div class="sys-row"><span>Warhead</span><span>450–500 kg</span></div><div class="sys-row"><span>Guidance</span><span>inertial + satellite (GPS-aided); quasi-ballistic with maneuvering variants</span></div><div class="sys-row"><span>First used vs Israel</span><span>September 25, 2024 — Hezbollah&#x27;s first-ever ballistic missile launch at Tel Aviv (intercepted by David&#x27;s Sling)</span></div></div>
+          <p class="sys-notes"><strong>Warhead:</strong> 450-500 kg HE; the Qader-1 fired at Tel Aviv carried a 500 kg warhead. Precision-guided versions are the core of Hezbollah&#x27;s PGM project — CEPs from ~500 m down to tens of meters claimed.</p>
+          <p class="sys-notes"><strong>In action:</strong> Single-missile use documented (Sept 25, 2024). Israeli intelligence assessed Hezbollah held hundreds of Fateh-110/M-600-class missiles; most were targeted in the Sept–Nov 2024 air campaign.</p>
+          <p class="sys-notes">The most strategically watched item in Hezbollah&#x27;s arsenal: a genuinely guided ballistic missile family, its lone combat use against Tel Aviv intercepted. <span class="src-links">Sources: <a href="https://missilethreat.csis.org/missile/fateh-110/" target="_blank" rel="noopener">[1]</a> <a href="https://breakingdefense.com/2024/09/in-first-hezbollah-launches-qadr-1-ballistic-missile-towards-tel-aviv/" target="_blank" rel="noopener">[2]</a></span></p>
+          <button class="sim-link" type="button" data-sim="fateh-110-m600">▶ Fire it in the simulator</button>
+        </article>
+        <article class="sys-card" id="sys-mirsad-1">
+          <h3 class="sys-name">Mirsad-1</h3>
+          <div class="sys-aka">Ababil-T · Mersad</div>
+          <div class="sys-stats"><div class="sys-row"><span>Class</span><span>OWA drone</span></div><div class="sys-row"><span>Range</span><span>~120 km</span></div><div class="sys-row"><span>Warhead</span><span>~40 kg</span></div><div class="sys-row"><span>Guidance</span><span>pre-programmed waypoint/GPS navigation</span></div><div class="sys-row"><span>First used vs Israel</span><span>First penetrated Israeli airspace on reconnaissance in November 2004; used as an attack drone from October 2023</span></div></div>
+          <p class="sys-notes"><strong>Warhead:</strong> Up to ~40 kg of explosives in one-way attack configuration.</p>
+          <p class="sys-notes"><strong>In action:</strong> October 13, 2024: two Mirsads launched from Lebanon; one evaded detection and hit a Golani Brigade dining hall in Binyamina — 4 soldiers killed, ~60 wounded, the deadliest single Hezbollah drone strike of the war.</p>
+          <p class="sys-notes">Hezbollah&#x27;s drone campaign proved harder to detect than rockets — low, slow and small, several crossed 40+ km into Israel before interception or impact. <span class="src-links">Sources: <a href="https://en.wikipedia.org/wiki/Mirsad-1" target="_blank" rel="noopener">[1]</a> <a href="https://www.fdd.org/analysis/op_eds/2024/10/14/what-types-of-deadly-drones-is-hezbollah-using-against-israel/" target="_blank" rel="noopener">[2]</a></span></p>
+          <button class="sim-link" type="button" data-sim="mirsad-1">▶ Fire it in the simulator</button>
+        </article>
+        <article class="sys-card" id="sys-almas">
+          <h3 class="sys-name">Almas</h3>
+          <div class="sys-aka">Almas-1/2/3</div>
+          <div class="sys-stats"><div class="sys-row"><span>Class</span><span>ATGM</span></div><div class="sys-row"><span>Range</span><span>4–16 km</span></div><div class="sys-row"><span>Warhead</span><span>undisclosed</span></div><div class="sys-row"><span>Guidance</span><span>electro-optical seeker with datalink — fire-and-observe, Spike-style lofted attack profile</span></div><div class="sys-row"><span>First used vs Israel</span><span>January 2024 (videoed strikes on border surveillance posts)</span></div></div>
+          <p class="sys-notes"><strong>Warhead:</strong> Tandem shaped-charge (anti-armor); Almas-1 ~4 km, Almas-2 ~8 km, Almas-3 up to 16 km from aerial platforms.</p>
+          <p class="sys-notes"><strong>In action:</strong> Used in repeated single-shot precision strikes on IDF observation posts, radars and even an Iron Dome battery area through 2024.</p>
+          <p class="sys-notes">A bitter irony documented by Israeli media: an Israeli Spike cloned by Iran and fired back at Israeli border installations, giving Hezbollah true precision at the tactical edge. <span class="src-links">Sources: <a href="https://en.wikipedia.org/wiki/Almas_(missile)" target="_blank" rel="noopener">[1]</a> <a href="https://israel-alma.org/a-profile-of-hezbollahs-almas-missile-capabilities-and-significance/" target="_blank" rel="noopener">[2]</a></span></p>
+          
+        </article></div></div>
+    <div class="actor-section" id="houthis" style="--actor-color:#4a9eff;">
+      <div class="section-label" style="margin-bottom:.5rem;color:#4a9eff;">Yemen — the Houthis</div>
+      <h2 class="section-title" style="font-size:1.8rem;margin-bottom:1rem;">5 systems</h2>
+      <div class="sys-grid">
+        <article class="sys-card" id="sys-palestine-2">
+          <h3 class="sys-name">Palestine-2</h3>
+          <div class="sys-aka">Filastin-2</div>
+          <div class="sys-stats"><div class="sys-row"><span>Class</span><span>MRBM</span></div><div class="sys-row"><span>Range</span><span>1,450–2,150 km</span></div><div class="sys-row"><span>Warhead</span><span>~500 kg</span></div><div class="sys-row"><span>Guidance</span><span>inertial/satnav with maneuvering re-entry vehicle (assessed)</span></div><div class="sys-row"><span>First used vs Israel</span><span>September 15, 2024 (first missile from Yemen to reach central Israel)</span></div></div>
+          <p class="sys-notes"><strong>Warhead:</strong> ~500 kg claimed; two-stage solid fuel with a maneuvering re-entry vehicle. Houthi &#x27;hypersonic&#x27; branding (claimed Mach 16) is treated with heavy skepticism by analysts — the Israeli Air Force said it has no evidence of a true hypersonic weapon.</p>
+          <p class="sys-notes"><strong>In action:</strong> Fired singly, roughly weekly during peaks: 52 Houthi ballistic missiles + 13 drones at Israel between March 18 and June 28, 2025. May 4, 2025: one evaded THAAD and Arrow and hit Ben Gurion Airport&#x27;s perimeter, injuring 6-8.</p>
+          <p class="sys-notes">The Ben Gurion strike was the propaganda high-point of the Houthi campaign — a single missile that briefly halted international air traffic. <span class="src-links">Sources: <a href="https://www.atlanticcouncil.org/blogs/menasource/yemen-iran-houthis-hypersonic-missile-israel/" target="_blank" rel="noopener">[1]</a> <a href="https://en.wikipedia.org/wiki/2025_Houthi_attack_on_Tel_Aviv_airport" target="_blank" rel="noopener">[2]</a></span></p>
+          <button class="sim-link" type="button" data-sim="palestine-2">▶ Fire it in the simulator</button>
+        </article>
+        <article class="sys-card" id="sys-zulfiqar-houthi">
+          <h3 class="sys-name">Zulfiqar (Houthi)</h3>
+          <div class="sys-aka">Zolfaghar · Burkan-3 derivative</div>
+          <div class="sys-stats"><div class="sys-row"><span>Class</span><span>MRBM</span></div><div class="sys-row"><span>Range</span><span>1,350–1,950 km</span></div><div class="sys-row"><span>Warhead</span><span>undisclosed</span></div><div class="sys-row"><span>Guidance</span><span>inertial (Scud-lineage liquid-fuel MRBM)</span></div><div class="sys-row"><span>First used vs Israel</span><span>October 31, 2023 (first Houthi ballistic missile attack on Israel — intercepted by Arrow 2, Arrow&#x27;s first combat kill)</span></div></div>
+          <p class="sys-notes"><strong>Warhead:</strong> Scud/Ghadr-lineage HE warhead, ~500-650 kg class assessed. Reaching Eilat from northern Yemen requires ~1,600+ km, which led analysts to conclude a Ghadr-class missile was in play.</p>
+          <p class="sys-notes"><strong>In action:</strong> Launched in small salvos of 1-3 missiles toward Eilat in Oct-Nov 2023 — all intercepted or fell short; the Oct 31 Arrow 2 engagement is cited as the first combat interception in space.</p>
+          <p class="sys-notes">Analysis of the 2023 launches concluded the Houthis were using modified Scud-family missiles with ranges beyond anything they had fired before, confirming Iranian MRBM transfer to Yemen. <span class="src-links">Sources: <a href="https://breakingdefense.com/2023/12/analysis-houthi-targeting-of-israel-suggests-new-longer-range-missile-in-play/" target="_blank" rel="noopener">[1]</a> <a href="https://www.armscontrol.org/act/2023-12/news/israeli-arrow-system-downs-first-missiles-combat" target="_blank" rel="noopener">[2]</a></span></p>
+          <button class="sim-link" type="button" data-sim="zulfiqar-houthi">▶ Fire it in the simulator</button>
+        </article>
+        <article class="sys-card" id="sys-toofan">
+          <h3 class="sys-name">Toofan</h3>
+          <div class="sys-aka">Tufan · Typhoon</div>
+          <div class="sys-stats"><div class="sys-row"><span>Class</span><span>MRBM</span></div><div class="sys-row"><span>Range</span><span>1,350–1,950 km</span></div><div class="sys-row"><span>Warhead</span><span>~650 kg</span></div><div class="sys-row"><span>Guidance</span><span>inertial</span></div><div class="sys-row"><span>First used vs Israel</span><span>Paraded September 2023; linked to long-range Houthi launches at Israel from late 2023 onward</span></div></div>
+          <p class="sys-notes"><strong>Warhead:</strong> Ghadr-class separating warhead ~650 kg; simulations found the 1,950 km claim plausible — enough to cover all of Israel from northern Yemen.</p>
+          <p class="sys-notes"><strong>In action:</strong> Single-missile launches typical of Houthi long-range strikes.</p>
+          <p class="sys-notes">Together with Zulfiqar and the Palestine family, Toofan shows the Houthis fielding Iranian MRBM technology under local names — the first non-state actor to sustain 1,500+ km ballistic missile strikes. <span class="src-links">Sources: <a href="https://breakingdefense.com/2023/12/analysis-houthi-targeting-of-israel-suggests-new-longer-range-missile-in-play/" target="_blank" rel="noopener">[1]</a> <a href="https://www.wilsoncenter.org/article/houthi-arsenal" target="_blank" rel="noopener">[2]</a></span></p>
+          <button class="sim-link" type="button" data-sim="toofan">▶ Fire it in the simulator</button>
+        </article>
+        <article class="sys-card" id="sys-quds-cruise">
+          <h3 class="sys-name">Quds cruise missile family</h3>
+          <div class="sys-aka">Quds-1/2/3/4 · al-Arqab</div>
+          <div class="sys-stats"><div class="sys-row"><span>Class</span><span>cruise missile</span></div><div class="sys-row"><span>Range</span><span>700–2,000 km</span></div><div class="sys-row"><span>Warhead</span><span>undisclosed</span></div><div class="sys-row"><span>Guidance</span><span>inertial + satellite navigation, low-altitude terrain-hugging profile</span></div><div class="sys-row"><span>First used vs Israel</span><span>October 19, 2023 (USS Carney intercepted 4 Houthi cruise missiles and 15 drones assessed as heading toward Israel)</span></div></div>
+          <p class="sys-notes"><strong>Warhead:</strong> Warhead size undisclosed (Quds-1 total mass only ~450 kg, so a relatively small HE charge); Quds-1 ~700-800 km, Quds-2 ~1,350 km, Quds-4 claimed up to ~2,000 km.</p>
+          <p class="sys-notes"><strong>In action:</strong> Oct 19, 2023 salvo of 4 cruise missiles + 15 drones; later typically 1-2 missiles per launch at Eilat; one reached the Eilat area in March 2024.</p>
+          <p class="sys-notes">The Quds family&#x27;s low-altitude approach makes it a different detection problem from ballistic missiles and forced Israel to widen radar coverage over the Red Sea approach. <span class="src-links">Sources: <a href="https://en.wikipedia.org/wiki/Quds_cruise_missile" target="_blank" rel="noopener">[1]</a> <a href="https://www.wilsoncenter.org/article/houthi-arsenal" target="_blank" rel="noopener">[2]</a></span></p>
+          <button class="sim-link" type="button" data-sim="quds-cruise">▶ Fire it in the simulator</button>
+        </article>
+        <article class="sys-card" id="sys-samad-3">
+          <h3 class="sys-name">Samad-3</h3>
+          <div class="sys-aka">Sammad-3 · Yafa (modified long-range version)</div>
+          <div class="sys-stats"><div class="sys-row"><span>Class</span><span>OWA drone</span></div><div class="sys-row"><span>Range</span><span>1,500–1,800 km</span></div><div class="sys-row"><span>Warhead</span><span>~40 kg</span></div><div class="sys-row"><span>Guidance</span><span>satellite/waypoint navigation</span></div><div class="sys-row"><span>First used vs Israel</span><span>Launch attempts from October 2023; July 19, 2024 a Samad-3 (&#x27;Yafa&#x27;) struck central Tel Aviv</span></div></div>
+          <p class="sys-notes"><strong>Warhead:</strong> Explosive payload up to ~40 kg; extended-range conformal fuel tank, ~4.5 m wingspan, pusher prop.</p>
+          <p class="sys-notes"><strong>In action:</strong> Typically single-drone sorties. July 19, 2024, 3:12 a.m.: one flew ~2,000 km, evaded detection and exploded near the US embassy branch in Tel Aviv, killing one man and injuring ten — the first fatal Houthi strike inside Israel.</p>
+          <p class="sys-notes">The Tel Aviv hit exposed a gap in drone detection (the drone was tracked but not classified as hostile) and triggered Israel&#x27;s first airstrike on Yemen the next day. <span class="src-links">Sources: <a href="https://en.wikipedia.org/wiki/Samad_(UAV)" target="_blank" rel="noopener">[1]</a> <a href="https://en.wikipedia.org/wiki/2024_Houthi_drone_attack_on_Israel" target="_blank" rel="noopener">[2]</a></span></p>
+          <button class="sim-link" type="button" data-sim="samad-3">▶ Fire it in the simulator</button>
+        </article></div></div>
+    <div class="actor-section" id="iran" style="--actor-color:#c678dd;">
+      <div class="section-label" style="margin-bottom:.5rem;color:#c678dd;">Iran — direct</div>
+      <h2 class="section-title" style="font-size:1.8rem;margin-bottom:1rem;">8 systems</h2>
+      <div class="sys-grid">
+        <article class="sys-card" id="sys-emad">
+          <h3 class="sys-name">Emad</h3>
+          <div class="sys-aka">Emad-1</div>
+          <div class="sys-stats"><div class="sys-row"><span>Class</span><span>MRBM</span></div><div class="sys-row"><span>Range</span><span>~1,700 km</span></div><div class="sys-row"><span>Warhead</span><span>~750 kg</span></div><div class="sys-row"><span>Guidance</span><span>inertial + satnav with terminally guided maneuvering re-entry vehicle</span></div><div class="sys-row"><span>Est. cost / round</span><span>$250k</span></div><div class="sys-row"><span>First used vs Israel</span><span>April 13-14, 2024 (Operation True Promise)</span></div></div>
+          <p class="sys-notes"><strong>Warhead:</strong> ~750 kg HE with a finned, maneuverable re-entry vehicle; Iran claims CEP ~50 m — Iran&#x27;s first &#x27;precision&#x27; MRBM.</p>
+          <p class="sys-notes"><strong>In action:</strong> Fired in every direct Iranian attack: April 2024 (part of 120+ ballistic missiles), October 1, 2024 (~180-200 in ~30 minutes), June 2025 (bulk of ~550-590 missiles with Ghadr), and the 2026 war (~650 missiles total).</p>
+          <p class="sys-notes">JINSA&#x27;s July 2025 cost study put Emad at ~$250,000 per round — Iran&#x27;s cheap workhorse for mass barrages; most were intercepted by Arrow, David&#x27;s Sling and US THAAD/Aegis. <span class="src-links">Sources: <a href="https://missilethreat.csis.org/missile/emad/" target="_blank" rel="noopener">[1]</a> <a href="https://jinsa.org/wp-content/uploads/2025/07/Cost-Estimates-During-the-U.S.-Israel-Iran-War-07-21-25.pdf" target="_blank" rel="noopener">[2]</a></span></p>
+          <button class="sim-link" type="button" data-sim="emad">▶ Fire it in the simulator</button>
+        </article>
+        <article class="sys-card" id="sys-ghadr">
+          <h3 class="sys-name">Ghadr</h3>
+          <div class="sys-aka">Ghadr-110 · Ghadr-S/H/F</div>
+          <div class="sys-stats"><div class="sys-row"><span>Class</span><span>MRBM</span></div><div class="sys-row"><span>Range</span><span>1,350–1,950 km</span></div><div class="sys-row"><span>Warhead</span><span>650–1,000 kg</span></div><div class="sys-row"><span>Guidance</span><span>inertial (+satnav updates on later variants)</span></div><div class="sys-row"><span>Est. cost / round</span><span>$5M</span></div><div class="sys-row"><span>First used vs Israel</span><span>April 13-14, 2024</span></div></div>
+          <p class="sys-notes"><strong>Warhead:</strong> Warhead reduced from ~1,000 kg to ~650 kg across variants to buy range (Ghadr-S 1,350 km → Ghadr-F 1,950 km); conventional HE, separating warhead.</p>
+          <p class="sys-notes"><strong>In action:</strong> With Emad, formed the bulk of the October 1, 2024 (~200-missile) and June 2025 (~550-590-missile) barrages; also fired in the 2026 war. Cost estimates for Iranian missiles vary widely between analysts.</p>
+          <p class="sys-notes">A 1990s-lineage design kept relevant by mass: Iran fired more Shahab-3-family (Ghadr/Emad) rounds at Israel in 2024-2026 than any other missile type. <span class="src-links">Sources: <a href="https://en.wikipedia.org/wiki/Ghadr-110" target="_blank" rel="noopener">[1]</a> <a href="https://jinsa.org/wp-content/uploads/2025/07/Cost-Estimates-During-the-U.S.-Israel-Iran-War-07-21-25.pdf" target="_blank" rel="noopener">[2]</a></span></p>
+          <button class="sim-link" type="button" data-sim="ghadr">▶ Fire it in the simulator</button>
+        </article>
+        <article class="sys-card" id="sys-kheibar-shekan">
+          <h3 class="sys-name">Kheibar Shekan</h3>
+          <div class="sys-aka">Khaybar Shekan · Castle Breaker</div>
+          <div class="sys-stats"><div class="sys-row"><span>Class</span><span>MRBM</span></div><div class="sys-row"><span>Range</span><span>~1,450 km</span></div><div class="sys-row"><span>Warhead</span><span>500–550 kg</span></div><div class="sys-row"><span>Guidance</span><span>inertial/satnav with terminal-phase maneuvering re-entry vehicle</span></div><div class="sys-row"><span>First used vs Israel</span><span>April 13-14, 2024 (debris identified); used at scale June 2025</span></div></div>
+          <p class="sys-notes"><strong>Warhead:</strong> ~500-550 kg HE in a tri-conic maneuverable re-entry vehicle designed to evade terminal defenses; composite body, launch-ready solid fuel. Basis for the Houthi Palestine-2.</p>
+          <p class="sys-notes"><strong>In action:</strong> One of the main types in Iran&#x27;s June 2025 barrages; its compact size lets more be stored in underground &#x27;missile cities&#x27;, sustaining multi-wave salvos.</p>
+          <p class="sys-notes">Several June 2025 impacts in Israeli cities were attributed to Kheibar Shekan-class missiles that leaked through saturated defenses. <span class="src-links">Sources: <a href="https://en.wikipedia.org/wiki/Kheibar_Shekan" target="_blank" rel="noopener">[1]</a> <a href="https://www.euronews.com/2025/06/22/iranian-weapon-with-ideological-payload-what-is-the-kheibar-shekan-missile" target="_blank" rel="noopener">[2]</a></span></p>
+          <button class="sim-link" type="button" data-sim="kheibar-shekan">▶ Fire it in the simulator</button>
+        </article>
+        <article class="sys-card" id="sys-fattah-1">
+          <h3 class="sys-name">Fattah-1</h3>
+          <div class="sys-aka">Fattah · Conqueror</div>
+          <div class="sys-stats"><div class="sys-row"><span>Class</span><span>MRBM</span></div><div class="sys-row"><span>Range</span><span>~1,400 km</span></div><div class="sys-row"><span>Warhead</span><span>350–500 kg</span></div><div class="sys-row"><span>Guidance</span><span>inertial/satnav; maneuvering re-entry vehicle with claimed in-flight course correction</span></div><div class="sys-row"><span>First used vs Israel</span><span>Debris identified from both the April and October 2024 strikes; IRGC claimed mass use October 1, 2024</span></div></div>
+          <p class="sys-notes"><strong>Warhead:</strong> Sources disagree: ~350-450 kg per some references, up to ~500 kg per others; two-stage solid fuel with a thrust-vector-controlled maneuvering warhead.</p>
+          <p class="sys-notes"><strong>In action:</strong> IRGC said Fattah-1s were among ~200 missiles fired Oct 1, 2024 (first claimed combat use of a &#x27;hypersonic&#x27; weapon against Israel); used again in June 2025.</p>
+          <p class="sys-notes">Iran&#x27;s flagship prestige missile. Independent analysts confirmed its debris in Israel but dispute the &#x27;unstoppable hypersonic&#x27; framing — Arrow and THAAD engaged Fattah-class re-entry vehicles with claimed success. <span class="src-links">Sources: <a href="https://en.wikipedia.org/wiki/Fattah-1" target="_blank" rel="noopener">[1]</a> <a href="https://www.army-technology.com/projects/fattah-hypersonic-ballistic-missile-iran/" target="_blank" rel="noopener">[2]</a></span></p>
+          <button class="sim-link" type="button" data-sim="fattah-1">▶ Fire it in the simulator</button>
+        </article>
+        <article class="sys-card" id="sys-haj-qasem">
+          <h3 class="sys-name">Haj Qasem</h3>
+          <div class="sys-aka">Hajj Qassem</div>
+          <div class="sys-stats"><div class="sys-row"><span>Class</span><span>MRBM</span></div><div class="sys-row"><span>Range</span><span>~1,400 km</span></div><div class="sys-row"><span>Warhead</span><span>~500 kg</span></div><div class="sys-row"><span>Guidance</span><span>inertial/satnav; maneuvering re-entry, reported electro-optical terminal seeker on upgraded rounds</span></div><div class="sys-row"><span>First used vs Israel</span><span>June 2025 (Twelve-Day War)</span></div></div>
+          <p class="sys-notes"><strong>Warhead:</strong> ~500 kg HE; 2024 upgrades reportedly added electro-optical terminal guidance and jamming resistance.</p>
+          <p class="sys-notes"><strong>In action:</strong> Named by Iran among the types fired in the June 2025 campaign; solid fuel allows quick multi-launcher salvos from dispersed sites.</p>
+          <p class="sys-notes">Part of Iran&#x27;s newer solid-fuel generation that launches with little warning — exactly the class Israel&#x27;s February 2026 preemptive campaign prioritized destroying on the ground. <span class="src-links">Sources: <a href="https://en.wikipedia.org/wiki/Haj_Qasem_(missile)" target="_blank" rel="noopener">[1]</a> <a href="https://www.presstv.ir/Detail/2025/06/14/749848/explainer-what-emad-ghadr-kheibar-shekan-missiles-iran-unleashed-israel" target="_blank" rel="noopener">[2]</a></span></p>
+          <button class="sim-link" type="button" data-sim="haj-qasem">▶ Fire it in the simulator</button>
+        </article>
+        <article class="sys-card" id="sys-sejjil">
+          <h3 class="sys-name">Sejjil</h3>
+          <div class="sys-aka">Sejil · Sajjil-2</div>
+          <div class="sys-stats"><div class="sys-row"><span>Class</span><span>MRBM</span></div><div class="sys-row"><span>Range</span><span>2,000–2,500 km</span></div><div class="sys-row"><span>Warhead</span><span>~700 kg</span></div><div class="sys-row"><span>Guidance</span><span>inertial</span></div><div class="sys-row"><span>First used vs Israel</span><span>June 18, 2025 (first combat use ever; Israel said it was intercepted)</span></div></div>
+          <p class="sys-notes"><strong>Warhead:</strong> ~700 kg payload; 18 m, 23.6 t missile. Iran claimed a possible submunition payload on the June 2025 combat round.</p>
+          <p class="sys-notes"><strong>In action:</strong> Single claimed launch during the Twelve-Day War — a demonstrative first combat use after 17 years in development.</p>
+          <p class="sys-notes">Storable, quick-launch solid fuel makes Sejjil harder to preempt than the liquid-fuel Ghadr/Emad family; its one combat launch was widely read as an escalation signal. <span class="src-links">Sources: <a href="https://en.wikipedia.org/wiki/Sejjil" target="_blank" rel="noopener">[1]</a> <a href="https://www.euronews.com/2025/06/20/new-missile-enters-israel-iran-conflict-what-we-know-about-tehrans-sejil" target="_blank" rel="noopener">[2]</a></span></p>
+          <button class="sim-link" type="button" data-sim="sejjil">▶ Fire it in the simulator</button>
+        </article>
+        <article class="sys-card" id="sys-shahed-131-136">
+          <h3 class="sys-name">Shahed-131 / Shahed-136</h3>
+          <div class="sys-aka">Geran-1/2 (Russian service) · Wa&#x27;id (Houthi clones)</div>
+          <div class="sys-stats"><div class="sys-row"><span>Class</span><span>OWA drone</span></div><div class="sys-row"><span>Range</span><span>900–2,500 km</span></div><div class="sys-row"><span>Warhead</span><span>30–50 kg</span></div><div class="sys-row"><span>Guidance</span><span>satnav (GNSS) + inertial waypoint navigation</span></div><div class="sys-row"><span>Est. cost / round</span><span>$20k–$50k</span></div><div class="sys-row"><span>First used vs Israel</span><span>April 13-14, 2024 (~170 launched directly by Iran; proxy Shahed-type launches toward Israel began October 2023)</span></div></div>
+          <p class="sys-notes"><strong>Warhead:</strong> Shahed-131: ~10-15 kg class; Shahed-136: 30-50 kg HE/fragmentation nose warhead, newer variants reported up to ~90 kg. Range estimates span 1,000-2,500 km for the 136.</p>
+          <p class="sys-notes"><strong>In action:</strong> April 13-14, 2024: ~170 one-way attack drones in one night — none reached Israeli territory (99% interception). June 2025: over 1,000 launched across the Twelve-Day War.</p>
+          <p class="sys-notes">The defining cheap mass-attack weapon of the decade, commonly cited at $20k-$50k apiece. Its slow speed gives hours of warning from Iran — and Israel downed virtually all of them. <span class="src-links">Sources: <a href="https://en.wikipedia.org/wiki/HESA_Shahed_136" target="_blank" rel="noopener">[1]</a> <a href="https://en.wikipedia.org/wiki/April_2024_Iranian_strikes_on_Israel" target="_blank" rel="noopener">[2]</a></span></p>
+          <button class="sim-link" type="button" data-sim="shahed-131-136">▶ Fire it in the simulator</button>
+        </article>
+        <article class="sys-card" id="sys-paveh">
+          <h3 class="sys-name">Paveh</h3>
+          <div class="sys-aka">Paveh-351 · Soumar family</div>
+          <div class="sys-stats"><div class="sys-row"><span>Class</span><span>cruise missile</span></div><div class="sys-row"><span>Range</span><span>~1,650 km</span></div><div class="sys-row"><span>Warhead</span><span>undisclosed</span></div><div class="sys-row"><span>Guidance</span><span>inertial + satellite navigation, terrain-following</span></div><div class="sys-row"><span>First used vs Israel</span><span>April 13-14, 2024 (30+ cruise missiles in the True Promise attack; none reached their targets)</span></div></div>
+          <p class="sys-notes"><strong>Warhead:</strong> Warhead weight undisclosed; terrain-following low-altitude profile for radar evasion.</p>
+          <p class="sys-notes"><strong>In action:</strong> April 2024: 30+ land-attack cruise missiles launched in one wave, downed largely by fighter aircraft; the same family serves Iraqi militias and the Houthis under other names.</p>
+          <p class="sys-notes">Iran&#x27;s export of the Paveh family to Iraq&#x27;s militias and Yemen effectively ringed Israel with the same cruise missile under three different names. <span class="src-links">Sources: <a href="https://en.wikipedia.org/wiki/Paveh_cruise_missile" target="_blank" rel="noopener">[1]</a> <a href="https://www.timesofisrael.com/iran-unveils-new-paveh-cruise-missile-that-can-reach-israel/" target="_blank" rel="noopener">[2]</a></span></p>
+          <button class="sim-link" type="button" data-sim="paveh">▶ Fire it in the simulator</button>
+        </article></div></div>
+
+    <div class="actor-section">
+      <div class="section-label" style="margin-bottom:.5rem;color:#4a9eff;">The Shield</div>
+      <h2 class="section-title" style="font-size:1.8rem;margin-bottom:.5rem;">What meets them in the air</h2>
+      <p class="section-desc" style="margin-bottom:1.25rem;max-width:640px;">Israel operates the most combat-tested layered air defense on earth — plus, since October 2024, a US Army THAAD battery. Every layer recorded world-first combat intercepts in this war.</p>
+      <div class="def-grid">
+        
+      <article class="sys-card def-card">
+        <div class="sys-aka">Bottom layer</div>
+        <h3 class="sys-name">Iron Dome</h3>
+        <div class="sys-stats">
+          <div class="sys-row"><span>Intercepts</span><span class="wrap">Short-range rockets, mortar bombs, and drones (threat ranges roughly 4-70 km); selective engagement — only shoots at projectiles headed for populated areas</span></div>
+          <div class="sys-row"><span>Cost / interceptor</span><span>$40k–$100k</span></div>
+        </div>
+        <p class="sys-notes">~90%+ claimed interception rate since 2011, with 10,000+ combat intercepts by its 15th anniversary in April 2026; independent analysts estimate 80-90%, lower under saturation barrages. <span class="src-links">Sources: <a href="https://missilethreat.csis.org/defsys/iron-dome/" target="_blank" rel="noopener">[1]</a> <a href="https://www.jpost.com/defense-and-tech/article-892329" target="_blank" rel="noopener">[2]</a></span></p>
+      </article>
+      <article class="sys-card def-card">
+        <div class="sys-aka">Middle layer</div>
+        <h3 class="sys-name">David&#x27;s Sling</h3>
+        <div class="sys-stats">
+          <div class="sys-row"><span>Intercepts</span><span class="wrap">Heavy rockets, short-range ballistic missiles, cruise missiles and aircraft in the 40-300 km band — between Iron Dome and Arrow</span></div>
+          <div class="sys-row"><span>Cost / interceptor</span><span>$1M</span></div>
+        </div>
+        <p class="sys-notes">First operational intercepts May 2023 (Gaza heavy rockets); intercepted Hezbollah&#x27;s Qader-1 ballistic missile over Tel Aviv on Sept 25, 2024; engaged Iranian missiles 2024-2026. <span class="src-links">Sources: <a href="https://en.wikipedia.org/wiki/David%27s_Sling" target="_blank" rel="noopener">[1]</a> <a href="https://breakingdefense.com/2024/09/in-first-hezbollah-launches-qadr-1-ballistic-missile-towards-tel-aviv/" target="_blank" rel="noopener">[2]</a></span></p>
+      </article>
+      <article class="sys-card def-card">
+        <div class="sys-aka">Upper layer</div>
+        <h3 class="sys-name">Arrow 2</h3>
+        <div class="sys-stats">
+          <div class="sys-row"><span>Intercepts</span><span class="wrap">Ballistic missiles in the upper atmosphere / edge of space (terminal-phase)</span></div>
+          <div class="sys-row"><span>Cost / interceptor</span><span>$3M</span></div>
+        </div>
+        <p class="sys-notes">First-ever combat intercept Oct 31, 2023 against a Houthi ballistic missile ~100 km up — described as the first combat interception in space; Arrow-family rates above 90% reported. <span class="src-links">Sources: <a href="https://www.armscontrol.org/act/2023-12/news/israeli-arrow-system-downs-first-missiles-combat" target="_blank" rel="noopener">[1]</a></span></p>
+      </article>
+      <article class="sys-card def-card">
+        <div class="sys-aka">Top layer</div>
+        <h3 class="sys-name">Arrow 3</h3>
+        <div class="sys-stats">
+          <div class="sys-row"><span>Intercepts</span><span class="wrap">Medium/long-range ballistic missiles exoatmospherically (hit-to-kill in space) — Israel&#x27;s top layer against Iranian MRBMs</span></div>
+          <div class="sys-row"><span>Cost / interceptor</span><span>$2M–$4M</span></div>
+        </div>
+        <p class="sys-notes">First combat intercept Nov 9, 2023 (Houthi missile bound for Eilat); primary killer of Iranian MRBMs in the 2024, 2025 and 2026 barrages. Interceptor stocks ran low in June 2025, prompting a 2026 US-Israel co-production push. <span class="src-links">Sources: <a href="https://en.wikipedia.org/wiki/Arrow_3" target="_blank" rel="noopener">[1]</a> <a href="https://www.fdd.org/analysis/2026/04/09/israel-partners-with-u-s-to-accelerate-arrow-interceptor-production/" target="_blank" rel="noopener">[2]</a></span></p>
+      </article>
+      <article class="sys-card def-card">
+        <div class="sys-aka">Upper layer (allied)</div>
+        <h3 class="sys-name">THAAD (US Army)</h3>
+        <div class="sys-stats">
+          <div class="sys-row"><span>Intercepts</span><span class="wrap">Medium/intermediate-range ballistic missiles in terminal high-altitude phase; US battery deployed to Israel October 2024</span></div>
+          <div class="sys-row"><span>Cost / interceptor</span><span>$12M–$13M</span></div>
+        </div>
+        <p class="sys-notes">First-ever THAAD combat intercept Dec 27, 2024 vs a Houthi missile; at least six Houthi missiles downed by mid-2025; shared a publicized miss (with Arrow) on the May 4, 2025 Ben Gurion strike; heavily expended in the June 2025 war. <span class="src-links">Sources: <a href="https://www.twz.com/land/u-s-armys-first-combat-use-of-thaad-missile-defense-system-just-occurred-in-israel" target="_blank" rel="noopener">[1]</a></span></p>
+      </article>
+      <article class="sys-card def-card">
+        <div class="sys-aka">Naval</div>
+        <h3 class="sys-name">C-Dome</h3>
+        <div class="sys-stats">
+          <div class="sys-row"><span>Intercepts</span><span class="wrap">Naval Iron Dome on Sa&#x27;ar 6 corvettes — rockets, cruise missiles and drones approaching from the sea</span></div>
+          <div class="sys-row"><span>Cost / interceptor</span><span>$40k–$100k</span></div>
+        </div>
+        <p class="sys-notes">First operational combat interception April 9, 2024 (hostile UAV approaching Eilat); protected the Eilat/Red Sea approach from Houthi drones and cruise missiles thereafter. <span class="src-links">Sources: <a href="https://breakingdefense.com/2024/04/israels-maritime-c-dome-downs-drone-in-first-operational-combat-interception/" target="_blank" rel="noopener">[1]</a></span></p>
+      </article>
+      <article class="sys-card def-card">
+        <div class="sys-aka">Bottom layer (laser)</div>
+        <h3 class="sys-name">Iron Beam</h3>
+        <div class="sys-stats">
+          <div class="sys-row"><span>Intercepts</span><span class="wrap">Rockets, mortars and drones at short range using a ~100 kW-class high-power laser — unlimited magazine, complement to Iron Dome</span></div>
+          <div class="sys-row"><span>Cost / interceptor</span><span>~$2–5 / shot (electricity)</span></div>
+        </div>
+        <p class="sys-notes">First operational system delivered to the Israeli Air Force Dec 28, 2025 — the world&#x27;s first fielded high-power laser air-defense system; cost per shot cited at ~$2-5 of electricity vs $40k-100k per Iron Dome interceptor. <span class="src-links">Sources: <a href="https://www.timesofisrael.com/defense-ministry-hands-idf-first-combat-ready-iron-beam-laser-interception-system/" target="_blank" rel="noopener">[1]</a> <a href="https://en.wikipedia.org/wiki/Iron_Beam" target="_blank" rel="noopener">[2]</a></span></p>
+      </article>
+      </div>
+    </div>
+
+    <div class="actor-section">
+      <div class="section-label" style="margin-bottom:.5rem;">Stockpiles</div>
+      <h2 class="section-title" style="font-size:1.8rem;margin-bottom:.5rem;">How big are the arsenals?</h2>
+      <p class="section-desc" style="margin-bottom:1.25rem;max-width:640px;">Public estimates, with the caveat that every number here is contested and moves with each war.</p>
+      
+      <div class="est-block" style="border-left:2px solid #d63031;">
+        <div class="est-actor" style="color:#d63031;">Gaza — Hamas &amp; PIJ</div>
+        <p>~20,000 rockets and mortar bombs on Oct 7, 2023 per Israeli estimates, most short-range. IDF one-year data: 13,200 projectiles fired from Gaza (≈5,000 on Oct 7 alone). Arsenal and production largely destroyed or depleted through 2024-25; fire fell to sporadic single launches and essentially stopped after the October 2025 Gaza ceasefire. <span class="src-links">Sources: <a href="https://www.timesofisrael.com/a-year-of-war-idf-data-shows-726-troops-killed-over-26000-rockets-fired-at-israel/" target="_blank" rel="noopener">[1]</a> <a href="https://www.israelhayom.com/2024/01/26/is-hamas-running-out-of-rockets-israeli-reveal-estimated-depletion-rate/" target="_blank" rel="noopener">[2]</a></span></p>
+      </div>
+      <div class="est-block" style="border-left:2px solid #f39c12;">
+        <div class="est-actor" style="color:#f39c12;">Lebanon — Hezbollah</div>
+        <p>Pre-Oct 2023: 120,000-200,000 rockets and missiles commonly cited (CSIS ~130,000; Israeli official estimate 150,000). IDF assessed 70-80% destroyed by the Nov 27, 2024 ceasefire. Early 2026: ~20,000-25,000 remaining; after the March-April 2026 Lebanon war, roughly 10,000-23,000 left, mostly short-range — still enough for 200-rocket barrage days. <span class="src-links">Sources: <a href="https://missilethreat.csis.org/country/hezbollahs-rocket-arsenal/" target="_blank" rel="noopener">[1]</a> <a href="https://www.timesofisrael.com/rocket-barrages-underscore-remaining-potency-of-hezbollahs-gutted-arsenal/" target="_blank" rel="noopener">[2]</a></span></p>
+      </div>
+      <div class="est-block" style="border-left:2px solid #4a9eff;">
+        <div class="est-actor" style="color:#4a9eff;">Yemen — the Houthis</div>
+        <p>Total inventory not publicly quantified; capability is Iranian-resupplied. Launch record vs Israel: 200+ ballistic/cruise missiles and drones in the first 14 months; 52 ballistic missiles + 13 drones between Mar 18 and Jun 28, 2025; attacks paused after the Oct 2025 Gaza ceasefire and resumed Mar 28, 2026 for the Iran war. <span class="src-links">Sources: <a href="https://www.securitycouncilreport.org/whatsinblue/2024/12/briefing-on-developments-related-to-houthi-attacks-on-israel.php" target="_blank" rel="noopener">[1]</a> <a href="https://en.wikipedia.org/wiki/2026_Houthi_strikes_on_Israel" target="_blank" rel="noopener">[2]</a></span></p>
+      </div>
+      <div class="est-block" style="border-left:2px solid #c678dd;">
+        <div class="est-actor" style="color:#c678dd;">Iran — direct</div>
+        <p>~2,500-3,000 ballistic missiles pre-June 2025 (US/Israeli estimates), of which ~2,000-2,500 could reach Israel. Fired ~550-590 at Israel in the June 2025 Twelve-Day War. Rebuilt toward ~2,500 Israel-range missiles by early 2026, then fired ~650 in the Feb-Apr 2026 war; an Israeli Air Force official estimated just over 1,000 remaining at the April 2026 ceasefire, with 300+ launchers destroyed cutting fire rates by 70-92%. <span class="src-links">Sources: <a href="https://jinsa.org/wp-content/uploads/2025/06/Iranian-Ballistic-Missile-Estimates-6-26-2025-6.pdf" target="_blank" rel="noopener">[1]</a> <a href="https://www.fdd.org/analysis/2026/05/26/evaluating-the-damage-to-irans-ballistic-missile-arsenal/" target="_blank" rel="noopener">[2]</a> <a href="https://en.wikipedia.org/wiki/2026_Iranian_strikes_on_Israel" target="_blank" rel="noopener">[3]</a></span></p>
+      </div>
+    </div>
+
+    <div class="actor-section">
+      <div class="section-label" style="margin-bottom:.5rem;">Firsts &amp; records</div>
+      <h2 class="section-title" style="font-size:1.8rem;margin-bottom:.5rem;">The escalation ladder, dated</h2>
+      <p class="section-desc" style="margin-bottom:0;max-width:640px;">Every rung on the way from improvised rockets to history's largest ballistic-missile barrages.</p>
+      <ol class="ev-list">
+        
+      <li class="ev-item">
+        <span class="ev-date">Oct 7, 2023</span>
+        <span class="ev-text">Hamas-led assault opens with the largest rocket barrage ever fired at Israel: 2,200-5,000 rockets and mortar bombs in the opening ~20-30 minutes. IDF one-year totals: 26,000+ projectiles from all fronts — 13,200 from Gaza, 12,400 from Lebanon, ~400 from Iran, 180 from Yemen, 60 from Syria. <span class="src-links">Sources: <a href="https://www.timesofisrael.com/a-year-of-war-idf-data-shows-726-troops-killed-over-26000-rockets-fired-at-israel/" target="_blank" rel="noopener">[1]</a></span></span>
+      </li>
+      <li class="ev-item">
+        <span class="ev-date">Oct 31, 2023</span>
+        <span class="ev-text">First Houthi ballistic missile attack on Israel; Arrow 2 records its first-ever combat interception, engaging outside the atmosphere. <span class="src-links">Sources: <a href="https://www.armscontrol.org/act/2023-12/news/israeli-arrow-system-downs-first-missiles-combat" target="_blank" rel="noopener">[1]</a></span></span>
+      </li>
+      <li class="ev-item">
+        <span class="ev-date">Apr 13, 2024</span>
+        <span class="ev-text">Iran&#x27;s first-ever direct attack on Israel: ~170 Shahed drones, 30+ cruise missiles, 120+ ballistic missiles overnight. US-led coalition and Israel intercept ~99%; ~5 ballistic missiles hit Nevatim airbase. <span class="src-links">Sources: <a href="https://en.wikipedia.org/wiki/April_2024_Iranian_strikes_on_Israel" target="_blank" rel="noopener">[1]</a></span></span>
+      </li>
+      <li class="ev-item">
+        <span class="ev-date">Jul 19, 2024</span>
+        <span class="ev-text">Houthi Samad-3 drone flies ~2,000 km and strikes central Tel Aviv, killing one — the first fatal Houthi strike in Israel; Israel strikes Hodeidah, Yemen the next day. <span class="src-links">Sources: <a href="https://en.wikipedia.org/wiki/2024_Houthi_drone_attack_on_Israel" target="_blank" rel="noopener">[1]</a></span></span>
+      </li>
+      <li class="ev-item">
+        <span class="ev-date">Sep 25, 2024</span>
+        <span class="ev-text">Hezbollah fires its first-ever ballistic missile at Tel Aviv — a Qader-1 aimed at Mossad HQ — intercepted by David&#x27;s Sling. <span class="src-links">Sources: <a href="https://breakingdefense.com/2024/09/in-first-hezbollah-launches-qadr-1-ballistic-missile-towards-tel-aviv/" target="_blank" rel="noopener">[1]</a></span></span>
+      </li>
+      <li class="ev-item">
+        <span class="ev-date">Oct 1, 2024</span>
+        <span class="ev-text">Iran launches ~180-200 ballistic missiles in ~30 minutes — the largest single ballistic missile salvo in history. Most intercepted; ~20-32 impacts at Nevatim airbase. <span class="src-links">Sources: <a href="https://en.wikipedia.org/wiki/October_2024_Iranian_strikes_on_Israel" target="_blank" rel="noopener">[1]</a></span></span>
+      </li>
+      <li class="ev-item">
+        <span class="ev-date">Oct 13, 2024</span>
+        <span class="ev-text">Hezbollah Mirsad-1 drone evades detection and hits a Golani Brigade base dining hall in Binyamina: 4 soldiers killed, ~60 wounded — the deadliest drone strike of the war. <span class="src-links">Sources: <a href="https://www.fdd.org/analysis/op_eds/2024/10/14/what-types-of-deadly-drones-is-hezbollah-using-against-israel/" target="_blank" rel="noopener">[1]</a></span></span>
+      </li>
+      <li class="ev-item">
+        <span class="ev-date">Nov 24, 2024</span>
+        <span class="ev-text">Hezbollah fires ~250 rockets and projectiles in one day — its heaviest barrage of the war — three days before the Nov 27 ceasefire. <span class="src-links">Sources: <a href="https://www.globalsecurity.org/military/library/news/2024/11/mil-241124-voa01.htm" target="_blank" rel="noopener">[1]</a></span></span>
+      </li>
+      <li class="ev-item">
+        <span class="ev-date">Dec 27, 2024</span>
+        <span class="ev-text">First-ever combat intercept by a THAAD battery anywhere: the US Army system in Israel downs a Houthi medium-range ballistic missile. <span class="src-links">Sources: <a href="https://www.twz.com/land/u-s-armys-first-combat-use-of-thaad-missile-defense-system-just-occurred-in-israel" target="_blank" rel="noopener">[1]</a></span></span>
+      </li>
+      <li class="ev-item">
+        <span class="ev-date">May 4, 2025</span>
+        <span class="ev-text">A Houthi ballistic missile (claimed Palestine-2) evades both THAAD and Arrow and hits the perimeter of Ben Gurion Airport, injuring 6-8 and halting international flights for days. <span class="src-links">Sources: <a href="https://en.wikipedia.org/wiki/2025_Houthi_attack_on_Tel_Aviv_airport" target="_blank" rel="noopener">[1]</a></span></span>
+      </li>
+      <li class="ev-item">
+        <span class="ev-date">Jun 13, 2025</span>
+        <span class="ev-text">Twelve-Day War: Iran fires ~550-591 ballistic missiles and 1,000+ drones at Israel. ~86-90% intercepted; 59-64 missile impacts kill ~30 and wound ~2,000. First combat Sejjil launch and cluster-submunition warheads documented June 18-19. <span class="src-links">Sources: <a href="https://en.wikipedia.org/wiki/Twelve-Day_War" target="_blank" rel="noopener">[1]</a> <a href="https://www.twz.com/land/iran-just-used-ballistic-missiles-with-cluster-warheads-to-strike-israel" target="_blank" rel="noopener">[2]</a></span></span>
+      </li>
+      <li class="ev-item">
+        <span class="ev-date">Oct 10, 2025</span>
+        <span class="ev-text">Gaza war ceasefire takes effect; rocket fire from Gaza has dwindled to sporadic launches, and Houthi attacks pause following the deal. <span class="src-links">Sources: <a href="https://en.wikipedia.org/wiki/2026_Houthi_strikes_on_Israel" target="_blank" rel="noopener">[1]</a></span></span>
+      </li>
+      <li class="ev-item">
+        <span class="ev-date">Feb 28, 2026</span>
+        <span class="ev-text">The 2026 Iran war begins: ~900 US-Israeli strikes in 12 hours; Iran retaliates with the heaviest missile-and-drone barrages ever fired at Israel — 10,162 alerts in a single day. <span class="src-links">Sources: <a href="https://en.wikipedia.org/wiki/2026_Iran_war" target="_blank" rel="noopener">[1]</a></span></span>
+      </li>
+      <li class="ev-item">
+        <span class="ev-date">Mar 2, 2026</span>
+        <span class="ev-text">Hezbollah resumes rocket fire for the first time since Nov 2024, igniting the 2026 Lebanon war: ~2,000 rockets plus drones over six weeks. <span class="src-links">Sources: <a href="https://en.wikipedia.org/wiki/2026_Lebanon_war" target="_blank" rel="noopener">[1]</a></span></span>
+      </li>
+      <li class="ev-item">
+        <span class="ev-date">Mar 11, 2026</span>
+        <span class="ev-text">Largest integrated Axis attack of the 2026 war: Hezbollah fires ~200 rockets in one barrage while the IRGC launches ballistic missiles in a coordinated operation — 105 attack waves counted that day. <span class="src-links">Sources: <a href="https://www.timesofisrael.com/hezbollah-fires-at-least-150-rockets-at-north-iran-launches-missiles-in-integrated-operation/" target="_blank" rel="noopener">[1]</a></span></span>
+      </li>
+      <li class="ev-item">
+        <span class="ev-date">Mar 28, 2026</span>
+        <span class="ev-text">The Houthis rejoin the fight, resuming ballistic missile, cruise missile and drone attacks on Israel in coordination with Iran and Hezbollah. <span class="src-links">Sources: <a href="https://en.wikipedia.org/wiki/2026_Houthi_strikes_on_Israel" target="_blank" rel="noopener">[1]</a></span></span>
+      </li>
+      <li class="ev-item">
+        <span class="ev-date">Apr 8, 2026</span>
+        <span class="ev-text">US-Iran ceasefire ends the 2026 Iran war after ~5.5 weeks. Iran fired ~650 ballistic missiles at Israel during the war; 300+ Iranian launchers destroyed cut fire rates by 70-92%. <span class="src-links">Sources: <a href="https://en.wikipedia.org/wiki/2026_Iran_war_ceasefire" target="_blank" rel="noopener">[1]</a> <a href="https://en.wikipedia.org/wiki/2026_Iranian_strikes_on_Israel" target="_blank" rel="noopener">[2]</a></span></span>
+      </li>
+      </ol>
+    </div>
+
+    <div class="actor-section">
+      <div class="section-label" style="margin-bottom:.5rem;">Method</div>
+      <h2 class="section-title" style="font-size:1.8rem;margin-bottom:.5rem;">About this page</h2>
+      <p class="section-desc" style="max-width:680px;">
+        This is curated editorial reference material, compiled July 2026 from public sources — CSIS
+        Missile Threat, IISS, the US Defense Intelligence Agency, Wikipedia, and press reporting
+        (each entry links its sources). Specifications for these systems are approximate: ranges and
+        warhead figures are the commonly cited envelopes, and sources frequently disagree — where
+        they do, the entry says so. Unlike the rest of this site, none of this derives from the
+        alert dataset; the raw file is
+        <a href="data/processed/arsenal.json" style="color:var(--accent);">arsenal.json</a>.
+      </p>
+    </div>
+
+  </div>
+</div>
+
+<footer>
+  <div class="footer-left">Under Fire — <span data-live="end-year">2026</span></div>
+  <div class="footer-credit">Alert data from <a href="https://rocketalert.live" target="_blank">RocketAlert.live</a>.</div>
+</footer>
+
+<script src="src/js/shared.js?v=20260613e"></script>
+<script src="src/js/arsenal-sim.js?v=20260704d"></script>
+<script>
+const ACTOR_META = {
+  hamas:     { label: 'Gaza',    color: '#d63031' },
+  hezbollah: { label: 'Lebanon', color: '#f39c12' },
+  houthis:   { label: 'Yemen',   color: '#4a9eff' },
+  iran:      { label: 'Iran',    color: '#c678dd' },
+};
+const REFS = [
+  { km: 70,   label: 'Tel Aviv ← Gaza' },
+  { km: 130,  label: 'Tel Aviv ← S. Lebanon' },
+  { km: 1600, label: 'Tel Aviv ← Tehran' },
+  { km: 2000, label: 'Tel Aviv ← Sanaa' },
+];
+
+function drawReach(systems) {
+  const c = document.getElementById('reach-wrap');
+  c.querySelector('svg').innerHTML = '';
+  const data = [...systems]
+    .filter(s => s.range_km)
+    .sort((a, b) => (b.range_km[1]) - (a.range_km[1]));
+  const W = Math.max(c.clientWidth || 900, 620);
+  const barH = 17, barPad = 5;
+  const M = { top: 26, right: 40, bottom: 34, left: 168 };
+  const H = data.length * (barH + barPad) + M.top + M.bottom;
+  const w = W - M.left - M.right;
+  const svg = d3.select('#reach').attr('width', W).attr('height', H);
+  const g = svg.append('g').attr('transform', `translate(${M.left},${M.top})`);
+  const x = d3.scaleLog().domain([1, 2800]).range([0, w]);
+
+  // reference distance lines
+  for (const r of REFS) {
+    g.append('line').attr('x1', x(r.km)).attr('x2', x(r.km))
+      .attr('y1', -14).attr('y2', H - M.top - M.bottom)
+      .attr('stroke', 'rgba(255,255,255,0.18)').attr('stroke-dasharray', '3,4');
+    g.append('text').attr('x', x(r.km)).attr('y', -18).attr('text-anchor', 'middle')
+      .attr('font-family', 'IBM Plex Mono').attr('font-size', '8.5px')
+      .attr('fill', 'rgba(255,255,255,0.45)').text(r.label);
+  }
+
+  data.forEach((s, i) => {
+    const yPos = i * (barH + barPad);
+    const col = (ACTOR_META[s.actor] || {}).color || '#aaa';
+    const [lo, hi] = s.range_km;
+    g.append('rect')
+      .attr('x', x(Math.max(lo, 1.01))).attr('y', yPos)
+      .attr('width', 0).attr('height', barH)
+      .attr('fill', col).attr('fill-opacity', 0.55).attr('rx', 2)
+      .on('mouseover', e => showTip(
+        `<b>${s.name}</b><br>${(ACTOR_META[s.actor] || {}).label} · ${s.class}<br>` +
+        `Range: ${lo === hi ? '~' + hi.toLocaleString() : lo.toLocaleString() + '–' + hi.toLocaleString()} km<br>` +
+        `Guidance: ${s.guidance.split(';')[0]}`, e))
+      .on('mousemove', moveTip).on('mouseleave', hideTip)
+      .transition().delay(i * 35).duration(420).ease(d3.easeCubicOut)
+      .attr('width', Math.max(x(hi) - x(Math.max(lo, 1.01)), 3));
+    g.append('text').attr('x', -8).attr('y', yPos + barH / 2 + 3.5)
+      .attr('text-anchor', 'end').attr('font-family', 'IBM Plex Mono').attr('font-size', '9.5px')
+      .attr('fill', col).text(s.name.length > 24 ? s.name.slice(0, 23) + '…' : s.name);
+  });
+
+  g.append('g').attr('transform', `translate(0,${H - M.top - M.bottom})`)
+    .call(d3.axisBottom(x).tickValues([1, 10, 100, 1000, 2500])
+      .tickFormat(d => d >= 1000 ? (d / 1000) + ',000 km' : d + ' km'))
+    .call(s => { s.select('.domain').attr('stroke', 'var(--border)');
+      s.selectAll('text').attr('fill', 'var(--muted)').attr('font-family', 'IBM Plex Mono').attr('font-size', '9.5px');
+      s.selectAll('line').attr('stroke', 'var(--border)'); });
+}
+
+(async () => {
+  const arsenal = await fetchData('arsenal.json');
+  const sec = document.getElementById('reach-section');
+  revealOnScroll(sec, () => { sec.classList.add('revealed'); drawReach(arsenal.systems); });
+  let t;
+  window.addEventListener('resize', () => { clearTimeout(t); t = setTimeout(() => drawReach(arsenal.systems), 150); });
+
+  // Hangar: hover = stats, click = jump to the full entry
+  renderHangar({
+    mount: '#hangar', arsenal,
+    onSelect: s => {
+      const card = document.getElementById('sys-' + s.id);
+      if (!card) return;
+      card.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      card.classList.remove('flash');
+      requestAnimationFrame(() => card.classList.add('flash'));
+    },
+  });
+
+  // Duel simulator + per-card "simulate" links
+  const duel = mountDuel({ mount: '#duel', arsenal });
+  document.querySelectorAll('.sim-link').forEach(btn => {
+    btn.addEventListener('click', () => {
+      if (duel) duel.select(btn.dataset.sim);
+      document.getElementById('duel').scrollIntoView({ behavior: 'smooth', block: 'center' });
+    });
+  });
+})().catch(e => console.warn('arsenal', e));
+</script>
+</body>
+</html>

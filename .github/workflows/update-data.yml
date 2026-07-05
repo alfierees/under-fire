@@ -3,9 +3,9 @@
 # ─────────────────────────────────────────────────────────────────
 # Every 30 minutes: fetch new Tzeva Adom alerts (RocketAlert.live,
 # tzevaadom fallback), attribute origin, append to the committed
-# master (data/master/alerts.csv.gz) and regenerate the 7 processed
-# JSON aggregates the site consumes. Commits only when something
-# changed; GitHub Pages redeploys on the commit.
+# master (data/master/alerts.csv.gz) and regenerate the processed
+# JSON aggregates the site consumes, plus sitemap.xml and llms.txt.
+# Commits only when something changed; the site redeploys on the commit.
 #
 # Scripts are stdlib-only — no pip install needed.
 # Manual run: Actions tab → "Update Alert Data" → Run workflow.
@@ -45,6 +45,6 @@ jobs:
         uses: stefanzweifel/git-auto-commit-action@v5
         with:
           commit_message: "data: auto-update alerts"
-          file_pattern: "data/master/*.gz data/processed/*.json src/js/shared.js"
+          file_pattern: "data/master/*.gz data/processed/*.json src/js/shared.js llms.txt sitemap.xml"
           commit_user_name: "under-fire-bot"
           commit_user_email: "actions@github.com"

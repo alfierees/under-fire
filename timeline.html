@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <link rel="icon" type="image/png" href="images/favicon.png">
+  <link rel="icon" type="image/png" sizes="96x96" href="images/favicon.png">
   <link rel="canonical" href="https://under-fire.org/timeline">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Israel Rocket Alert Timeline 2020–2026 — Under Fire</title>
@@ -83,6 +83,7 @@
         <a href="timeline.html">Timeline</a>
         <a href="fronts.html">Fronts</a>
         <a href="calendar.html">Calendar</a>
+        <a href="compare.html">Compare</a>
       </div>
     </div>
     <div class="nav-group">
@@ -90,6 +91,7 @@
       <div class="nav-dropdown">
         <a href="oct7.html">Oct 7</a>
         <a href="story.html">Story</a>
+        <a href="timelapse.html">Time-Lapse</a>
       </div>
     </div>
     <div class="nav-group">
@@ -104,6 +106,8 @@
       <div class="nav-dropdown">
         <a href="live.html">Live Feed</a>
         <a href="records.html">Records &amp; Stats</a>
+        <a href="arsenal.html">The Arsenal</a>
+        <a href="data.html">Data</a>
         <a href="mission.html">Mission</a>
       </div>
     </div>
@@ -439,7 +443,7 @@ const bisectWeek = d3.bisector(d => d.date).left;
 function runReveal(charts) {
   const t0 = performance.now();
   function tick(now) {
-    const t = Math.min(1, (now - t0) / REVEAL_MS);
+    const t = Math.min(1, Math.max(0, (now - t0) / REVEAL_MS));
     const e = d3.easeCubicInOut(t);
     charts.forEach(c => {
       if (!c) return;
@@ -540,7 +544,7 @@ function drawYearChart(weekly) {
     ALL_ACTORS.forEach(actor => {
       const val = d[actor] || 0;
       if (!val) return;
-      const segW = x(val);
+      const segW = Math.max(0, x(val));
       g.append('rect')
         .attr('x', xOff).attr('y', yPos)
         .attr('height', barH).attr('fill', ACTOR_HEX[actor]).attr('opacity', 0.88)

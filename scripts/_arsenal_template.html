@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <link rel="icon" type="image/png" sizes="96x96" href="images/favicon.png">
+  <link rel="canonical" href="https://under-fire.org/arsenal">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>The Rockets, Missiles &amp; Drones Fired at Israel — The Arsenal — Under Fire</title>
+  <meta name="description" content="Every major weapon system fired at Israel from Gaza, Lebanon, Yemen, and Iran — Qassams to Shahed drones to hypersonic-class ballistic missiles. Ranges, warheads, costs, salvo history, and the defenses that meet them.">
+  <meta property="og:type" content="article">
+  <meta property="og:title" content="The Rockets, Missiles &amp; Drones Fired at Israel — The Arsenal — Under Fire">
+  <meta property="og:description" content="Every major weapon system fired at Israel from Gaza, Lebanon, Yemen, and Iran — Qassams to Shahed drones to hypersonic-class ballistic missiles. Ranges, warheads, costs, salvo history, and the defenses that meet them.">
+  <meta property="og:image" content="https://under-fire.org/images/og-card.png">
+  <meta property="og:url" content="https://under-fire.org/arsenal">
+  <meta name="twitter:card" content="summary_large_image">
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400;1,700&family=IBM+Plex+Mono:wght@300;400;500&family=IBM+Plex+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.8.5/d3.min.js"></script>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <link rel="stylesheet" href="src/css/shared.css">
+  <style>
+    #reach-wrap { width:100%; overflow-x:auto; }
+    #reach { display:block; }
+
+    .actor-section { margin-top: 3.5rem; }
+    .sys-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(320px,1fr)); gap:1rem; }
+    .sys-card { border:1px solid var(--border); border-radius:4px; padding:1.25rem 1.35rem; background:rgba(255,255,255,.015); position:relative; overflow:hidden; }
+    .sys-card::before { content:''; position:absolute; top:0; left:0; right:0; height:2px; background:var(--actor-color,#666); }
+    .sys-name { font-family:'Playfair Display',serif; font-weight:900; font-size:1.2rem; color:#fff; line-height:1.15; margin:0 0 .15rem; }
+    .sys-aka { font-family:'IBM Plex Mono',monospace; font-size:.58rem; letter-spacing:.1em; text-transform:uppercase; color:var(--muted); margin-bottom:.8rem; }
+    .sys-stats { border-top:1px solid rgba(255,255,255,.07); margin-bottom:.8rem; }
+    .sys-row { display:flex; justify-content:space-between; gap:1rem; font-family:'IBM Plex Mono',monospace; font-size:.63rem; padding:.3rem 0; border-bottom:1px solid rgba(255,255,255,.05); }
+    .sys-row span:first-child { color:var(--muted); flex-shrink:0; }
+    .sys-row span:last-child { color:var(--text); text-align:right; }
+    .sys-row span.wrap { text-align:right; line-height:1.5; }
+    .sys-notes { font-size:.76rem; color:var(--muted); line-height:1.65; margin:.55rem 0 0; }
+    .sys-notes strong { color:var(--text); font-weight:500; }
+    .src-links { white-space:nowrap; }
+    .src-links a { color:var(--accent); text-decoration:none; font-size:.68rem; opacity:.75; }
+    .src-links a:hover { opacity:1; }
+
+    .def-card::before { background:#4a9eff; }
+    .def-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(320px,1fr)); gap:1rem; }
+
+    .est-block { padding:.9rem 1.2rem; margin-bottom:1rem; background:rgba(255,255,255,.015); border-radius:0 4px 4px 0; }
+    .est-actor { font-family:'IBM Plex Mono',monospace; font-size:.6rem; letter-spacing:.14em; text-transform:uppercase; margin-bottom:.4rem; }
+    .est-block p { font-size:.82rem; color:var(--muted); line-height:1.7; margin:0; }
+
+    .ev-list { list-style:none; margin:1.2rem 0 0; padding:0; border-left:1px solid var(--border); }
+    .ev-item { display:flex; gap:1.2rem; padding:.7rem 0 .7rem 1.4rem; position:relative; }
+    .ev-item::before { content:''; position:absolute; left:-3.5px; top:1.15rem; width:6px; height:6px; border-radius:50%; background:var(--red); }
+    .ev-date { font-family:'IBM Plex Mono',monospace; font-size:.62rem; color:var(--accent); flex:0 0 92px; padding-top:.1rem; }
+    .ev-text { font-size:.8rem; color:var(--muted); line-height:1.65; }
+
+    .fact-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(200px,1fr)); gap:1px; background:var(--border); border:1px solid var(--border); border-radius:4px; overflow:hidden; margin:1.4rem 0 .6rem; }
+    .fact { background:#0b0b10; padding:1.1rem 1.25rem; }
+    .fact .f-num { font-family:'Playfair Display',serif; font-weight:900; font-size:1.45rem; color:#fff; }
+    .fact .f-lbl { font-family:'IBM Plex Mono',monospace; font-size:.56rem; letter-spacing:.12em; text-transform:uppercase; color:var(--muted); margin-top:.3rem; line-height:1.5; }
+
+    @media (max-width:640px) {
+      .ev-item { flex-direction:column; gap:.2rem; }
+      .ev-date { flex:none; }
+    }
+
+    /* ── Hangar ── */
+    .hangar-row { display:flex; gap:1.2rem; align-items:flex-start; padding:1rem 0; border-bottom:1px solid rgba(255,255,255,.05); }
+    .hangar-actor { flex:0 0 108px; font-family:'IBM Plex Mono',monospace; font-size:.56rem; letter-spacing:.13em; text-transform:uppercase; padding-top:.9rem; line-height:1.6; }
+    .hangar-rack { display:flex; flex-wrap:wrap; gap:.4rem 1.4rem; align-items:flex-end; }
+    .hangar-item { background:none; border:none; padding:.5rem .2rem .2rem; cursor:pointer; display:flex; flex-direction:column; align-items:center; gap:.3rem; border-radius:3px; transition:background .15s, transform .15s; }
+    .hangar-item:hover { background:rgba(255,255,255,.04); transform:translateY(-2px); }
+    .hangar-item svg { display:block; opacity:.9; }
+    .hangar-name { font-family:'IBM Plex Mono',monospace; font-size:.52rem; letter-spacing:.06em; color:var(--muted); white-space:nowrap; }
+    .hangar-item:hover .hangar-name { color:var(--text); }
+    @media (max-width:640px) { .hangar-row { flex-direction:column; gap:.3rem; } .hangar-actor { padding-top:0; } }
+
+    /* ── Duel simulator ── */
+    .duel-controls { display:flex; flex-wrap:wrap; gap:.5rem; align-items:center; margin-bottom:.8rem; }
+    .duel-select { font-family:'IBM Plex Mono',monospace; font-size:.66rem; letter-spacing:.04em; padding:.45rem .7rem;
+      background:#0b0b10; color:var(--text); border:1px solid var(--border); border-radius:3px; max-width:100%; }
+    .duel-fire { color:var(--red) !important; border-color:var(--red) !important; margin-left:.4rem; }
+    .duel-fire:hover { background:rgba(214,48,49,.12) !important; }
+    #duel-views { display:inline-flex; gap:.3rem; }
+    .duel-stage-wrap { position:relative; height:360px; border:1px solid var(--border); border-radius:4px; background:#07070a; overflow:hidden; }
+    #duel-canvas { position:absolute; inset:0; width:100%; height:100%; }
+    #duel-map-stage { position:absolute; inset:0; }
+    #duel-map { position:absolute; inset:0; background:#07070a; }
+    #duel-map-canvas { position:absolute; inset:0; pointer-events:none; z-index:400; }
+    #duel-map .leaflet-control-attribution { font-size:8px; background:rgba(7,7,10,.6); color:var(--muted); }
+    .duel-readout { position:absolute; top:.9rem; left:1rem; z-index:410; background:rgba(7,7,10,.88); border:1px solid var(--border); border-radius:4px; padding:.7rem .9rem; pointer-events:none; max-width:min(300px, 70%); }
+    .duel-readout .dr-name { font-family:'Playfair Display',serif; font-weight:900; font-size:1.05rem; margin-bottom:.4rem; }
+    .duel-readout .dr-row { display:flex; justify-content:space-between; gap:1rem; font-family:'IBM Plex Mono',monospace; font-size:.56rem; color:var(--muted); padding:.14rem 0; }
+    .duel-readout .dr-row span:last-child { color:var(--text); text-align:right; }
+    .duel-counters { display:grid; grid-template-columns:repeat(auto-fit,minmax(110px,1fr)); gap:1px; background:var(--border); border:1px solid var(--border); border-top:none; border-radius:0 0 4px 4px; overflow:hidden; }
+    .duel-counter { background:#0b0b10; padding:.7rem .8rem; text-align:center; }
+    .duel-counter .dc-num { font-family:'Playfair Display',serif; font-weight:900; font-size:1.15rem; color:#fff; }
+    .duel-counter .dc-lbl { font-family:'IBM Plex Mono',monospace; font-size:.5rem; letter-spacing:.1em; text-transform:uppercase; color:var(--muted); margin-top:.2rem; }
+    @media (max-width:640px) { .duel-stage-wrap { height:270px; } .duel-readout { display:none; } }
+
+    .sys-card.flash { animation:cardflash 1.6s ease-out; }
+    @keyframes cardflash { 0% { border-color:var(--accent); box-shadow:0 0 0 1px var(--accent); } 100% { border-color:var(--border); box-shadow:none; } }
+    .sim-link { display:inline-block; margin-top:.6rem; font-family:'IBM Plex Mono',monospace; font-size:.58rem; letter-spacing:.1em; text-transform:uppercase;
+      color:var(--accent); background:none; border:1px solid rgba(232,184,75,.35); border-radius:3px; padding:.3rem .6rem; cursor:pointer; transition:border-color .15s; }
+    .sim-link:hover { border-color:var(--accent); }
+  </style>
+  <!-- Google Analytics -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-JXKX4MKJ8W"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-JXKX4MKJ8W');
+  </script>
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@type": "Article",
+        "headline": "The Arsenal — the rockets, missiles, and drones fired at Israel",
+        "url": "https://under-fire.org/arsenal",
+        "description": "Reference guide to the weapon systems fired at Israel from Gaza, Lebanon, Yemen, and Iran since 2020: specifications, ranges, warheads, salvo history, arsenal size estimates, and Israel's layered air defenses.",
+        "author": { "@type": "Person", "name": "Alfie Rees" },
+        "isPartOf": { "@type": "WebSite", "name": "Under Fire", "url": "https://under-fire.org/" }
+      },
+      {
+        "@type": "BreadcrumbList",
+        "itemListElement": [
+          { "@type": "ListItem", "position": 1, "name": "Under Fire", "item": "https://under-fire.org/" },
+          { "@type": "ListItem", "position": 2, "name": "The Arsenal", "item": "https://under-fire.org/arsenal" }
+        ]
+      }
+    ]
+  }
+  </script>
+</head>
+<body>
+
+<nav>
+  <a href="index.html" class="nav-brand">Under Fire</a>
+  <div class="nav-links">
+    <div class="nav-group">
+      <button class="nav-group-btn" type="button">Charts<span class="caret">▾</span></button>
+      <div class="nav-dropdown">
+        <a href="timeline.html">Timeline</a>
+        <a href="fronts.html">Fronts</a>
+        <a href="calendar.html">Calendar</a>
+        <a href="compare.html">Compare</a>
+      </div>
+    </div>
+    <div class="nav-group">
+      <button class="nav-group-btn" type="button">Maps<span class="caret">▾</span></button>
+      <div class="nav-dropdown">
+        <a href="oct7.html">Oct 7</a>
+        <a href="story.html">Story</a>
+        <a href="timelapse.html">Time-Lapse</a>
+      </div>
+    </div>
+    <div class="nav-group">
+      <button class="nav-group-btn" type="button">Patterns<span class="caret">▾</span></button>
+      <div class="nav-dropdown">
+        <a href="patterns.html">Patterns</a>
+        <a href="areas.html">By Area</a>
+      </div>
+    </div>
+    <div class="nav-group">
+      <button class="nav-group-btn" type="button">More<span class="caret">▾</span></button>
+      <div class="nav-dropdown">
+        <a href="live.html">Live Feed</a>
+        <a href="records.html">Records &amp; Stats</a>
+        <a href="arsenal.html">The Arsenal</a>
+        <a href="data.html">Data</a>
+        <a href="mission.html">Mission</a>
+      </div>
+    </div>
+  </div>
+  <a href="live.html" class="nav-badge" id="nav-badge">🔔 Loading…</a>
+</nav>
+
+<div id="tooltip"></div>
+
+<div class="chart-page">
+  <div class="section-wrapper">
+    <a href="index.html" class="back-link">← Back to all charts</a>
+    <div class="section-label">10 — Reference</div>
+    <h1 class="section-title">The Arsenal</h1>
+    <p class="section-desc">Behind every alert in this dataset is a physical object: a pipe rocket welded in a Gaza workshop, a Soviet-designed Katyusha, a Shahed drone droning at 185 km/h, or a six-tonne ballistic missile arriving from Iran at two kilometres per second. This is a field guide to all of them — what they are, how far they fly, what they carry, and what it costs to shoot them down. A $500 Qassam can force a $50,000 interceptor shot; Iran's June 2025 barrage cost it an estimated $1–6 billion, and defending against it cost more.</p>
+
+    <div class="fact-grid">
+      <div class="fact"><div class="f-num">$300–800</div><div class="f-lbl">Cost of one Qassam rocket</div></div>
+      <div class="fact"><div class="f-num">$40–100k</div><div class="f-lbl">Cost of one Iron Dome interceptor</div></div>
+      <div class="fact"><div class="f-num">~$12M</div><div class="f-lbl">Cost of one THAAD interceptor</div></div>
+      <div class="fact"><div class="f-num">~$5</div><div class="f-lbl">Cost of one Iron Beam laser shot</div></div>
+    </div>
+    <p class="chart-note">Cost asymmetry is the arithmetic of this war: attackers spend hundreds; defenders spend thousands to millions per interception. Sources: JINSA (2025), CSIS Missile Threat.</p>
+
+    <div style="margin-top:3.5rem;">
+      <div class="section-label" style="margin-bottom:.5rem;">The Hangar</div>
+      <h2 class="section-title" style="font-size:1.8rem;margin-bottom:.5rem;">Every system, to silhouette</h2>
+      <p class="section-desc" style="margin-bottom:.6rem;max-width:640px;">Schematic side profiles of each system, smallest to longest-ranged per front. Hover for the quick stats; click to jump to its full entry below.</p>
+      <div id="hangar"></div>
+      <p class="chart-note">Silhouettes are stylised by weapon class — illustrative, not engineering drawings.</p>
+    </div>
+
+    <div style="margin-top:3.5rem;">
+      <div class="section-label" style="margin-bottom:.5rem;">The Duel</div>
+      <h2 class="section-title" style="font-size:1.8rem;margin-bottom:.5rem;">Fire one. Then fire eighty.</h2>
+      <p class="section-desc" style="margin-bottom:1rem;max-width:660px;">Pick a system and launch it at the deepest target it can reach — watch the trajectory, the interceptor rising to meet it, and the bill both sides run up. Then stack the salvo: interception rates that look unbeatable at ×1 start leaking at ×80, which is the whole logic of saturation barrages.</p>
+      <div id="duel"></div>
+      <p class="chart-note">Illustrative simulation, not a model: intercept rates are anchored to publicly reported figures (~90%+ single-threat claims, ~86–90% across the June 2025 barrages), costs to the documented estimates above — * marks class-level cost estimates. Trajectories and timings are schematic; real flight times shown in the readout.</p>
+    </div>
+
+    <div style="margin-top:3.5rem;" id="reach-section" class="chart-gated">
+      <div class="section-label" style="margin-bottom:.5rem;">Reach</div>
+      <h2 class="section-title" style="font-size:1.8rem;margin-bottom:.5rem;">How far each system can fly</h2>
+      <p class="section-desc" style="margin-bottom:1.25rem;max-width:640px;">Maximum documented range of every system, on a logarithmic scale — from mortars that cross the fence to missiles that cross the Middle East. Reference lines mark real distances to Tel Aviv.</p>
+      <div id="reach-wrap"><svg id="reach"></svg></div>
+      <p class="chart-note">Bar = documented range envelope (log scale). Hover for detail. Distances to Tel Aviv are approximate straight-line figures.</p>
+    </div>
+
+    <!--SYSTEMS-->
+
+    <div class="actor-section">
+      <div class="section-label" style="margin-bottom:.5rem;color:#4a9eff;">The Shield</div>
+      <h2 class="section-title" style="font-size:1.8rem;margin-bottom:.5rem;">What meets them in the air</h2>
+      <p class="section-desc" style="margin-bottom:1.25rem;max-width:640px;">Israel operates the most combat-tested layered air defense on earth — plus, since October 2024, a US Army THAAD battery. Every layer recorded world-first combat intercepts in this war.</p>
+      <div class="def-grid">
+        <!--DEFENSES-->
+      </div>
+    </div>
+
+    <div class="actor-section">
+      <div class="section-label" style="margin-bottom:.5rem;">Stockpiles</div>
+      <h2 class="section-title" style="font-size:1.8rem;margin-bottom:.5rem;">How big are the arsenals?</h2>
+      <p class="section-desc" style="margin-bottom:1.25rem;max-width:640px;">Public estimates, with the caveat that every number here is contested and moves with each war.</p>
+      <!--ESTIMATES-->
+    </div>
+
+    <div class="actor-section">
+      <div class="section-label" style="margin-bottom:.5rem;">Firsts &amp; records</div>
+      <h2 class="section-title" style="font-size:1.8rem;margin-bottom:.5rem;">The escalation ladder, dated</h2>
+      <p class="section-desc" style="margin-bottom:0;max-width:640px;">Every rung on the way from improvised rockets to history's largest ballistic-missile barrages.</p>
+      <ol class="ev-list">
+        <!--EVENTS-->
+      </ol>
+    </div>
+
+    <div class="actor-section">
+      <div class="section-label" style="margin-bottom:.5rem;">Method</div>
+      <h2 class="section-title" style="font-size:1.8rem;margin-bottom:.5rem;">About this page</h2>
+      <p class="section-desc" style="max-width:680px;">
+        This is curated editorial reference material, compiled July 2026 from public sources — CSIS
+        Missile Threat, IISS, the US Defense Intelligence Agency, Wikipedia, and press reporting
+        (each entry links its sources). Specifications for these systems are approximate: ranges and
+        warhead figures are the commonly cited envelopes, and sources frequently disagree — where
+        they do, the entry says so. Unlike the rest of this site, none of this derives from the
+        alert dataset; the raw file is
+        <a href="data/processed/arsenal.json" style="color:var(--accent);">arsenal.json</a>.
+      </p>
+    </div>
+
+  </div>
+</div>
+
+<footer>
+  <div class="footer-left">Under Fire — <span data-live="end-year">2026</span></div>
+  <div class="footer-credit">Alert data from <a href="https://rocketalert.live" target="_blank">RocketAlert.live</a>.</div>
+</footer>
+
+<script src="src/js/shared.js?v=20260613e"></script>
+<script src="src/js/arsenal-sim.js?v=20260704d"></script>
+<script>
+const ACTOR_META = {
+  hamas:     { label: 'Gaza',    color: '#d63031' },
+  hezbollah: { label: 'Lebanon', color: '#f39c12' },
+  houthis:   { label: 'Yemen',   color: '#4a9eff' },
+  iran:      { label: 'Iran',    color: '#c678dd' },
+};
+const REFS = [
+  { km: 70,   label: 'Tel Aviv ← Gaza' },
+  { km: 130,  label: 'Tel Aviv ← S. Lebanon' },
+  { km: 1600, label: 'Tel Aviv ← Tehran' },
+  { km: 2000, label: 'Tel Aviv ← Sanaa' },
+];
+
+function drawReach(systems) {
+  const c = document.getElementById('reach-wrap');
+  c.querySelector('svg').innerHTML = '';
+  const data = [...systems]
+    .filter(s => s.range_km)
+    .sort((a, b) => (b.range_km[1]) - (a.range_km[1]));
+  const W = Math.max(c.clientWidth || 900, 620);
+  const barH = 17, barPad = 5;
+  const M = { top: 26, right: 40, bottom: 34, left: 168 };
+  const H = data.length * (barH + barPad) + M.top + M.bottom;
+  const w = W - M.left - M.right;
+  const svg = d3.select('#reach').attr('width', W).attr('height', H);
+  const g = svg.append('g').attr('transform', `translate(${M.left},${M.top})`);
+  const x = d3.scaleLog().domain([1, 2800]).range([0, w]);
+
+  // reference distance lines
+  for (const r of REFS) {
+    g.append('line').attr('x1', x(r.km)).attr('x2', x(r.km))
+      .attr('y1', -14).attr('y2', H - M.top - M.bottom)
+      .attr('stroke', 'rgba(255,255,255,0.18)').attr('stroke-dasharray', '3,4');
+    g.append('text').attr('x', x(r.km)).attr('y', -18).attr('text-anchor', 'middle')
+      .attr('font-family', 'IBM Plex Mono').attr('font-size', '8.5px')
+      .attr('fill', 'rgba(255,255,255,0.45)').text(r.label);
+  }
+
+  data.forEach((s, i) => {
+    const yPos = i * (barH + barPad);
+    const col = (ACTOR_META[s.actor] || {}).color || '#aaa';
+    const [lo, hi] = s.range_km;
+    g.append('rect')
+      .attr('x', x(Math.max(lo, 1.01))).attr('y', yPos)
+      .attr('width', 0).attr('height', barH)
+      .attr('fill', col).attr('fill-opacity', 0.55).attr('rx', 2)
+      .on('mouseover', e => showTip(
+        `<b>${s.name}</b><br>${(ACTOR_META[s.actor] || {}).label} · ${s.class}<br>` +
+        `Range: ${lo === hi ? '~' + hi.toLocaleString() : lo.toLocaleString() + '–' + hi.toLocaleString()} km<br>` +
+        `Guidance: ${s.guidance.split(';')[0]}`, e))
+      .on('mousemove', moveTip).on('mouseleave', hideTip)
+      .transition().delay(i * 35).duration(420).ease(d3.easeCubicOut)
+      .attr('width', Math.max(x(hi) - x(Math.max(lo, 1.01)), 3));
+    g.append('text').attr('x', -8).attr('y', yPos + barH / 2 + 3.5)
+      .attr('text-anchor', 'end').attr('font-family', 'IBM Plex Mono').attr('font-size', '9.5px')
+      .attr('fill', col).text(s.name.length > 24 ? s.name.slice(0, 23) + '…' : s.name);
+  });
+
+  g.append('g').attr('transform', `translate(0,${H - M.top - M.bottom})`)
+    .call(d3.axisBottom(x).tickValues([1, 10, 100, 1000, 2500])
+      .tickFormat(d => d >= 1000 ? (d / 1000) + ',000 km' : d + ' km'))
+    .call(s => { s.select('.domain').attr('stroke', 'var(--border)');
+      s.selectAll('text').attr('fill', 'var(--muted)').attr('font-family', 'IBM Plex Mono').attr('font-size', '9.5px');
+      s.selectAll('line').attr('stroke', 'var(--border)'); });
+}
+
+(async () => {
+  const arsenal = await fetchData('arsenal.json');
+  const sec = document.getElementById('reach-section');
+  revealOnScroll(sec, () => { sec.classList.add('revealed'); drawReach(arsenal.systems); });
+  let t;
+  window.addEventListener('resize', () => { clearTimeout(t); t = setTimeout(() => drawReach(arsenal.systems), 150); });
+
+  // Hangar: hover = stats, click = jump to the full entry
+  renderHangar({
+    mount: '#hangar', arsenal,
+    onSelect: s => {
+      const card = document.getElementById('sys-' + s.id);
+      if (!card) return;
+      card.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      card.classList.remove('flash');
+      requestAnimationFrame(() => card.classList.add('flash'));
+    },
+  });
+
+  // Duel simulator + per-card "simulate" links
+  const duel = mountDuel({ mount: '#duel', arsenal });
+  document.querySelectorAll('.sim-link').forEach(btn => {
+    btn.addEventListener('click', () => {
+      if (duel) duel.select(btn.dataset.sim);
+      document.getElementById('duel').scrollIntoView({ behavior: 'smooth', block: 'center' });
+    });
+  });
+})().catch(e => console.warn('arsenal', e));
+</script>
+</body>
+</html>
