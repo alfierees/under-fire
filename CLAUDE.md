@@ -76,3 +76,5 @@ Files in `data/processed/`. Large raw data is gitignored. Regenerate with `pytho
 
 ## Not yet done (future work)
 See `HANDOFF.md`. Next candidates: zoomable timeline, mobile particle-count tweak.
+- **Social/OG preview image** (`images/og-card.png`, referenced as `og:image` on every page) is generic — redesign it to reflect the site better (e.g. the arsenal reach chart, the map-view launch, or the hero). Decision logged 2026-07-05.
+- Accurate 2D weapon sprites to replace the schematic hangar silhouettes (`images/arsenal/`), and mixed-volley duel mode.

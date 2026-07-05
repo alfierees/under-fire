@@ -202,3 +202,6 @@ When picking this up in Claude Code:
   - `records.html`: card descriptions no longer state fixed ratios that could contradict their live headline numbers.
   - Deliberately NOT changed: `hub.js` preview-bar dedup (would alter existing visuals for marginal gain) and unifying the two duel animation loops (large refactor, regression risk before a production push) — both logged as future cleanups. A pre-existing 1px notch in the timeline card sparkline at the Oct-7 divider is also noted but out of scope.
 - **Future wishlist**: accurate 2D weapon sprites to replace the schematic SVG silhouettes (drop PNG/SVGs in `images/arsenal/`, wire into the hangar slots); mixed-volley mode (drones + rockets + BMs in one salvo, the April-2024 pattern).
+
+## Future decisions logged (2026-07-05)
+- **Preview/OG image** — `images/og-card.png` is the social-share card on every page (`<meta property="og:image">`). It's currently generic and doesn't reflect the expanded site. Redesign candidate: the arsenal reach chart, the map-view launch, or the "UNDER FIRE" hero. (Owner request.)
