@@ -131,7 +131,7 @@ def build_records(weekly, hourly_dow, areas, stats, by_day):
         "major_attack_days": {
             "count": major_days,
             "threshold": major_threshold,
-            "one_in_every": round(span_days / major_days, 1),
+            "one_in_every": round(span_days / major_days, 1) if major_days else None,
         },
     }
 

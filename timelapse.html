@@ -176,13 +176,14 @@
       <div class="section-label" style="margin-bottom:.5rem;">What the animation shows</div>
       <h2 class="section-title" style="font-size:1.8rem;margin-bottom:.5rem;">From one front to every front</h2>
       <p class="section-desc" style="margin-bottom:0;">
-        Before October 2023, only one month in nearly four years exceeded a thousand alerts
-        nationwide — May 2021, the Guardian of the Walls war, with 6,331. Twenty-three of
-        Israel's 30 alert regions had ever been hit. After October 7 the map changes state:
-        Hezbollah lights up the Confrontation Line for fourteen straight months, Houthi fire
-        reaches Eilat and the centre, Iran's direct barrages flash nationwide in April and
-        October 2024 and June 2025 — and the war of February 2026 becomes the biggest month
-        on record, 58,608 alerts in March 2026 alone, with every single region under fire.
+        Before October 2023, <span id="tl-pre-lead">only one month</span> in nearly four years
+        exceeded a thousand alerts nationwide — <span id="tl-pre">May 2021, with 6,331</span>.
+        <span id="tl-regions-pre">Twenty-three</span> of Israel's 30 alert regions had ever been
+        hit. After October 7 the map changes state: Hezbollah lights up the Confrontation Line
+        for fourteen straight months, Houthi fire reaches Eilat and the centre, Iran's direct
+        barrages flash nationwide in April and October 2024 and June 2025 — until the map's
+        biggest month on record, <span id="tl-max">March 2026, with 58,608 alerts</span>, when
+        <span id="tl-regions-max">every one of the 30 regions</span> was under fire.
       </p>
       <p class="chart-note" style="margin-top:1rem;">For the records themselves — busiest day, busiest hour, longest quiet streak — see <a href="records.html" style="color:var(--accent);">Records &amp; Stats</a>.</p>
     </div>
@@ -211,11 +212,45 @@ const FRAME_MS = 320;
 
 function monthLabel(m) { return MONTH_NAMES[+m.slice(5) - 1] + ' ' + m.slice(0, 4); }
 
+// Fill the narrative figures from the data so they never go stale. The static
+// HTML text is the fetch-failure fallback.
+const WORDS = ['zero','one','two','three','four','five','six','seven','eight','nine','ten',
+  'eleven','twelve','thirteen','fourteen','fifteen','sixteen','seventeen','eighteen','nineteen',
+  'twenty','twenty-one','twenty-two','twenty-three','twenty-four','twenty-five','twenty-six',
+  'twenty-seven','twenty-eight','twenty-nine','thirty'];
+function fillNarrative(am) {
+  const { months, totals, counts, areas } = am;
+  const oct = months.indexOf('2023-10');
+  if (oct < 1) return;
+  const nRegions = areas.length;
+  let preMax = -1, nOver = 0;
+  for (let i = 0; i < oct; i++) {
+    if (totals[i] > 1000) nOver++;
+    if (preMax < 0 || totals[i] > totals[preMax]) preMax = i;
+  }
+  let maxI = 0;
+  for (let i = 1; i < totals.length; i++) if (totals[i] > totals[maxI]) maxI = i;
+  const regionsPre = areas.filter(a => counts[a].slice(0, oct).some(v => v > 0)).length;
+  const regionsMax = areas.filter(a => counts[a][maxI] > 0).length;
+  const cap = w => w.charAt(0).toUpperCase() + w.slice(1);
+  const set = (id, t) => { const el = document.getElementById(id); if (el) el.textContent = t; };
+  if (preMax >= 0) {
+    set('tl-pre-lead', nOver === 1 ? 'only one month' : `just ${WORDS[nOver] || nOver} months`);
+    set('tl-pre', `${monthLabel(months[preMax])}, with ${fmtNum(totals[preMax])}`);
+  }
+  set('tl-regions-pre', cap(WORDS[regionsPre] || String(regionsPre)));
+  set('tl-max', `${monthLabel(months[maxI])}, with ${fmtNum(totals[maxI])} alerts`);
+  set('tl-regions-max', regionsMax >= nRegions
+    ? `every one of the ${nRegions} regions`
+    : `${regionsMax} of the ${nRegions} regions`);
+}
+
 (async () => {
   const [am, geo] = await Promise.all([
     fetchData('area_monthly.json'),
     fetchData('area_polygons.json'),
   ]);
+  fillNarrative(am);
   const months = am.months, N = months.length;
 
   // cumulative counts per area, aligned to months

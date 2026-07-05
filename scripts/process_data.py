@@ -278,6 +278,10 @@ def operations(rows):
     data_end = rows[-1]["date"]
     out = []
     for op in OPERATIONS:
+        # An ongoing op whose start postdates the newest alert hasn't begun in
+        # this dataset yet — skip it rather than emit a negative-length window.
+        if op["start"] > data_end:
+            continue
         end = op["end"] or data_end
         sel = [r for r in rows if op["start"] <= r["date"] <= end
                and (op["origin"] is None or r["origin"] == op["origin"])]
@@ -425,6 +429,9 @@ def write_llms_txt(rows):
     def n(x):
         return f"{x:,}"
 
+    def pct(x):
+        return f"{x / total:.1%}" if total else "0%"
+
     txt = f"""# Under Fire — under-fire.org
 
 > Live-updated data journalism: every rocket, missile, and drone alert
@@ -435,11 +442,11 @@ def write_llms_txt(rows):
 ## Key figures (as of {s['date_range']['end']})
 
 - Total alerts recorded: {n(total)} ({s['date_range']['start']} to {s['date_range']['end']})
-- Attributed to Hamas/Gaza: {n(o.get('Hamas', 0))} ({o.get('Hamas', 0) / total:.1%})
-- Attributed to Hezbollah/Lebanon: {n(o.get('Hezbollah', 0))} ({o.get('Hezbollah', 0) / total:.1%})
-- Attributed to Iran (direct attacks): {n(o.get('Iran', 0))} ({o.get('Iran', 0) / total:.1%})
-- Attributed to the Houthis/Yemen: {n(o.get('Houthis', 0))} ({o.get('Houthis', 0) / total:.1%})
-- Unattributed: {n(o.get('Unknown', 0))} ({o.get('Unknown', 0) / total:.1%})
+- Attributed to Hamas/Gaza: {n(o.get('Hamas', 0))} ({pct(o.get('Hamas', 0))})
+- Attributed to Hezbollah/Lebanon: {n(o.get('Hezbollah', 0))} ({pct(o.get('Hezbollah', 0))})
+- Attributed to Iran (direct attacks): {n(o.get('Iran', 0))} ({pct(o.get('Iran', 0))})
+- Attributed to the Houthis/Yemen: {n(o.get('Houthis', 0))} ({pct(o.get('Houthis', 0))})
+- Unattributed: {n(o.get('Unknown', 0))} ({pct(o.get('Unknown', 0))})
 - Busiest single day: {s['busiest_day']['date']} with {n(s['busiest_day']['count'])} alerts
 - Distinct alert locations: {n(s['unique_locations'])} across {s['unique_areas']} Home Front Command regions
 - Days with at least one alert: {n(s['total_days_covered'])}
