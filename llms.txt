@@ -5,17 +5,17 @@
 > minutes from Israeli Home Front Command (Tzeva Adom / Red Alert) alerts
 > aggregated by RocketAlert.live, with estimated origin attribution.
 
-## Key figures (as of 2026-06-14)
+## Key figures (as of 2026-07-20)
 
-- Total alerts recorded: 160,159 (2020-01-12 to 2026-06-14)
-- Attributed to Hamas/Gaza: 8,966 (5.6%)
-- Attributed to Hezbollah/Lebanon: 32,415 (20.2%)
+- Total alerts recorded: 160,163 (2020-01-12 to 2026-07-20)
+- Attributed to Hamas/Gaza: 8,968 (5.6%)
+- Attributed to Hezbollah/Lebanon: 32,417 (20.2%)
 - Attributed to Iran (direct attacks): 97,113 (60.6%)
 - Attributed to the Houthis/Yemen: 13,085 (8.2%)
 - Unattributed: 8,580 (5.4%)
 - Busiest single day: 2026-02-28 with 10,162 alerts
 - Distinct alert locations: 1,546 across 30 Home Front Command regions
-- Days with at least one alert: 762
+- Days with at least one alert: 764
 
 ## Pages
 

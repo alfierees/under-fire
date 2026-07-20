@@ -1,5 +1,5 @@
 {
-  "total_alerts": 160161,
+  "total_alerts": 160163,
   "busiest_day": {
     "date": "2026-02-28",
     "count": 10162
@@ -24,13 +24,13 @@
     "count": 30723
   },
   "days_under_attack": {
-    "days_with_alerts": 762,
-    "total_days": 2346,
+    "days_with_alerts": 764,
+    "total_days": 2382,
     "pct": 32
   },
   "major_attack_days": {
     "count": 216,
     "threshold": 100,
-    "one_in_every": 10.9
+    "one_in_every": 11.0
   }
 }
