@@ -123,7 +123,7 @@
     <a href="index.html" class="back-link">← Back to all charts</a>
     <div class="section-label">09 — Compare</div>
     <h1 class="section-title">The Wars, Side by Side</h1>
-    <p class="section-desc">Nine named operations and campaigns, measured in the same unit — Home Front Command alerts. Some wars are a violent night; some are a two-year grind. The May 2021 Gaza war, the biggest of its era, produced 6,325 alerts in twelve days. The June 2025 Israel–Iran war produced three times that in the same span — and the war that began in February 2026 has passed 83,000, more than every previous round combined.</p>
+    <p class="section-desc"><span id="op-count">Ten</span> named operations and campaigns — every one since 2020, measured in the same unit — Home Front Command alerts. Some wars are a violent night; some are a two-year grind. The May 2021 Gaza war, the biggest of its era, produced 6,325 alerts in twelve days. The June 2025 Israel–Iran war produced three times that in the same span — and the war that began in February 2026 has passed 83,000, more than every previous round combined.</p>
 
     <div class="filter-bar">
       <span class="filter-label">Fronts</span>
@@ -325,6 +325,8 @@ function buildCards(ops) {
 
 (async () => {
   const { operations } = await fetchData('operations.json');
+  const NUM_WORDS = ['Zero','One','Two','Three','Four','Five','Six','Seven','Eight','Nine','Ten','Eleven','Twelve'];
+  document.getElementById('op-count').textContent = NUM_WORDS[operations.length] || String(operations.length);
   buildCards(operations);
   salvoScatter = window.mountSalvo ? mountSalvo({ mount: '#scatter-wrap' }) : null;
   revealOnScroll(document.getElementById('intensity'), () => {

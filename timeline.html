@@ -149,14 +149,14 @@
           <span class="pct" data-live="share:Iran"></span>
           <div class="num" data-live="origin:Iran">—</div>
           <div class="mini" id="mini-Iran"></div>
-          <div class="desc">Direct ballistic &amp; drone barrages — Apr &amp; Oct 2024, Jun 2025, Feb–Mar 2026.</div>
+          <div class="desc">Direct ballistic &amp; drone barrages — Apr &amp; Oct 2024, Jun 2025, and sustained fire since Feb 2026.</div>
         </div>
         <div class="actor-card" data-actor="Hezbollah">
           <span class="label" style="color:var(--hezbollah)">HEZBOLLAH</span>
           <span class="pct" data-live="share:Hezbollah"></span>
           <div class="num" data-live="origin:Hezbollah">—</div>
           <div class="mini" id="mini-Hezbollah"></div>
-          <div class="desc">Northern border, peaked Sept–Oct 2024.</div>
+          <div class="desc">Northern border — peaked Oct–Nov 2024, resurgent in 2026.</div>
         </div>
         <div class="actor-card" data-actor="Houthis">
           <span class="label" style="color:var(--houthis)">HOUTHIS</span>
@@ -476,17 +476,21 @@ function buildLegend(origins) {
 
 async function init() {
   let stats = null;
-  try {
-    stats = await fetchData('stats_summary.json');
-    document.getElementById('stat-pre-oct7').textContent = fmtNum(stats.origins['Unknown'] || 8596);
-    const post = (stats.origins['Hamas']||0) + (stats.origins['Hezbollah']||0) + (stats.origins['Houthis']||0) + (stats.origins['Iran']||0);
-    document.getElementById('stat-post-oct7').textContent = fmtNum(post);
-  } catch (e) {
-    document.getElementById('stat-pre-oct7').textContent = '8,596';
-    document.getElementById('stat-post-oct7').textContent = '134,241';
-  }
-  const origins = (stats && stats.origins) || { Iran: 82288, Hezbollah: 29950, Houthis: 13022, Hamas: 8981, Unknown: 8596 };
+  try { stats = await fetchData('stats_summary.json'); } catch (e) { /* data-live fallbacks remain */ }
   const timelineData = await fetchData('timeline_weekly.json');
+  // Prefer stats_summary; otherwise derive origin totals from the weekly series itself.
+  const origins = (stats && stats.origins) || (() => {
+    const o = {};
+    ['Iran','Hezbollah','Houthis','Hamas','Unknown'].forEach(a => { o[a] = d3.sum(timelineData, d => d[a] || 0); });
+    return o;
+  })();
+
+  // True era split from the weekly series: weeks before Oct 7, 2023 vs since.
+  const OCT7_WEEK = '2023-10-02';
+  let pre = 0, post = 0;
+  timelineData.forEach(d => { if (d.week < OCT7_WEEK) pre += (d.total || 0); else post += (d.total || 0); });
+  document.getElementById('stat-pre-oct7').textContent = fmtNum(pre);
+  document.getElementById('stat-post-oct7').textContent = fmtNum(post);
 
   const reveal = document.getElementById('reveal-area');
 
@@ -534,7 +538,12 @@ function drawYearChart(weekly) {
   const svg = d3.select('#year-chart').append('svg').attr('width', W).attr('height', H);
   const g = svg.append('g').attr('transform', `translate(${M.left},0)`);
 
-  const ANNO = { '2023': 'INC. OCT 7', '2026': 'JAN–MAR ONLY' };
+  // Annotate the current (partial) year with its real data coverage, e.g. "JAN–JUL ONLY".
+  const lastWeek = weekly[weekly.length - 1].week;
+  const lastYear = lastWeek.slice(0, 4);
+  const lastMonth = d3.timeFormat('%b')(new Date(lastWeek + 'T00:00:00')).toUpperCase();
+  const ANNO = { '2023': 'INC. OCT 7' };
+  ANNO[lastYear] = `JAN–${lastMonth} ONLY`;
 
   years.forEach((d, i) => {
     const yPos = i * (barH + gap);

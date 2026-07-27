@@ -118,13 +118,13 @@
         <div class="rec-label">Busiest hour of the clock</div>
         <div class="rec-big" id="rec-hour">—</div>
         <div class="rec-sub" id="rec-hour-when">—</div>
-        <div class="rec-desc">Across every day of every year, this one hour of the clock sees more alerts than any other. Aggregated over 2,281 days.</div>
+        <div class="rec-desc">Across every day of every year, this one hour of the clock sees more alerts than any other. Aggregated over the full record.</div>
       </div>
       <div class="rec-card blue">
         <div class="rec-label">Longest quiet stretch</div>
         <div class="rec-big" id="rec-quiet">—</div>
         <div class="rec-sub" id="rec-quiet-when">—</div>
-        <div class="rec-desc">The longest consecutive run of weeks with fewer than five alerts nationwide. A moment of relative calm before Oct 7 broke it.</div>
+        <div class="rec-desc">The longest consecutive run of weeks with fewer than five alerts nationwide — a stretch of calm broken by the spring 2023 escalation.</div>
       </div>
       <div class="rec-card purple">
         <div class="rec-label">Busiest day of the week</div>
@@ -149,7 +149,7 @@
     <div class="peak-wrap">
       <div class="section-label" style="margin-bottom:.5rem;">Minute by minute</div>
       <h2 class="section-title" style="font-size:2rem;">October 7, 2023 — as it happened</h2>
-      <p class="section-desc" style="max-width:720px;">The peak day for all-time alert counts by attack is still Oct 7, 2023. Each bar is one minute between 06:29 and 23:13. The early-morning spike runs for roughly three hours before the cadence settles into a steady, exhausted drumbeat.</p>
+      <p class="section-desc" style="max-width:720px;">October 7, 2023 is no longer the busiest day in the record — the 2026 war has passed it — but it remains the day the war began, minute by minute. Each bar is one minute between 06:29 and 23:13. The early-morning spike runs for roughly three hours before the cadence settles into a steady, exhausted drumbeat.</p>
       <div id="peak-day-chart"></div>
     </div>
   </div>
@@ -180,7 +180,7 @@
   document.getElementById('rec-hour').innerHTML =
     `${String(bh.hour).padStart(2,'0')}:00<span> – ${String(bh.hour+1).padStart(2,'0')}:00</span>`;
   document.getElementById('rec-hour-when').textContent =
-    `${bh.count.toLocaleString()} alerts across the 2,281-day record`;
+    `${bh.count.toLocaleString()} alerts across the ${records.days_under_attack.total_days.toLocaleString()}-day record`;
 
   // Longest quiet streak
   const qs = records.longest_quiet_streak;

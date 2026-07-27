@@ -154,7 +154,7 @@
   <div class="section-wrapper">
     <a href="index.html" class="back-link">← Back to all charts</a>
     <div class="section-label">06 — The Wars, Chapter by Chapter</div>
-    <h1 class="section-title">Six Fronts, One War</h1>
+    <h1 class="section-title">Six Chapters, One War</h1>
     <p class="section-desc">A guided replay through the war front by front — from October 7 to total war. The map flies to each front, draws the fire from its source, and reveals the alerts; it pauses on each chapter long enough to read, then moves on. The fronts stack up as you go, so by the end the whole country is lit at once. Click any chapter on the rail to jump.</p>
   </div>
 
@@ -249,10 +249,10 @@
     return `M ${x1} ${y1} Q ${mx} ${my} ${x2} ${y2}`;
   }
 
-  // For Hezbollah, drop points above the border (~33.05–33.27) so impacts and
-  // bounds stay in clearly Israeli towns rather than bleeding into Lebanon.
+  // Points are real alert coordinates (see generate_story_chapters.py) — no
+  // filtering, so border-region alerts along the Confrontation Line stay visible.
   function chapterPoints(ch) {
-    return ch.actor === 'Hezbollah' ? ch.points.filter(p => p[0] <= 32.95) : ch.points;
+    return ch.points;
   }
 
   function clusterPoints(points, gridDeg = 0.18, topN = 5) {

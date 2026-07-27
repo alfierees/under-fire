@@ -20,7 +20,7 @@ Data-vis site about rocket/missile/drone alerts over Israel (2020–2026). Stati
 - `src/css/hub.css` — hero + card grid (index only).
 - `src/js/shared.js` — `fetchData`, tooltip helpers, nav-badge boot.
 - `src/js/iron-dome.js` — hero canvas animation (index only).
-- `src/js/salvo.js` — `mountSalvo({ mount }).fire({ count, label })` — missile-arc overlay scaled by alert count, capped at 80 missiles. Used on timeline (week-click) and compare (scatter-bubble click).
+- `src/js/salvo.js` — `mountSalvo({ mount }).fire({ count, label })` — missile-arc overlay scaled by alert count, capped at 250 missiles (√-scaled). Used on timeline (week-click) and compare (scatter-bubble click).
 - `src/js/hub.js` — card sparkline previews.
 - `src/js/arsenal-sim.js` — arsenal interactives: `renderHangar()` (schematic SVG silhouettes per weapon class; hover stats, click scrolls to `#sys-{id}` card) and `mountDuel()` (launch/saturation simulator with interceptors + live cost tally; intercept rates anchored to reported figures, degraded by log2(salvo)).
 
@@ -48,7 +48,7 @@ Before pushing: run the local server and click through `index.html` → each car
 - Charts reveal on scroll-into-view via `revealOnScroll(el, fn)` in `shared.js` (IntersectionObserver + scroll fallback; fires immediately if already in view). The press-to-run code panel was removed 2026-06 — it hid content behind a non-obvious interaction.
 - Fronts reveal: per-actor stacked bars grow from zero, **1200ms each, staggered 450ms**. Auto-plays on IntersectionObserver.
 - Patterns clock: sweep hand **2.2s**, wedges fade in as hand passes. 10am flare.
-- Salvo animation cap: **80 missiles max**; label shows raw count only (no "N shown").
+- Salvo animation cap: **250 missiles max** (√-scaled); label shows raw count only (no "N shown").
 - Hero background: `images/hero-bg.jpg` — CSS path is `url('../../images/hero-bg.jpg')` (relative to `src/css/hub.css`).
 
 ## Data files (small aggregates, committed)

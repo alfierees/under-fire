@@ -187,7 +187,7 @@ function drawAreas(data) {
       .attr('x', 0).attr('y', y)
       .attr('width', 0).attr('height', barH)
       .attr('fill', col).attr('rx', 2)
-      .on('mouseover', e => showTip(`<b>${d.area}</b><br>Total: ${fmtNum(d.total)}<br>Avg/day: ${d.avg_per_day.toFixed(2)}<br>Active days: ${fmtNum(d.active_days)}`, e))
+      .on('mouseover', e => showTip(`<b>${d.area}</b><br>Total: ${fmtNum(d.total)}<br>Avg/day (whole period): ${d.avg_per_day.toFixed(2)}<br>Active days: ${fmtNum(d.active_days)}`, e))
       .on('mousemove', moveTip).on('mouseleave', hideTip)
       .transition().delay(delay).duration(BAR_DUR).ease(d3.easeCubicOut)
       .attr('width', x(d.total));
@@ -250,7 +250,7 @@ function buildAreaMap(areas, geo) {
     document.getElementById('mi-total-lbl').textContent = 'total alerts';
     document.getElementById('mi-stats').innerHTML =
       `<div class="mi-row"><span>Days with alerts</span><span>${fmtNum(a.active_days)}</span></div>` +
-      `<div class="mi-row"><span>Avg / active day</span><span>${a.avg_per_day.toFixed(1)}</span></div>` +
+      `<div class="mi-row"><span>Avg / active day</span><span>${a.active_days ? (a.total / a.active_days).toFixed(1) : '—'}</span></div>` +
       `<div class="mi-row"><span>Rocket / drone</span><span>${100 - uavPct}% / ${uavPct}%</span></div>` +
       `<div class="mi-row"><span>Worst day</span><span>${fmtNum(a.peak_day_count)} on ${a.peak_day ? a.peak_day.slice(5) : '—'}</span></div>`;
   }

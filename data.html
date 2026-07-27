@@ -159,7 +159,7 @@
             <tr><td><a href="data/processed/stats_summary.json">stats_summary.json</a></td><td class="size">&lt;1 KB</td><td class="desc-col">Headline totals: alert count, date range, per-origin breakdown, busiest day, unique locations/areas.</td></tr>
             <tr><td><a href="data/processed/timeline_weekly.json">timeline_weekly.json</a></td><td class="size">~10 KB</td><td class="desc-col">Weekly alert totals since 2020, broken down by attributed actor.</td></tr>
             <tr><td><a href="data/processed/actors_monthly.json">actors_monthly.json</a></td><td class="size">~3 KB</td><td class="desc-col">Monthly totals per actor — the "Four Fronts" chart data.</td></tr>
-            <tr><td><a href="data/processed/daily_counts.json">daily_counts.json</a></td><td class="size">~47 KB</td><td class="desc-col">Per-day national counts (estimated from weekly × day-of-week distribution before 2024; exact after).</td></tr>
+            <tr><td><a href="data/processed/daily_counts.json">daily_counts.json</a></td><td class="size">~47 KB</td><td class="desc-col">Per-day national counts — <strong>estimated</strong>: weekly totals spread by the global day-of-week distribution. Do not use for single-day analysis; per-day extremes live in records.json.</td></tr>
             <tr><td><a href="data/processed/hourly_dow.json">hourly_dow.json</a></td><td class="size">~2 KB</td><td class="desc-col">Alerts by hour of day (per actor) and by day of week.</td></tr>
             <tr><td><a href="data/processed/actor_hour.json">actor_hour.json</a></td><td class="size">~4 KB</td><td class="desc-col">Flat actor × hour counts for the patterns heatmap.</td></tr>
             <tr><td><a href="data/processed/areas_summary.json">areas_summary.json</a></td><td class="size">~6 KB</td><td class="desc-col">Per-region totals, rocket/drone split, active days, peak day, origin mix.</td></tr>
@@ -170,7 +170,7 @@
             <tr><td><a href="data/processed/records.json">records.json</a></td><td class="size">&lt;1 KB</td><td class="desc-col">Precomputed extremes: busiest day and hour, longest quiet streak, biggest single-area spike.</td></tr>
             <tr><td><a href="data/processed/recent_alerts.json">recent_alerts.json</a></td><td class="size">~5 KB</td><td class="desc-col">The last 30 alert events, salvo-grouped, plus exact per-day counts for the last 14 days. Feeds the live feed.</td></tr>
             <tr><td><a href="data/processed/story_chapters.json">story_chapters.json</a></td><td class="size">~61 KB</td><td class="desc-col">The scroll-story's chapters: text, per-chapter map points, and replay sequences.</td></tr>
-            <tr><td><a href="data/processed/arsenal.json">arsenal.json</a></td><td class="size">~30 KB</td><td class="desc-col">Curated reference data on the weapon systems fired at Israel — specs, ranges, salvo history, sources. Editorial, not derived from the alert data.</td></tr>
+            <tr><td><a href="data/processed/arsenal.json">arsenal.json</a></td><td class="size">~45 KB</td><td class="desc-col">Curated reference data on the weapon systems fired at Israel — specs, ranges, salvo history, sources. Editorial, not derived from the alert data.</td></tr>
           </tbody>
         </table>
       </div>

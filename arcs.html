@@ -105,14 +105,10 @@
     <a href="index.html" class="back-link">← Back to all charts</a>
     <div class="section-label">02b — Threat Origins</div>
     <h1 class="section-title">Four Sources, One Target</h1>
-    <p class="section-desc">A schematic of where alerts originate. Arc width is the share of total attributed alerts; each source pulses until its arc reaches the focal point. Toggle between the full six-year period and the post-October-7 era.</p>
+    <p class="section-desc">A schematic of where alerts originate across the full six-year record. Arc width scales with each source's alert count, relative to the largest; each source pulses until its arc reaches the focal point.</p>
 
     <div id="arcs-wrap">
       <div id="arcs-chart"></div>
-      <div class="arcs-controls">
-        <button class="arcs-btn active" data-mode="all">All-time</button>
-        <button class="arcs-btn" data-mode="oct7">Since Oct 7</button>
-      </div>
       <div class="arcs-legend" id="arcs-legend">
         <h4>By Actor</h4>
       </div>
@@ -140,12 +136,9 @@ const SOURCES = [
   { actor: 'Iran',      label: 'Iran',    x:1100, y: 250, color: 'var(--iran)',      hex: '#c678dd' },
 ];
 
-// Since-Oct-7 counts approximated: all attributed alerts were recorded after
-// Oct 7 (origin attribution is only reliable post-Oct-7), so the subset is
-// equal to the full attributed totals for Hamas/Hezbollah/Houthis/Iran.
-// For the "All-time" view we add the Unknown bucket as a translucent grey arc
-// originating from the sea (west of Israel) — visually represents the
-// unattributed share that predates the Oct 7 breakout.
+// Origin attribution only exists post-Oct-7, so a period toggle can't be
+// supported by the data — we show one all-time view. The Unknown bucket
+// (largely pre-Oct-7 fire) draws as a translucent grey arc from the west.
 
 (async () => {
   const stats = await fetchData('stats_summary.json');
@@ -172,10 +165,9 @@ const SOURCES = [
 
   const g = svg.append('g').attr('class','arcs-layer');
 
-  function render(mode) {
+  function render() {
     g.selectAll('*').remove();
 
-    // Choose dataset.
     const sourceCounts = SOURCES.map(s => ({ ...s, count: counts[s.actor] || 0 }));
     const maxCount = d3.max(sourceCounts, d => d.count);
 
@@ -246,8 +238,8 @@ const SOURCES = [
         .on('mousemove', moveTip).on('mouseleave', hideTip);
     });
 
-    // Unknown sliver from the sea for all-time view.
-    if (mode === 'all' && counts.Unknown) {
+    // Unknown sliver from the sea (largely pre-Oct-7, unattributed fire).
+    if (counts.Unknown) {
       const sx = 330, sy = 340;
       const width = 2 + (counts.Unknown / maxCount) * 24;
       const midX = (sx + TARGET.x) / 2, midY = (sy + TARGET.y) / 2 - 80;
@@ -266,7 +258,8 @@ const SOURCES = [
         .text('UNATTRIBUTED');
     }
 
-    updateLegend(sourceCounts);
+    updateLegend(sourceCounts.concat(counts.Unknown
+      ? [{ actor: 'Unattributed', hex: '#6b6b80', count: counts.Unknown }] : []));
   }
 
   function updateLegend(items) {
@@ -284,15 +277,7 @@ const SOURCES = [
     });
   }
 
-  render('all');
-
-  document.querySelectorAll('.arcs-btn').forEach(btn => {
-    btn.addEventListener('click', () => {
-      document.querySelectorAll('.arcs-btn').forEach(b => b.classList.remove('active'));
-      btn.classList.add('active');
-      render(btn.dataset.mode);
-    });
-  });
+  render();
 })();
 </script>
 </body>

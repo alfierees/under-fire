@@ -1,11 +1,13 @@
 #!/usr/bin/env python3
 """Generate story_chapters.json for the scroll-driven narrative story map."""
-import json, random
+import csv, gzip, json, random
+from datetime import date
 from pathlib import Path
 
 random.seed(42)
 BASE = Path(__file__).parent.parent
 PROCESSED = BASE / 'data' / 'processed'
+MASTER = BASE / 'data' / 'master' / 'alerts.csv.gz'
 
 # Approximate bounding boxes for each Israeli alert area [lat_min, lat_max], [lon_min, lon_max]
 AREA_BOUNDS = {
@@ -67,6 +69,32 @@ def actor_area_counts(actor, areas_list):
     return {a['area']: a.get('origins', {}).get(actor, 0) for a in areas_list}
 
 
+def load_raw_points():
+    """Real per-alert [lat, lon] from the master CSV, keyed by (origin, date-str).
+
+    Returns None if the raw file isn't available (dots then fall back to
+    area-box sampling)."""
+    if not MASTER.exists():
+        return None
+    rows = []
+    with gzip.open(MASTER, 'rt') as f:
+        for r in csv.DictReader(f):
+            try:
+                rows.append((r['origin'], r['timestamp'][:10],
+                             round(float(r['lat']), 5), round(float(r['lon']), 5)))
+            except (KeyError, ValueError):
+                continue
+    return rows
+
+
+def real_dots(raw, actor, start=None, end=None, cap=DOT_CAP):
+    """Sample real alert coordinates for one actor, optionally windowed by date."""
+    pts = [[lat, lon] for (o, d, lat, lon) in raw
+           if o == actor and (start is None or d >= start) and (end is None or d <= end)]
+    random.shuffle(pts)
+    return pts[:cap]
+
+
 def main():
     with open(PROCESSED / 'oct7_replay.json') as f:
         oct7 = json.load(f)
@@ -74,15 +102,22 @@ def main():
         areas_list = json.load(f)
     with open(PROCESSED / 'stats_summary.json') as f:
         stats = json.load(f)
+    with open(PROCESSED / 'operations.json') as f:
+        ops = {o['id']: o for o in json.load(f)['operations']}
 
     area_by_name = {a['area']: a for a in areas_list}
 
     # Real per-actor totals used in the guided-replay captions (never hardcode —
     # these flow from the live aggregates so the 30-min pipeline keeps them true).
     n_oct7 = len(oct7)
+    n_oct7_areas = len({a['area'] for a in oct7 if a.get('area')})
     n_hamas = stats['origins'].get('Hamas', 0)
-    n_hez = stats['origins'].get('Hezbollah', 0)
     n_hou = stats['origins'].get('Houthis', 0)
+    # Northern-war window total (Oct 8 2023 – Nov 27 2024) — NOT the all-time
+    # Hezbollah figure, which includes the 2026 Lebanon war.
+    n_hez_war = ops['northern-war']['total']
+    n_tp1 = ops['true-promise-1']['total']
+    n_busiest = stats['busiest_day']['count']
 
     # ── Guided-replay captions ────────────────────────────────────────────────
     # Short, ~8.5s-read beat captions for the chapter-by-chapter replay (story.html).
@@ -90,15 +125,15 @@ def main():
     REPLAY = {
         "oct7": {
             "time": "7 OCT 2023 · 06:29", "head": "It begins",
-            "body": f"A Shabbat morning, the quiet peak of the holiday season. At 06:29 Hamas opens a coordinated, multi-front assault — the heaviest single day Israel has ever recorded, {n_oct7:,} rocket alerts blanketing the Gaza Envelope, the Negev and the coastal heartland. As families ran for shelters, gunmen breached the border by land, sea and air.",
+            "body": f"A Shabbat morning, the quiet peak of the holiday season. At 06:29 Hamas opens a coordinated, multi-front assault — the heaviest single day Israel had ever recorded to that point, {n_oct7:,} rocket alerts blanketing the Gaza Envelope, the Negev and the coastal heartland. As families ran for shelters, gunmen breached the border by land, sea and air.",
         },
         "gaza": {
             "time": "OCT 2023 – OCT 2024", "head": "The grind",
-            "body": f"Even as the ground operation began, the sky over the south rarely cleared. For the year that followed, Hamas kept up a steady rhythm of fire over the Gaza Envelope, Lakhish and the Western Negev — {n_hamas:,} alerts in all. Not front-line statistics, but the daily soundtrack of a region that couldn't return to normal.",
+            "body": f"Even as the ground operation began, the sky over the south rarely cleared. Hamas kept up a steady rhythm of fire over the Gaza Envelope, Lakhish and the Western Negev — {n_hamas:,} alerts attributed to it across the whole war. Not front-line statistics, but the daily soundtrack of a region that couldn't return to normal.",
         },
         "hezbollah": {
             "time": "OCT 2023 · THE NORTH", "head": "The north ignites",
-            "body": f"On October 8 a second front opened in the north. Hezbollah's anti-tank fire and explosive drones turned the Galilee's kibbutzim and tourist towns into a combat zone — {n_hez:,} alerts along the Confrontation Line. By the following autumn more than 60,000 residents had been evacuated, leaving ghost towns behind.",
+            "body": f"On October 8 a second front opened in the north. Hezbollah's anti-tank fire and explosive drones turned the Galilee's kibbutzim and tourist towns into a combat zone — {n_hez_war:,} alerts across the north before the November 2024 ceasefire. More than 60,000 residents were evacuated, leaving ghost towns behind.",
         },
         "houthis": {
             "time": "NOV 2023 · FROM YEMEN", "head": "From 2,000 km away",
@@ -110,7 +145,7 @@ def main():
         },
         "total-war": {
             "time": "28 FEB 2026", "head": "Total war",
-            "body": "On February 28, 2026 the conflict became what many had feared for decades. In a single 24-hour window Iran launched the largest coordinated missile-and-drone barrage in modern history — 10,162 alerts in one day, every one of the 30 regions under fire from the Golan to Eilat. The war had moved from the borders into every home.",
+            "body": f"On February 28, 2026 the conflict became what many had feared for decades. In a single 24-hour window Iran launched the largest coordinated missile-and-drone barrage in modern history — {n_busiest:,} alerts in one day, every one of the 30 regions under fire from the Golan to Eilat. The war had moved from the borders into every home.",
         },
     }
 
@@ -118,31 +153,29 @@ def main():
     oct7_pts = [[round(a['lat'], 5), round(a['lon'], 5)] for a in oct7]
     random.shuffle(oct7_pts)
 
-    # Ch2: Hamas barrages — all Hamas-attributed alerts by area
-    ch2_areas = actor_area_counts('Hamas', areas_list)
-
-    # Ch3: Hezbollah — northern front
-    ch3_areas = actor_area_counts('Hezbollah', areas_list)
-
-    # Ch4: Houthis — long-range strikes
-    ch4_areas = actor_area_counts('Houthis', areas_list)
-
-    # Ch5: Iran direct (True Promise 1 Apr 14 2024 + True Promise 2 Oct 1 2024)
-    # Areas that peaked on 2024-04-14: Central Negev, Southern Negev
-    ch5_areas = {
-        "Central Negev":  355,
-        "Southern Negev": 189,
-        "Dead Sea":        60,
-        "Arabah":          40,
-        "Jerusalem":       80,
-        "Judea":           50,
-        "Lakhish":         30,
-        "Sharon":          20,
-        "Dan":             20,
-    }
-
-    # Ch6: 2026 total war — all Iran-attributed alerts across every area
-    ch6_areas = actor_area_counts('Iran', areas_list)
+    # Chapters 2–6: real alert coordinates from the master CSV (windowed per
+    # chapter), so the dot maps show measured positions, not invented ones.
+    # Falls back to area-box sampling only if the raw file is unavailable.
+    raw = load_raw_points()
+    REAL_NOTE = "Real alert coordinates from RocketAlert.live"
+    APPROX_NOTE = "Approximate positions within recorded alert areas"
+    if raw:
+        ch2_pts = real_dots(raw, 'Hamas')
+        ch3_pts = real_dots(raw, 'Hezbollah',
+                            ops['northern-war']['start'], ops['northern-war']['end'])
+        ch4_pts = real_dots(raw, 'Houthis')
+        ch5_pts = real_dots(raw, 'Iran', '2024-04-13', '2024-04-15') + \
+                  real_dots(raw, 'Iran', '2024-10-01', '2024-10-02')
+        random.shuffle(ch5_pts); ch5_pts = ch5_pts[:DOT_CAP]
+        ch6_pts = real_dots(raw, 'Iran', ops['total-war']['start'], None)
+        dots_note = REAL_NOTE
+    else:
+        ch2_pts = sample_dots(actor_area_counts('Hamas', areas_list))
+        ch3_pts = sample_dots(actor_area_counts('Hezbollah', areas_list))
+        ch4_pts = sample_dots(actor_area_counts('Houthis', areas_list))
+        ch5_pts = sample_dots(actor_area_counts('Iran', areas_list))
+        ch6_pts = sample_dots(actor_area_counts('Iran', areas_list))
+        dots_note = APPROX_NOTE
 
     chapters = [
         {
@@ -157,7 +190,7 @@ def main():
             "stats": [
                 {"label": "Alerts in one day", "value": str(len(oct7))},
                 {"label": "Duration", "value": "17 hours"},
-                {"label": "Areas struck", "value": "12"},
+                {"label": "Areas struck", "value": str(n_oct7_areas)},
             ],
             "map": {"center": [34.55, 31.50], "zoom": 8.2},
             "points": oct7_pts[:DOT_CAP],
@@ -178,26 +211,26 @@ def main():
                 {"label": "Active days", "value": str(area_by_name.get('Gaza Envelope', {}).get('active_days', 460))},
             ],
             "map": {"center": [34.62, 31.55], "zoom": 8.0},
-            "points": sample_dots(ch2_areas),
-            "points_note": "Approximate positions within recorded alert areas",
+            "points": ch2_pts,
+            "points_note": dots_note,
         },
         {
             "id": "hezbollah",
             "chapter": 3,
-            "eyebrow": "Chapter 3 — Oct 2023 – Sep 2024",
+            "eyebrow": "Chapter 3 — Oct 2023 – Nov 2024",
             "title": "The Northern Front",
-            "date": "8 October 2023 – September 2024",
+            "date": "8 October 2023 – 27 November 2024",
             "actor": "Hezbollah",
             "color": "#f39c12",
-            "description": "While the south was still reeling, a second front ignited in the north. On October 8, Hezbollah began a campaign of \"solidarity\" that effectively turned the Galilee into a combat zone. For nearly a year, the Confrontation Line—once a string of thriving kibbutzim and tourist towns—became a landscape of sirens and smoke. The threat here was different: precision anti-tank missiles fired directly at homes and swarms of explosive UAVs that gave residents seconds to find cover. By the fall of 2024, more than 60,000 people had been forced from their homes, leaving behind \"ghost towns\" and a region in a state of suspended animation.",
+            "description": "While the south was still reeling, a second front ignited in the north. On October 8, Hezbollah began a campaign of \"solidarity\" that effectively turned the Galilee into a combat zone. For more than a year, the Confrontation Line—once a string of thriving kibbutzim and tourist towns—became a landscape of sirens and smoke. The threat here was different: precision anti-tank missiles fired directly at homes and swarms of explosive UAVs that gave residents seconds to find cover. By the fall of 2024, more than 60,000 people had been forced from their homes, leaving behind \"ghost towns\" and a region in a state of suspended animation.",
             "stats": [
-                {"label": "Hezbollah alerts", "value": str(stats['origins'].get('Hezbollah', 0))},
+                {"label": "Alerts, northern war", "value": str(n_hez_war)},
                 {"label": "Most-hit area", "value": "Confrontation Line"},
                 {"label": "Evacuated residents", "value": "60,000"},
             ],
             "map": {"center": [35.48, 33.12], "zoom": 8.8},
-            "points": sample_dots(ch3_areas),
-            "points_note": "Approximate positions within recorded alert areas",
+            "points": ch3_pts,
+            "points_note": dots_note,
         },
         {
             "id": "houthis",
@@ -214,8 +247,8 @@ def main():
                 {"label": "First strike", "value": "Eilat, Nov 2023"},
             ],
             "map": {"center": [35.05, 30.80], "zoom": 7.0},
-            "points": sample_dots(ch4_areas),
-            "points_note": "Approximate positions within recorded alert areas",
+            "points": ch4_pts,
+            "points_note": dots_note,
         },
         {
             "id": "iran-direct",
@@ -227,13 +260,13 @@ def main():
             "color": "#c678dd",
             "description": "For decades, the conflict between Iran and Israel was fought in the shadows. In 2024, that shadow war vanished. On the night of April 14, the world watched as Iran launched over 300 drones and missiles in the first-ever direct assault from Iranian soil. It was a surreal spectacle: streaks of light across the Jerusalem sky as a historic coalition of five nations—Israel, the US, the UK, France, and Jordan—worked in unison to intercept nearly every threat before it reached its target. But the quiet didn't last. On October 1, Iran struck again, this time with a more aggressive barrage of nearly 200 high-speed ballistic missiles. This second wave bypassed the slower drone phase, sending millions of Israelis into shelters simultaneously. While the defense held, the impact sites in central Israel and the Negev signaled a new, dangerous era of direct confrontation where the \"front line\" was now the entire country. ",
             "stats": [
-                {"label": "True Promise 1 alerts", "value": "655"},
+                {"label": "True Promise 1 alerts", "value": str(n_tp1)},
                 {"label": "Coalition intercept rate", "value": ">99%"},
                 {"label": "Peak area", "value": "Central Negev"},
             ],
             "map": {"center": [35.0, 31.2], "zoom": 8.0},
-            "points": sample_dots(ch5_areas),
-            "points_note": "Approximate positions within recorded alert areas",
+            "points": ch5_pts,
+            "points_note": dots_note,
         },
         {
             "id": "total-war",
@@ -245,13 +278,13 @@ def main():
             "color": "#c678dd",
             "description": "On February 28, 2026, the long-simmering regional conflict exploded into what many had feared for decades: a total war. In a single 24-hour window, Iran launched the most massive coordinated missile and drone barrage in the history of modern warfare.This was no longer a limited front. From the northern peaks of the Golan Heights to the southern tip of Eilat, and from the coastal plains to the Jordan Valley, the entire country was unified under the scream of over 10,000 alerts. The sheer volume of fire tested the limits of the world’s most advanced defense systems and forced millions of Israelis into shelters for hours on end. It was the day the conflict moved from the borders into every single home, crossing a threshold from which the region would never be the same.",
             "stats": [
-                {"label": "Alerts — Feb 28 alone", "value": "10,162"},
+                {"label": "Alerts — Feb 28 alone", "value": f"{n_busiest:,}"},
                 {"label": "Total Iran alerts", "value": str(stats['origins'].get('Iran', 0))},
                 {"label": "Regions struck", "value": "All 30"},
             ],
             "map": {"center": [35.12, 31.80], "zoom": 7.0},
-            "points": sample_dots(ch6_areas),
-            "points_note": "Approximate positions within recorded alert areas",
+            "points": ch6_pts,
+            "points_note": dots_note,
         },
     ]
 
@@ -259,7 +292,7 @@ def main():
     for ch in chapters:
         ch["replay"] = REPLAY[ch["id"]]
 
-    out = {"generated": "2026-04-23", "chapters": chapters}
+    out = {"generated": date.today().isoformat(), "chapters": chapters}
     out_path = PROCESSED / 'story_chapters.json'
     with open(out_path, 'w') as f:
         json.dump(out, f, separators=(',', ':'))

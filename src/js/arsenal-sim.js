@@ -383,7 +383,10 @@
     function updateLiveCounters() {
       const { s, sim } = tally;         // sim.cost is unitCost(s), memoized at fire time
       const atk = sim.cost.v * tally.fired;
-      const shots = sim.def.beam ? tally.stopped : Math.round(tally.stopped * 1.15);
+      // Defenders engage every resolved threat (including leakers), matching the
+      // pre-fire estimate's n×1.15 — the two figures converge when the salvo ends.
+      const engaged = sim.p === 0 ? 0 : tally.stopped + tally.hit;
+      const shots = sim.def.beam ? engaged : Math.round(engaged * 1.15);
       renderCounters(tally.fired, tally.stopped, tally.hit, atk, shots * sim.def.cost,
         sim.cost.est, s, false);
     }
