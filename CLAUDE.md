@@ -10,7 +10,6 @@ Data-vis site about rocket/missile/drone alerts over Israel (2020–2026). Stati
 - `calendar.html` — Daily heatmap (GitHub-contributions style). One cell = one day 2020–present.
 - `oct7.html`, `patterns.html`, `areas.html` — individual chart pages.
 - `patterns.html` — 24h polar clock (concentric actor rings + sweep reveal), weekday bar, actor×hour heatmap. Auto-reveals on scroll.
-- `arcs.html` — Schematic arcs from Gaza/Lebanon/Iran/Yemen into Israel. Width = attributed share. Toggle all-time/Oct 7.
 - `records.html` — Records & extremes: busiest day/hour, longest quiet streak, biggest area spike, Oct 7 minute-by-minute bars.
 - `timelapse.html` — "The Spread": month-by-month animated choropleth, play/scrub every month 2020–present, monthly/cumulative modes. Data: `area_monthly.json` + `area_polygons.json`.
 - `compare.html` — "The Wars, Side by Side": duration×intensity log-log scatter, ranked totals, one card per operation. Data: `operations.json`; operation windows/text live in `OPERATIONS` in `scripts/process_data.py`.

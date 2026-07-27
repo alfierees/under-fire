@@ -2,7 +2,7 @@
 
 **Patterns in rocket, missile, and drone attacks on Israel — an interactive data journalism project.**
 
-Six years of alert data (2020–2026), visualised across eight pages: timelines, heatmaps, geographic arcs, and records. Built to make the scale and rhythm of the conflict legible.
+Six years of alert data (2020–2026), visualised across a dozen pages: timelines, heatmaps, maps, and records. Built to make the scale and rhythm of the conflict legible.
 
 ---
 
@@ -64,7 +64,6 @@ timeline.html                 ← Six-year area chart
 fronts.html                   ← Stacked monthly bars by actor
 calendar.html                 ← Daily heatmap (2020–present)
 patterns.html                 ← 24h polar clock + weekday + heatmap
-arcs.html                     ← Schematic arcs from each origin
 records.html                  ← Records & extremes
 oct7.html                     ← Oct 7 minute-by-minute replay
 story.html                    ← Scroll-driven war narrative map

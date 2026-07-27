@@ -24,7 +24,7 @@ _Last updated: 2026-04-17 (late session — graphs/maps/patterns/stats overhaul)
 - `oct7.html` — Oct 7 Leaflet replay map. Play/pause/reset controls.
 - `patterns.html` — 24h polar clock (per-actor concentric rings + animated sweep reveal + 10am flare), day-of-week bar chart, and a 4×24 "who attacks when" actor × hour heatmap. Code-runner UI.
 - `areas.html` — Area vulnerability horizontal bar leaderboard.
-- `arcs.html` — Schematic "Four Sources, One Target" map. Animated arcs from Gaza, Lebanon, Iran, Yemen into a central target, widths scaled by attributed alert totals. Toggle between all-time / since Oct 7.
+- `archive/arcs.html` — Schematic "Four Sources, One Target" map. Never linked from the live site; archived 2026-07-27.
 - `records.html` — Records & extremes board: busiest day, busiest hour, longest quiet streak, biggest single-area spike, plus the Oct 7 peak day plotted minute by minute.
 
 ### Shared files

@@ -394,7 +394,6 @@ SITEMAP_PAGES = [
     ("/areas",     "0.7", None,     None),
     ("/timelapse", "0.8", None,     None),
     ("/compare",   "0.8", None,     None),
-    ("/arcs",      "0.7", None,     None),
     ("/records",   "0.7", None,     None),
     ("/arsenal",   "0.8", None,     "2026-07-04"),
     ("/data",      "0.7", None,     None),
@@ -464,7 +463,6 @@ def write_llms_txt(rows):
 - [Areas](https://under-fire.org/areas): choropleth + ranking of alerts by Home Front Command region
 - [Time-lapse](https://under-fire.org/timelapse): month-by-month animated map of where alerts fell, 2020–today
 - [Compare](https://under-fire.org/compare): side-by-side stats for each named operation and campaign
-- [Arcs](https://under-fire.org/arcs): schematic attack arcs from Gaza, Lebanon, Yemen, and Iran
 - [Records](https://under-fire.org/records): extremes — busiest day/hour, longest quiet streak
 - [Arsenal](https://under-fire.org/arsenal): the rockets, missiles, and drones fired at Israel — specs, ranges, salvo history
 - [Data](https://under-fire.org/data): documentation of every dataset with download links

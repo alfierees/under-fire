@@ -30,7 +30,6 @@
 - [Areas](https://under-fire.org/areas): choropleth + ranking of alerts by Home Front Command region
 - [Time-lapse](https://under-fire.org/timelapse): month-by-month animated map of where alerts fell, 2020–today
 - [Compare](https://under-fire.org/compare): side-by-side stats for each named operation and campaign
-- [Arcs](https://under-fire.org/arcs): schematic attack arcs from Gaza, Lebanon, Yemen, and Iran
 - [Records](https://under-fire.org/records): extremes — busiest day/hour, longest quiet streak
 - [Arsenal](https://under-fire.org/arsenal): the rockets, missiles, and drones fired at Israel — specs, ranges, salvo history
 - [Data](https://under-fire.org/data): documentation of every dataset with download links
