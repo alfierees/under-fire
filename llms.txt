@@ -7,8 +7,8 @@
 
 ## Key figures (as of 2026-07-28)
 
-- Total alerts recorded: 160,164 (2020-01-12 to 2026-07-28)
-- Attributed to Hamas/Gaza: 8,969 (5.6%)
+- Total alerts recorded: 160,165 (2020-01-12 to 2026-07-28)
+- Attributed to Hamas/Gaza: 8,970 (5.6%)
 - Attributed to Hezbollah/Lebanon: 32,417 (20.2%)
 - Attributed to Iran (direct attacks): 97,113 (60.6%)
 - Attributed to the Houthis/Yemen: 13,085 (8.2%)
