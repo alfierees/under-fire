@@ -179,7 +179,8 @@ function drawClock(data, totals) {
   const maxByActor = {};
   RING_ORDER.forEach(a => { maxByActor[a] = d3.max(data, d => d[a] || 0) || 1; });
 
-  const svg = d3.select('#clock-chart').append('svg').attr('width', size).attr('height', size);
+  // Extra height below the square so the 10:00 callout (which hangs below its spoke) is never cut off.
+  const svg = d3.select('#clock-chart').append('svg').attr('width', size).attr('height', size + 32);
   const g = svg.append('g').attr('transform', `translate(${cx},${cy})`);
   const tau = 2 * Math.PI;
   const sA = tau / 24;
@@ -260,10 +261,13 @@ function drawClock(data, totals) {
     const delay = (d.hour / 24) * duration;
     hg.transition().delay(delay).duration(240).attr('opacity', 1);
     if (d.hour === 10) {
-      hg.transition().delay(delay).duration(240)
+      // Named transition: an unnamed one here would interrupt the fade-in above and
+      // leave the 10:00 wedge (the peak hour) invisible.
+      hg.transition('flare').delay(delay).duration(240)
         .style('filter', 'drop-shadow(0 0 10px rgba(224,73,62,0.85))')
         .transition().duration(900)
-        .style('filter', 'drop-shadow(0 0 0 rgba(224,73,62,0))');
+        .style('filter', 'drop-shadow(0 0 0 rgba(224,73,62,0))')
+        .on('end', function () { d3.select(this).style('filter', null); });
     }
   });
 
