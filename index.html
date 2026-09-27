@@ -13,10 +13,10 @@
   <meta property="og:image" content="https://under-fire.org/images/og-card.png">
   <meta property="og:url" content="https://under-fire.org/">
   <meta name="twitter:card" content="summary_large_image">
-  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400;1,700&family=IBM+Plex+Mono:wght@300;400;500&family=IBM+Plex+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,300..800&family=Archivo+Narrow:wght@400..700&family=Bodoni+Moda:opsz,wght@6..96,500..900&display=swap" rel="stylesheet">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.8.5/d3.min.js"></script>
-  <link rel="stylesheet" href="src/css/shared.css">
-  <link rel="stylesheet" href="src/css/hub.css">
+  <link rel="stylesheet" href="src/css/shared.css?v=20260927c">
+  <link rel="stylesheet" href="src/css/hub.css?v=20260927c">
   <!-- Google Analytics -->
   <script async src="https://www.googletagmanager.com/gtag/js?id=G-JXKX4MKJ8W"></script>
   <script>
@@ -30,68 +30,6 @@
     window.va = window.va || function () { (window.vaq = window.vaq || []).push(arguments); };
   </script>
   <script defer src="/_vercel/insights/script.js"></script>
-  <style>
-    .mission-panel {
-      max-width: 1100px;
-      margin: 0 auto;
-      padding: 5rem 4rem 6rem;
-      border-top: 1px solid var(--border);
-    }
-    .mission-panel-eyebrow {
-      font-family: 'IBM Plex Mono', monospace;
-      font-size: .58rem;
-      letter-spacing: .22em;
-      text-transform: uppercase;
-      color: var(--accent);
-      margin-bottom: 1.4rem;
-      display: flex;
-      align-items: center;
-      gap: .9rem;
-    }
-    .mission-panel-eyebrow::before {
-      content: '';
-      display: block;
-      width: 28px;
-      height: 1px;
-      background: var(--accent);
-      flex-shrink: 0;
-    }
-    .mission-panel h2 {
-      font-family: 'Playfair Display', serif;
-      font-size: clamp(1.6rem, 3vw, 2.4rem);
-      font-weight: 900;
-      color: #fff;
-      line-height: 1.1;
-      letter-spacing: -.02em;
-      margin-bottom: 1.4rem;
-      max-width: 680px;
-    }
-    .mission-panel p {
-      font-size: .95rem;
-      color: var(--muted);
-      line-height: 1.85;
-      max-width: 680px;
-      margin-bottom: 2rem;
-    }
-    .mission-panel a.mission-link {
-      display: inline-flex;
-      align-items: center;
-      gap: .5rem;
-      font-family: 'IBM Plex Mono', monospace;
-      font-size: .62rem;
-      letter-spacing: .14em;
-      text-transform: uppercase;
-      color: var(--accent);
-      text-decoration: none;
-      border-bottom: 1px solid rgba(232,184,75,.3);
-      padding-bottom: .15rem;
-      transition: border-color .2s;
-    }
-    .mission-panel a.mission-link:hover { border-color: var(--accent); }
-    @media (max-width: 700px) {
-      .mission-panel { padding: 3.5rem 1.4rem 4rem; }
-    }
-  </style>
 <script type="application/ld+json">
 {
   "@context": "https://schema.org",
@@ -146,17 +84,17 @@
 <body>
 
 <div id="file-protocol-warning">
-  <strong>⚠ CHARTS WON'T LOAD VIA FILE://</strong>
+  <strong>Charts won't load from a file:// URL</strong>
   Run a local server to see all visualisations:<br>
-  <code>python3 -m http.server 8000</code>&nbsp;then open&nbsp;<code style="color:#4a9eff;">http://localhost:8000</code>
-  <span class="close-x" onclick="this.parentElement.style.display='none'">✕</span>
+  <code>python3 -m http.server 8000</code>&nbsp;then open&nbsp;<code style="color:#4f9be8;">http://localhost:8000</code>
+  <button class="close-x" type="button" aria-label="Dismiss" onclick="this.parentElement.style.display='none'"></button>
 </div>
 
 <nav>
   <a href="index.html" class="nav-brand">Under Fire</a>
   <div class="nav-links">
     <div class="nav-group">
-      <button class="nav-group-btn" type="button">Charts<span class="caret">▾</span></button>
+      <button class="nav-group-btn" type="button">Charts<span class="caret" aria-hidden="true"></span></button>
       <div class="nav-dropdown">
         <a href="timeline.html">Timeline</a>
         <a href="fronts.html">Fronts</a>
@@ -165,7 +103,7 @@
       </div>
     </div>
     <div class="nav-group">
-      <button class="nav-group-btn" type="button">Maps<span class="caret">▾</span></button>
+      <button class="nav-group-btn" type="button">Maps<span class="caret" aria-hidden="true"></span></button>
       <div class="nav-dropdown">
         <a href="oct7.html">Oct 7</a>
         <a href="story.html">Story</a>
@@ -173,14 +111,14 @@
       </div>
     </div>
     <div class="nav-group">
-      <button class="nav-group-btn" type="button">Patterns<span class="caret">▾</span></button>
+      <button class="nav-group-btn" type="button">Patterns<span class="caret" aria-hidden="true"></span></button>
       <div class="nav-dropdown">
         <a href="patterns.html">Patterns</a>
         <a href="areas.html">By Area</a>
       </div>
     </div>
     <div class="nav-group">
-      <button class="nav-group-btn" type="button">More<span class="caret">▾</span></button>
+      <button class="nav-group-btn" type="button">More<span class="caret" aria-hidden="true"></span></button>
       <div class="nav-dropdown">
         <a href="live.html">Live Feed</a>
         <a href="records.html">Records &amp; Stats</a>
@@ -190,198 +128,161 @@
       </div>
     </div>
   </div>
-  <a href="live.html" class="nav-badge" id="nav-badge">🔔 Loading…</a>
+  <a href="live.html" class="nav-badge" id="nav-badge">160,000+ alerts</a>
 </nav>
 
 <div id="tooltip"></div>
 
 <!-- HERO -->
-<section id="hero">
-  <div class="hero-bg"></div>
+<header id="hero">
+  <div class="hero-bg" aria-hidden="true"></div>
   <canvas id="iron-dome-canvas" aria-hidden="true"></canvas>
   <div class="hero-content">
-    <div class="hero-eyebrow">Special Investigation</div>
-    <h1 class="hero-title">UNDER<br>FIRE</h1>
-    <p class="hero-subtitle">
-      <span data-live="years-word-cap">Six</span> years of rocket, missile, and drone alerts across Israel — every single one
-      recorded, mapped, and analysed. This is what the data looks like.
+    <h1 class="hero-title">Under<br>Fire</h1>
+    <p class="hero-deck">
+      Every rocket, missile and drone alert sounded across Israel since January 2020,
+      recorded, mapped and charted, and updated every 30 minutes.
     </p>
-    <div class="hero-stats">
-      <div class="stat">
-        <div class="stat-num" id="counter-alerts">160,000+</div>
-        <div class="stat-label">Total alerts</div>
-      </div>
-      <div class="stat">
-        <div class="stat-num"><span id="counter-actors">4</span><span class="stat-actors-dots">
-          <span style="background:#d63031"></span>
-          <span style="background:#f39c12"></span>
-          <span style="background:#4a9eff"></span>
-          <span style="background:#c678dd"></span>
-        </span></div>
-        <div class="stat-label">Threat actors</div>
-      </div>
-      <div class="stat">
-        <div class="stat-num" id="counter-years">6</div>
-        <div class="stat-label">Years of data</div>
-      </div>
+  </div>
+</header>
+
+<!-- THE BOARD -->
+<section class="board" aria-label="The record at a glance">
+  <div class="board-main">
+    <p class="board-caption label" id="board-range">Alerts recorded since 12 January 2020</p>
+    <div class="flaps flaps-xl" id="board-total" role="img" aria-label="160,000+ alerts"><span class="flap-strip">160,000+</span></div>
+    <ul class="fronts" id="board-fronts">
+      <li class="front"><span class="label" style="color:var(--iran)"><span class="chip" style="background:var(--iran)"></span>Iran</span><span class="flaps flaps-sm" data-front="Iran"><span class="flap-strip" data-live="origin:Iran">97,000+</span></span></li>
+      <li class="front"><span class="label" style="color:var(--hezbollah)"><span class="chip" style="background:var(--hezbollah)"></span>Hezbollah</span><span class="flaps flaps-sm" data-front="Hezbollah"><span class="flap-strip" data-live="origin:Hezbollah">32,000+</span></span></li>
+      <li class="front"><span class="label" style="color:var(--houthis)"><span class="chip" style="background:var(--houthis)"></span>Houthis</span><span class="flaps flaps-sm" data-front="Houthis"><span class="flap-strip" data-live="origin:Houthis">13,000+</span></span></li>
+      <li class="front"><span class="label" style="color:var(--hamas)"><span class="chip" style="background:var(--hamas)"></span>Hamas</span><span class="flaps flaps-sm" data-front="Hamas"><span class="flap-strip" data-live="origin:Hamas">8,900+</span></span></li>
+    </ul>
+  </div>
+  <div class="board-latest">
+    <table class="latest">
+      <caption class="visually-hidden">Most recent alert events</caption>
+      <thead><tr><th scope="col">When</th><th scope="col">Area</th><th scope="col">Origin</th><th scope="col" class="num">Alerts</th></tr></thead>
+      <tbody id="board-latest"></tbody>
+    </table>
+    <div class="board-foot">
+      <span id="board-fresh">Origin is estimated from location and timing</span>
+      <a href="live.html" class="board-link">Full live feed<svg viewBox="0 0 20 12" aria-hidden="true"><path d="M0 6h18M13 1l5 5-5 5"/></svg></a>
     </div>
   </div>
-  <div class="hero-scroll">Scroll to explore</div>
 </section>
 
-<!-- LIVE TICKER -->
-<a href="live.html" class="live-strip" id="live-strip" style="display:none;">
-  <span class="live-strip-dot"></span>
-  <span class="live-strip-label">LIVE</span>
-  <span class="live-strip-text" id="live-strip-text"></span>
-  <span class="live-strip-cta">full feed →</span>
-</a>
-
-<!-- CARD HUB -->
+<!-- CHART INDEX -->
 <main class="hub">
 
-  <!-- GRAPHS -->
-  <div class="category">
-    <div class="category-header">
-      <span class="category-label">01</span>
-      <span class="category-title">Graphs</span>
-      <span class="category-count">4 visualisations</span>
-    </div>
-    <div class="card-grid">
-      <a href="timeline.html" class="card red">
-        <div class="card-eyebrow">Area Chart · Weekly</div>
-        <div class="card-title">Six Years of Alerts</div>
-        <div class="card-desc">Weekly alert totals from Jan 2020 to today, live-updated. The Oct 7 spike is not a typo.</div>
-        <div class="card-preview"><svg data-preview="timeline"></svg></div>
-        <div class="card-cta"><span>Explore timeline</span><span class="arrow">→</span></div>
+  <section class="category" aria-labelledby="cat-charts">
+    <h2 class="category-title" id="cat-charts"><span>Charts</span></h2>
+    <div class="rows">
+      <a href="timeline.html" class="row">
+        <span class="row-text"><span class="row-title">Six Years of Alerts</span><span class="row-desc">Weekly alert totals from January 2020 to today, live-updated.</span></span>
+        <span class="row-kind label">Area chart · weekly</span>
+        <span class="row-preview"><svg data-preview="timeline" aria-hidden="true"></svg></span>
+        <svg class="row-go" viewBox="0 0 20 12" aria-hidden="true"><path d="M0 6h18M13 1l5 5-5 5"/></svg>
       </a>
-      <a href="fronts.html" class="card purple">
-        <div class="card-eyebrow">Stacked Bars · Monthly</div>
-        <div class="card-title">The Four Fronts</div>
-        <div class="card-desc">From one enemy to four — Hamas, Hezbollah, Houthis, and Iran, stacked month by month. Each layer grows in sequence.</div>
-        <div class="card-preview"><svg data-preview="fronts"></svg></div>
-        <div class="card-cta"><span>Explore fronts</span><span class="arrow">→</span></div>
+      <a href="fronts.html" class="row">
+        <span class="row-text"><span class="row-title">The Four Fronts</span><span class="row-desc">From one front to four: Hamas, Hezbollah, the Houthis and Iran, stacked month by month.</span></span>
+        <span class="row-kind label">Stacked bars · monthly</span>
+        <span class="row-preview"><svg data-preview="fronts" aria-hidden="true"></svg></span>
+        <svg class="row-go" viewBox="0 0 20 12" aria-hidden="true"><path d="M0 6h18M13 1l5 5-5 5"/></svg>
       </a>
-      <a href="calendar.html" class="card red">
-        <div class="card-eyebrow">Heatmap · Daily</div>
-        <div class="card-title">Every Day, Six Years</div>
-        <div class="card-desc">A GitHub-contributions-style grid — each cell is one day. The post-Oct-7 era shows as a near-continuous red band.</div>
-        <div class="card-preview"><svg data-preview="calendar"></svg></div>
-        <div class="card-cta"><span>See the calendar</span><span class="arrow">→</span></div>
+      <a href="calendar.html" class="row">
+        <span class="row-text"><span class="row-title">Every Day, Six Years</span><span class="row-desc">One cell per day since 2020. After October 7 the grid becomes a near-continuous band.</span></span>
+        <span class="row-kind label">Heatmap · daily</span>
+        <span class="row-preview"><svg data-preview="calendar" aria-hidden="true"></svg></span>
+        <svg class="row-go" viewBox="0 0 20 12" aria-hidden="true"><path d="M0 6h18M13 1l5 5-5 5"/></svg>
       </a>
-      <a href="compare.html" class="card gold">
-        <div class="card-eyebrow">Scatter · Leaderboard · Files</div>
-        <div class="card-title">The Wars, Side by Side</div>
-        <div class="card-desc">Every operation measured in one unit — a night of terror or a year of attrition, from Guardian of the Walls to the 2026 Total War.</div>
-        <div class="card-preview"><svg data-preview="compare"></svg></div>
-        <div class="card-cta"><span>Compare the wars</span><span class="arrow">→</span></div>
+      <a href="compare.html" class="row">
+        <span class="row-text"><span class="row-title">The Wars, Side by Side</span><span class="row-desc">Every operation measured in one unit, from Guardian of the Walls to the 2026 war.</span></span>
+        <span class="row-kind label">Scatter · ranked</span>
+        <span class="row-preview"><svg data-preview="compare" aria-hidden="true"></svg></span>
+        <svg class="row-go" viewBox="0 0 20 12" aria-hidden="true"><path d="M0 6h18M13 1l5 5-5 5"/></svg>
       </a>
     </div>
-  </div>
+  </section>
 
-  <!-- MAPS -->
-  <div class="category">
-    <div class="category-header">
-      <span class="category-label">02</span>
-      <span class="category-title">Maps</span>
-      <span class="category-count">3 visualisations</span>
-    </div>
-    <div class="card-grid">
-      <a href="oct7.html" class="card red">
-        <div class="card-eyebrow">Animated Map · Oct 7, 2023</div>
-        <div class="card-title">The Day It Changed</div>
-        <div class="card-desc">Nearly 4,000 alerts across Israel in 17 hours — watch them appear in real time.</div>
-        <div class="card-preview"><svg data-preview="oct7"></svg></div>
-        <div class="card-cta"><span>Play the replay</span><span class="arrow">→</span></div>
+  <section class="category" aria-labelledby="cat-maps">
+    <h2 class="category-title grad-dusk" id="cat-maps"><span>Maps</span></h2>
+    <div class="rows">
+      <a href="oct7.html" class="row">
+        <span class="row-text"><span class="row-title">The Day It Changed</span><span class="row-desc">Nearly 4,000 alerts across Israel in 17 hours on October 7, 2023, replayed as they sounded.</span></span>
+        <span class="row-kind label">Animated map · Oct 7</span>
+        <span class="row-preview"><svg data-preview="oct7" aria-hidden="true"></svg></span>
+        <svg class="row-go" viewBox="0 0 20 12" aria-hidden="true"><path d="M0 6h18M13 1l5 5-5 5"/></svg>
       </a>
-      <a href="story.html" class="card purple">
-        <div class="card-eyebrow">Scroll Story · Six Chapters</div>
-        <div class="card-title">The War, Chapter by Chapter</div>
-        <div class="card-desc">From Oct 7 to the 2026 barrage — a scroll-driven map that flies between each front and scatters alerts as they fell.</div>
-        <div class="card-preview"><svg data-preview="story"></svg></div>
-        <div class="card-cta"><span>Read the story</span><span class="arrow">→</span></div>
+      <a href="story.html" class="row">
+        <span class="row-text"><span class="row-title">The War, Chapter by Chapter</span><span class="row-desc">From October 7 to the 2026 barrage: a guided map that moves between each front and plots alerts where they fell.</span></span>
+        <span class="row-kind label">Guided story · six chapters</span>
+        <span class="row-preview"><svg data-preview="story" aria-hidden="true"></svg></span>
+        <svg class="row-go" viewBox="0 0 20 12" aria-hidden="true"><path d="M0 6h18M13 1l5 5-5 5"/></svg>
       </a>
-      <a href="timelapse.html" class="card red">
-        <div class="card-eyebrow">Animated Choropleth · Monthly</div>
-        <div class="card-title">The Spread</div>
-        <div class="card-desc">Six years of the map filling in, one month per frame — from a single red corner in 2020 to all 30 regions burning in 2026.</div>
-        <div class="card-preview"><svg data-preview="timelapse"></svg></div>
-        <div class="card-cta"><span>Press play</span><span class="arrow">→</span></div>
+      <a href="timelapse.html" class="row">
+        <span class="row-text"><span class="row-title">The Spread</span><span class="row-desc">The map filling in one month at a time, from a single corner in 2020 to all 30 regions by 2026.</span></span>
+        <span class="row-kind label">Choropleth · monthly</span>
+        <span class="row-preview"><svg data-preview="timelapse" aria-hidden="true"></svg></span>
+        <svg class="row-go" viewBox="0 0 20 12" aria-hidden="true"><path d="M0 6h18M13 1l5 5-5 5"/></svg>
       </a>
     </div>
-  </div>
+  </section>
 
-  <!-- PATTERNS -->
-  <div class="category">
-    <div class="category-header">
-      <span class="category-label">03</span>
-      <span class="category-title">Patterns</span>
-      <span class="category-count">2 visualisations</span>
-    </div>
-    <div class="card-grid">
-      <a href="patterns.html" class="card gold">
-        <div class="card-eyebrow">Polar Clock · Weekday Bar · Actor Heatmap</div>
-        <div class="card-title">When Do They Strike?</div>
-        <div class="card-desc">A 24-hour polar clock with per-actor rings, a weekday bar (Saturday leads), and a "who attacks when" actor × hour heatmap.</div>
-        <div class="card-preview" style="min-height:110px;"><svg data-preview="clock"></svg></div>
-        <div class="card-cta"><span>See the patterns</span><span class="arrow">→</span></div>
+  <section class="category" aria-labelledby="cat-patterns">
+    <h2 class="category-title grad-night" id="cat-patterns"><span>Patterns</span></h2>
+    <div class="rows">
+      <a href="patterns.html" class="row">
+        <span class="row-text"><span class="row-title">When Do They Strike?</span><span class="row-desc">A 24-hour clock of alerts by front, the weekday pattern (Saturday leads), and who fires at which hour.</span></span>
+        <span class="row-kind label">Polar clock · heatmap</span>
+        <span class="row-preview"><svg data-preview="clock" aria-hidden="true"></svg></span>
+        <svg class="row-go" viewBox="0 0 20 12" aria-hidden="true"><path d="M0 6h18M13 1l5 5-5 5"/></svg>
       </a>
-      <a href="areas.html" class="card blue">
-        <div class="card-eyebrow">Leaderboard · All-time</div>
-        <div class="card-title">Area Vulnerability</div>
-        <div class="card-desc">Total alerts received by each region of Israel, ranked. Every region has been hit.</div>
-        <div class="card-preview"><svg data-preview="areas"></svg></div>
-        <div class="card-cta"><span>Rank areas</span><span class="arrow">→</span></div>
+      <a href="areas.html" class="row">
+        <span class="row-text"><span class="row-title">Area Vulnerability</span><span class="row-desc">Total alerts received by each region of Israel, ranked. Every region has been hit.</span></span>
+        <span class="row-kind label">Map · ranked</span>
+        <span class="row-preview"><svg data-preview="areas" aria-hidden="true"></svg></span>
+        <svg class="row-go" viewBox="0 0 20 12" aria-hidden="true"><path d="M0 6h18M13 1l5 5-5 5"/></svg>
       </a>
     </div>
-  </div>
+  </section>
 
-  <!-- STATS -->
-  <div class="category">
-    <div class="category-header">
-      <span class="category-label">04</span>
-      <span class="category-title">Stats &amp; Reference</span>
-      <span class="category-count">3 entries</span>
-    </div>
-    <div class="card-grid">
-      <a href="records.html" class="card gold">
-        <div class="card-eyebrow">Records · Extremes</div>
-        <div class="card-title">The Numbers at Their Worst</div>
-        <div class="card-desc">Busiest day, busiest hour, longest quiet stretch, biggest single-area spike — and the peak day plotted minute by minute.</div>
-        <div class="card-preview"><svg data-preview="records"></svg></div>
-        <div class="card-cta"><span>See the records</span><span class="arrow">→</span></div>
+  <section class="category" aria-labelledby="cat-ref">
+    <h2 class="category-title grad-night" id="cat-ref"><span>Reference</span></h2>
+    <div class="rows">
+      <a href="records.html" class="row">
+        <span class="row-text"><span class="row-title">The Numbers at Their Worst</span><span class="row-desc">Busiest day, busiest hour, longest quiet stretch, biggest single-area spike, and the peak day minute by minute.</span></span>
+        <span class="row-kind label">Records · extremes</span>
+        <span class="row-preview"><svg data-preview="records" aria-hidden="true"></svg></span>
+        <svg class="row-go" viewBox="0 0 20 12" aria-hidden="true"><path d="M0 6h18M13 1l5 5-5 5"/></svg>
       </a>
-      <a href="arsenal.html" class="card purple">
-        <div class="card-eyebrow">Reference · Weapon Systems</div>
-        <div class="card-title">What They Fire</div>
-        <div class="card-desc">Qassams to hypersonics — the rockets, missiles, and drones fired at Israel from four fronts, with range, warhead, and salvo history.</div>
-        <div class="card-preview"><svg data-preview="arsenal"></svg></div>
-        <div class="card-cta"><span>Open the arsenal</span><span class="arrow">→</span></div>
+      <a href="arsenal.html" class="row">
+        <span class="row-text"><span class="row-title">What They Fire</span><span class="row-desc">Qassams to hypersonics: the rockets, missiles and drones fired at Israel from four fronts, with range, warhead and salvo history.</span></span>
+        <span class="row-kind label">Weapon systems</span>
+        <span class="row-preview"><svg data-preview="arsenal" aria-hidden="true"></svg></span>
+        <svg class="row-go" viewBox="0 0 20 12" aria-hidden="true"><path d="M0 6h18M13 1l5 5-5 5"/></svg>
       </a>
-      <a href="data.html" class="card blue">
-        <div class="card-eyebrow">Open Data · CSV + JSON</div>
-        <div class="card-title">Take the Data</div>
-        <div class="card-desc">The dataset behind every chart — <span data-live="total+">160,000+</span> alerts, documented, downloadable, refreshed every 30 minutes.</div>
-        <div class="card-preview"><svg data-preview="data"></svg></div>
-        <div class="card-cta"><span>Browse the data</span><span class="arrow">→</span></div>
+      <a href="data.html" class="row">
+        <span class="row-text"><span class="row-title">Take the Data</span><span class="row-desc">The dataset behind every chart: <span data-live="total+">160,000+</span> alerts, documented, downloadable and refreshed every 30 minutes.</span></span>
+        <span class="row-kind label">Open data · CSV, JSON</span>
+        <span class="row-preview"><svg data-preview="data" aria-hidden="true"></svg></span>
+        <svg class="row-go" viewBox="0 0 20 12" aria-hidden="true"><path d="M0 6h18M13 1l5 5-5 5"/></svg>
       </a>
     </div>
-  </div>
+  </section>
 
 </main>
 
-<!-- MISSION STATEMENT PANEL -->
+<!-- MISSION -->
 <section class="mission-panel">
-  <div class="mission-panel-eyebrow">Mission Statement</div>
   <h2>Structuring <span data-live="years-word">six</span> years of alerts over Israel.</h2>
   <p>
     Between 2020 and 2026, Israel was the target of an unprecedented sustained campaign
     of rocket, missile, and drone attacks from Hamas in Gaza, Hezbollah in Lebanon,
-    the Houthis in Yemen, and the Islamic Republic of Iran. <em style="color:var(--accent);font-style:italic;">Under Fire</em> is an attempt
-    to structure, visualise, and preserve that record — using frontier AI, open-source
+    the Houthis in Yemen, and the Islamic Republic of Iran. <em>Under Fire</em> is an attempt
+    to structure, visualise, and preserve that record, using frontier AI, open-source
     intelligence, and human editorial oversight.
   </p>
-  <a href="mission.html" class="mission-link">Read the full mission statement →</a>
+  <a href="mission.html" class="board-link">Read the full mission statement<svg viewBox="0 0 20 12" aria-hidden="true"><path d="M0 6h18M13 1l5 5-5 5"/></svg></a>
 </section>
 
 <footer>
@@ -393,8 +294,8 @@
   </div>
 </footer>
 
-<script src="src/js/shared.js?v=20260613e"></script>
-<script src="src/js/iron-dome.js"></script>
-<script src="src/js/hub.js?v=20260704a"></script>
+<script src="src/js/shared.js?v=20260927b"></script>
+<script src="src/js/iron-dome.js?v=20260927a"></script>
+<script src="src/js/hub.js?v=20260927f"></script>
 </body>
 </html>

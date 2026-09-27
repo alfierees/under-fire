@@ -13,15 +13,15 @@
   <meta property="og:image" content="https://under-fire.org/images/og-card.png">
   <meta property="og:url" content="https://under-fire.org/fronts">
   <meta name="twitter:card" content="summary_large_image">
-  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400;1,700&family=IBM+Plex+Mono:wght@300;400;500&family=IBM+Plex+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,300..800&family=Archivo+Narrow:wght@400..700&family=Bodoni+Moda:opsz,wght@6..96,500..900&display=swap" rel="stylesheet">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.8.5/d3.min.js"></script>
-  <link rel="stylesheet" href="src/css/shared.css">
+  <link rel="stylesheet" href="src/css/shared.css?v=20260927c">
   <style>
     #fronts-chart { min-height: 380px; }
     #fronts-chart svg { display:block; overflow:visible; }
-    .tl-annotation { font-family:'IBM Plex Mono',monospace; font-size:.6rem; fill:var(--accent); letter-spacing:.06em; }
+    .tl-annotation { font-family:'Archivo Narrow',monospace; font-size:.76rem; fill:var(--muted); letter-spacing:.06em; }
     .actor-legend { display:flex; gap:1.5rem; flex-wrap:wrap; margin-bottom:1.5rem; }
-    .actor-tag { display:flex; align-items:center; gap:.5rem; font-family:'IBM Plex Mono',monospace; font-size:.6rem; letter-spacing:.08em; color:var(--muted); }
+    .actor-tag { display:flex; align-items:center; gap:.5rem; font-family:'Archivo Narrow',monospace; font-size:.76rem; letter-spacing:.08em; color:var(--muted); }
     .actor-swatch { width:10px; height:10px; border-radius:2px; flex-shrink:0; }
   </style>
   <!-- Google Analytics -->
@@ -41,16 +41,16 @@
 <body>
 
 <div id="file-protocol-warning">
-  <strong>⚠ CHARTS WON'T LOAD VIA FILE://</strong>
+  <strong>Charts won't load from a file:// URL</strong>
   Run: <code>python3 -m http.server 8000</code>
-  <span class="close-x" onclick="this.parentElement.style.display='none'">✕</span>
+  <button class="close-x" type="button" aria-label="Dismiss" onclick="this.parentElement.style.display='none'"></button>
 </div>
 
 <nav>
   <a href="index.html" class="nav-brand">Under Fire</a>
   <div class="nav-links">
     <div class="nav-group">
-      <button class="nav-group-btn" type="button">Charts<span class="caret">▾</span></button>
+      <button class="nav-group-btn" type="button">Charts<span class="caret" aria-hidden="true"></span></button>
       <div class="nav-dropdown">
         <a href="timeline.html">Timeline</a>
         <a href="fronts.html">Fronts</a>
@@ -59,7 +59,7 @@
       </div>
     </div>
     <div class="nav-group">
-      <button class="nav-group-btn" type="button">Maps<span class="caret">▾</span></button>
+      <button class="nav-group-btn" type="button">Maps<span class="caret" aria-hidden="true"></span></button>
       <div class="nav-dropdown">
         <a href="oct7.html">Oct 7</a>
         <a href="story.html">Story</a>
@@ -67,14 +67,14 @@
       </div>
     </div>
     <div class="nav-group">
-      <button class="nav-group-btn" type="button">Patterns<span class="caret">▾</span></button>
+      <button class="nav-group-btn" type="button">Patterns<span class="caret" aria-hidden="true"></span></button>
       <div class="nav-dropdown">
         <a href="patterns.html">Patterns</a>
         <a href="areas.html">By Area</a>
       </div>
     </div>
     <div class="nav-group">
-      <button class="nav-group-btn" type="button">More<span class="caret">▾</span></button>
+      <button class="nav-group-btn" type="button">More<span class="caret" aria-hidden="true"></span></button>
       <div class="nav-dropdown">
         <a href="live.html">Live Feed</a>
         <a href="records.html">Records &amp; Stats</a>
@@ -84,15 +84,14 @@
       </div>
     </div>
   </div>
-  <a href="live.html" class="nav-badge" id="nav-badge">🔔 Loading…</a>
+  <a href="live.html" class="nav-badge" id="nav-badge">160,000+ alerts</a>
 </nav>
 
 <div id="tooltip"></div>
 
 <div class="chart-page">
   <div class="section-wrapper">
-    <a href="index.html" class="back-link">← Back to all charts</a>
-    <div class="section-label">02 — The Four Fronts</div>
+    <a href="index.html" class="back-link">All charts</a>
     <h1 class="section-title">From One Front to Four</h1>
     <p class="section-desc">Before October 2023, nearly all fire came from Gaza — those early alerts carry no origin attribution in this dataset. What followed was the opening of three additional fronts simultaneously. Iran alone accounts for more than half of all recorded alerts. Each actor's stacked monthly bars grow in sequence when the chart enters view.</p>
 
@@ -113,7 +112,6 @@
     <p class="chart-note">Monthly alert counts by estimated origin. Pre-Oct 2023 data does not include origin attribution.</p>
 
     <div id="donut-section" class="chart-gated" style="margin-top:3.5rem;">
-      <div class="section-label" style="margin-bottom:.5rem;">Share breakdown</div>
       <h2 class="section-title" style="font-size:1.8rem;margin-bottom:.25rem;">Who Fired What</h2>
       <p class="section-desc" style="margin-bottom:1.5rem;max-width:600px;">Proportion of total alerts by origin across the full six-year record.</p>
       <div style="display:flex;align-items:center;gap:3rem;flex-wrap:wrap;">
@@ -129,7 +127,7 @@
   <div class="footer-credit">Alert data from <a href="https://rocketalert.live" target="_blank">RocketAlert.live</a>.</div>
 </footer>
 
-<script src="src/js/shared.js?v=20260613e"></script>
+<script src="src/js/shared.js?v=20260927b"></script>
 <script>
 const ACTORS = ['Iran', 'Hezbollah', 'Houthis', 'Hamas', 'Unknown'];
 const ACTOR_COLORS = { Iran:'var(--iran)', Hezbollah:'var(--hezbollah)', Houthis:'var(--houthis)', Hamas:'var(--hamas)', Unknown:'var(--unknown)' };
@@ -203,7 +201,7 @@ function drawFronts(raw, scaleType) {
   const lineLen = h;
   const oct7Line = g.append('line')
     .attr('x1', oct7x).attr('x2', oct7x).attr('y1', 0).attr('y2', h)
-    .attr('stroke', '#e8b84b').attr('stroke-width', 1.5).attr('stroke-dasharray', '4,3')
+    .attr('stroke', '#b9b5ac').attr('stroke-width', 1.5).attr('stroke-dasharray', '4,3')
     .attr('opacity', 0);
   const oct7Label = g.append('text')
     .attr('x', oct7x + 6).attr('y', 14).attr('class', 'tl-annotation').text('Oct 7, 2023')
@@ -227,7 +225,7 @@ function drawFronts(raw, scaleType) {
     .call(d3.axisBottom(xTime).ticks(8).tickFormat(d3.timeFormat('%Y')))
     .call(g => {
       g.select('.domain').attr('stroke', 'var(--border)');
-      g.selectAll('text').attr('fill','var(--muted)').attr('font-family','IBM Plex Mono').attr('font-size','10px');
+      g.selectAll('text').attr('fill','var(--muted)').attr('font-family','Archivo Narrow').attr('font-size','12px');
       g.selectAll('line').attr('stroke','var(--border)');
     });
 
@@ -243,7 +241,7 @@ function drawFronts(raw, scaleType) {
   g.append('g').call(yAxis)
     .call(g => {
       g.select('.domain').remove();
-      g.selectAll('text').attr('fill','var(--muted)').attr('font-family','IBM Plex Mono').attr('font-size','10px');
+      g.selectAll('text').attr('fill','var(--muted)').attr('font-family','Archivo Narrow').attr('font-size','12px');
       g.selectAll('line').remove();
     });
 
@@ -340,7 +338,7 @@ function drawDonut(monthly) {
     .attr('class', 'donut-pct')
     .attr('transform', d => `translate(${arcMid.centroid(d)})`)
     .attr('text-anchor', 'middle').attr('dominant-baseline', 'middle')
-    .attr('font-family', 'IBM Plex Mono').attr('font-size', '11px').attr('fill', '#fff')
+    .attr('font-family', 'Archivo Narrow').attr('font-size', '11px').attr('fill', '#fff')
     .attr('opacity', 0)
     .text(d => Math.round(d.data.pct * 100) + '%')
     .transition().delay(900).duration(300).attr('opacity', 1);
@@ -354,8 +352,8 @@ function drawDonut(monthly) {
     row.innerHTML = `
       <div style="width:10px;height:10px;border-radius:2px;flex-shrink:0;background:${ACTOR_COLORS[d.actor]}"></div>
       <div>
-        <div style="font-family:'IBM Plex Mono',monospace;font-size:.6rem;letter-spacing:.1em;color:var(--muted);">${d.actor.toUpperCase()} · ${Math.round(d.pct * 100)}%</div>
-        <div style="font-family:'IBM Plex Mono',monospace;font-size:.75rem;color:var(--text);">${fmt(d.count)} alerts</div>
+        <div style="font-family:'Archivo Narrow',monospace;font-size:.76rem;letter-spacing:.1em;color:var(--muted);">${d.actor.toUpperCase()} · ${Math.round(d.pct * 100)}%</div>
+        <div style="font-family:'Archivo Narrow',monospace;font-size:.75rem;color:var(--text);">${fmt(d.count)} alerts</div>
       </div>`;
     leg.appendChild(row);
   });

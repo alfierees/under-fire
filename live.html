@@ -13,28 +13,28 @@
   <meta property="og:image" content="https://under-fire.org/images/og-card.png">
   <meta property="og:url" content="https://under-fire.org/live">
   <meta name="twitter:card" content="summary_large_image">
-  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400;1,700&family=IBM+Plex+Mono:wght@300;400;500&family=IBM+Plex+Sans:wght@300;400;500&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="src/css/shared.css">
+  <link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,300..800&family=Archivo+Narrow:wght@400..700&family=Bodoni+Moda:opsz,wght@6..96,500..900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="src/css/shared.css?v=20260927c">
   <style>
     .live-dot { display:inline-block; width:8px; height:8px; border-radius:50%; background: var(--red); margin-right: 8px; animation: live-pulse 1.6s ease-in-out infinite; }
     @keyframes live-pulse { 0%,100% { opacity: 1; } 50% { opacity: 0.25; } }
 
     /* status banner */
-    .feed-status { display:flex; align-items:baseline; gap:14px; flex-wrap:wrap; border:1px solid var(--border); border-radius:8px; background:var(--surface); padding:16px 20px; margin:18px 0 26px; font-family:'IBM Plex Mono',monospace; }
-    .feed-status .big { font-family:'Playfair Display',serif; font-weight:900; font-size:1.6rem; }
+    .feed-status { display:flex; align-items:baseline; gap:14px; flex-wrap:wrap; border:1px solid var(--border); border-radius:8px; background:var(--surface); padding:16px 20px; margin:18px 0 26px; font-family:'Archivo Narrow',monospace; }
+    .feed-status .big { font-family:'Bodoni Moda',serif; font-weight:900; font-size:1.6rem; }
     .feed-status.active .big { color: var(--red); }
     .feed-status.quiet .big { color: var(--blue); }
     .feed-status .sub { color: var(--muted); font-size: 12px; }
 
     /* 14-day activity strip */
     .activity-strip { margin: 0 0 30px; }
-    .activity-strip .lbl { font-family:'IBM Plex Mono',monospace; font-size:10.5px; letter-spacing:.08em; text-transform:uppercase; color:var(--muted); margin-bottom:6px; }
+    .activity-strip .lbl { font-family:'Archivo Narrow',monospace; font-size:12.5px; letter-spacing:.08em; text-transform:uppercase; color:var(--muted); margin-bottom:6px; }
     .activity-strip svg { display:block; width:100%; height:56px; }
 
     /* table */
     .recent-table-wrap { border: 1px solid var(--border); border-radius: 8px; background: var(--surface); overflow: hidden; }
-    .recent-table { width: 100%; border-collapse: collapse; font-family: 'IBM Plex Mono', monospace; font-size: 12.5px; }
-    .recent-table th { position: sticky; top: 0; background: var(--surface2); z-index: 2; text-align: left; padding: 10px 14px; color: var(--muted); font-weight: 500; font-size: 10.5px; text-transform: uppercase; letter-spacing: 0.08em; border-bottom: 1px solid var(--border); }
+    .recent-table { width: 100%; border-collapse: collapse; font-family: 'Archivo Narrow', monospace; font-size: 12.5px; }
+    .recent-table th { position: sticky; top: 0; background: var(--surface2); z-index: 2; text-align: left; padding: 10px 14px; color: var(--muted); font-weight: 500; font-size: 12.5px; text-transform: uppercase; letter-spacing: 0.08em; border-bottom: 1px solid var(--border); }
     .recent-table td { padding: 10px 14px; border-bottom: 1px solid var(--border); vertical-align: top; }
     .recent-table tbody tr:last-child td { border-bottom: none; }
     .recent-table tbody tr.ev:hover { background: var(--surface2); }
@@ -44,8 +44,8 @@
     .recent-more { color: var(--muted); font-size: 11px; }
     .origin-pill { display: inline-block; padding: 2px 9px; border-radius: 999px; font-size: 11px; white-space: nowrap; border: 1px solid; }
     tr.ev.expandable { cursor: pointer; }
-    tr.ev.expandable .chev { display:inline-block; margin-left:6px; color:var(--muted); transition: transform .15s; font-size:10px; }
-    tr.ev.expanded .chev { transform: rotate(90deg); }
+    tr.ev.expandable .chev { display:inline-block; width:6px; height:6px; margin-left:8px; border-right:1.5px solid var(--muted); border-bottom:1.5px solid var(--muted); transform: rotate(-45deg); transition: transform .15s; vertical-align:middle; }
+    tr.ev.expanded .chev { transform: rotate(45deg); }
     tr.detail td { background: rgba(255,255,255,0.02); padding: 12px 14px 14px; }
     .area-chips { display:flex; flex-wrap:wrap; gap:6px; }
     .area-chip { border:1px solid var(--border); border-radius:4px; padding:2px 8px; font-size:11px; color:var(--muted); }
@@ -80,16 +80,16 @@
 <body>
 
 <div id="file-protocol-warning">
-  <strong>⚠ CHARTS WON'T LOAD VIA FILE://</strong>
+  <strong>Charts won't load from a file:// URL</strong>
   Run: <code>python3 -m http.server 8000</code>
-  <span class="close-x" onclick="this.parentElement.style.display='none'">✕</span>
+  <button class="close-x" type="button" aria-label="Dismiss" onclick="this.parentElement.style.display='none'"></button>
 </div>
 
 <nav>
   <a href="index.html" class="nav-brand">Under Fire</a>
   <div class="nav-links">
     <div class="nav-group">
-      <button class="nav-group-btn" type="button">Charts<span class="caret">▾</span></button>
+      <button class="nav-group-btn" type="button">Charts<span class="caret" aria-hidden="true"></span></button>
       <div class="nav-dropdown">
         <a href="timeline.html">Timeline</a>
         <a href="fronts.html">Fronts</a>
@@ -98,7 +98,7 @@
       </div>
     </div>
     <div class="nav-group">
-      <button class="nav-group-btn" type="button">Maps<span class="caret">▾</span></button>
+      <button class="nav-group-btn" type="button">Maps<span class="caret" aria-hidden="true"></span></button>
       <div class="nav-dropdown">
         <a href="oct7.html">Oct 7</a>
         <a href="story.html">Story</a>
@@ -106,14 +106,14 @@
       </div>
     </div>
     <div class="nav-group">
-      <button class="nav-group-btn" type="button">Patterns<span class="caret">▾</span></button>
+      <button class="nav-group-btn" type="button">Patterns<span class="caret" aria-hidden="true"></span></button>
       <div class="nav-dropdown">
         <a href="patterns.html">Patterns</a>
         <a href="areas.html">By Area</a>
       </div>
     </div>
     <div class="nav-group">
-      <button class="nav-group-btn" type="button">More<span class="caret">▾</span></button>
+      <button class="nav-group-btn" type="button">More<span class="caret" aria-hidden="true"></span></button>
       <div class="nav-dropdown">
         <a href="live.html">Live Feed</a>
         <a href="records.html">Records &amp; Stats</a>
@@ -123,16 +123,15 @@
       </div>
     </div>
   </div>
-  <a href="live.html" class="nav-badge" id="nav-badge">🔔 Loading…</a>
+  <a href="live.html" class="nav-badge" id="nav-badge">160,000+ alerts</a>
 </nav>
 
 <div id="tooltip"></div>
 
 <div class="chart-page">
   <div class="section-wrapper">
-    <a href="index.html" class="back-link">← Back to all charts</a>
-    <div class="section-label"><span class="live-dot"></span>Live Feed</div>
-    <h1 class="section-title">The Latest Alerts</h1>
+    <a href="index.html" class="back-link">All charts</a>
+    <h1 class="section-title grad-night">The Latest Alerts</h1>
     <p class="section-desc">The most recent alert events over Israel, newest first. Alerts from the same origin within ten minutes are grouped into a single salvo — click a row to see every affected area. The dataset refreshes automatically every 30 minutes.</p>
 
     <div class="feed-status" id="feed-status" style="display:none;">
@@ -162,11 +161,11 @@
   <div class="footer-credit">Alert data from <a href="https://rocketalert.live" target="_blank">RocketAlert.live</a>.</div>
 </footer>
 
-<script src="src/js/shared.js?v=20260613e"></script>
+<script src="src/js/shared.js?v=20260927b"></script>
 <script>
 const ACTOR_COLORS = {
-  'Hamas': '#d63031', 'Hezbollah': '#f39c12', 'Houthis': '#4a9eff',
-  'Iran': '#c678dd', 'Unknown': '#9a9aa8'
+  'Hamas': '#e0493e', 'Hezbollah': '#ee8a2a', 'Houthis': '#4f9be8',
+  'Iran': '#b27ce0', 'Unknown': '#9a9aa8'
 };
 
 const tsToMs = alertTsToMs, relTime = alertRelTime;
@@ -205,10 +204,10 @@ function renderStrip(daily) {
   svg.innerHTML = days.map((d, i) => {
     const h = d.count === 0 ? 2 : Math.max(3, (d.count / max) * (H - 16));
     const x = i * (bw + gap), y = H - 14 - h;
-    const col = d.count === 0 ? 'rgba(255,255,255,0.12)' : 'rgba(214,48,49,0.75)';
+    const col = d.count === 0 ? 'rgba(255,255,255,0.12)' : 'rgba(224,73,62,0.75)';
     const lbl = +d.date.slice(8, 10);
     return `<rect x="${x}" y="${y}" width="${bw}" height="${h}" rx="2" fill="${col}"><title>${d.date}: ${d.count} alerts</title></rect>` +
-           `<text x="${x + bw / 2}" y="${H - 2}" text-anchor="middle" font-family="IBM Plex Mono" font-size="9" fill="rgba(255,255,255,0.35)">${lbl}</text>`;
+           `<text x="${x + bw / 2}" y="${H - 2}" text-anchor="middle" font-family="Archivo Narrow" font-size="9" fill="rgba(255,255,255,0.35)">${lbl}</text>`;
   }).join('');
   document.getElementById('activity-strip').style.display = '';
 }
@@ -222,7 +221,7 @@ function renderTable(data) {
     const col = ACTOR_COLORS[ev.origin] || ACTOR_COLORS.Unknown;
     const extra = ev.areas.length - 1;
     const where = (ev.areas[0] || 'Israel') +
-      (extra > 0 ? ` <span class="recent-more">+${extra} more</span><span class="chev">▶</span>` : '');
+      (extra > 0 ? ` <span class="recent-more">+${extra} more</span><span class="chev" aria-hidden="true"></span>` : '');
     const countCls = ev.count >= 100 ? ' big-count' : '';
     tr.innerHTML =
       `<td class="recent-when">${fmtWhen(ev.ts)}<span class="recent-rel">${relTime(ev.ts)}</span></td>` +

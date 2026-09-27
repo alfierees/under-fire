@@ -13,9 +13,9 @@
   <meta property="og:image" content="https://under-fire.org/images/og-card.png">
   <meta property="og:url" content="https://under-fire.org/timeline">
   <meta name="twitter:card" content="summary_large_image">
-  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400;1,700&family=IBM+Plex+Mono:wght@300;400;500&family=IBM+Plex+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,300..800&family=Archivo+Narrow:wght@400..700&family=Bodoni+Moda:opsz,wght@6..96,500..900&display=swap" rel="stylesheet">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.8.5/d3.min.js"></script>
-  <link rel="stylesheet" href="src/css/shared.css">
+  <link rel="stylesheet" href="src/css/shared.css?v=20260927c">
   <style>
     .actor-cards { display:grid; grid-template-columns:repeat(4,1fr); gap:1rem; margin-bottom:1.5rem; }
     @media (max-width:900px){ .actor-cards{ grid-template-columns:1fr 1fr; } }
@@ -25,29 +25,29 @@
       padding:1rem 1.1rem .9rem; position:relative;
       display:flex; flex-direction:column; min-height:200px;
     }
-    .actor-card .label { font-family:'IBM Plex Mono',monospace; font-size:.56rem; letter-spacing:.18em; text-transform:uppercase; }
-    .actor-card .pct { position:absolute; top:1rem; right:1.1rem; font-family:'IBM Plex Mono',monospace; font-size:.58rem; color:var(--muted); }
-    .actor-card .num { font-family:'Playfair Display',serif; font-size:1.85rem; font-weight:700; color:#fff; margin-top:.2rem; letter-spacing:-.01em; }
+    .actor-card .label { font-family:'Archivo Narrow',monospace; font-size:.74rem; letter-spacing:.08em; text-transform:uppercase; }
+    .actor-card .pct { position:absolute; top:1rem; right:1.1rem; font-family:'Archivo Narrow',monospace; font-size:.76rem; color:var(--muted); }
+    .actor-card .num { align-self:flex-start; width:fit-content; font-family:var(--f-label); font-size:1.7rem; font-weight:700; color:var(--text); margin-top:.3rem; position:relative; display:inline-block; padding:0 .35rem; border-radius:2px; background:linear-gradient(180deg,var(--flap-hi) 0 50%,var(--surface2) 50%); box-shadow:0 1px 0 #000; }
     .actor-card .mini { flex:1; margin:.5rem 0 .6rem; min-height:70px; position:relative; }
     .actor-card .mini svg { display:block; width:100%; height:70px; overflow:visible; }
-    .actor-card .desc { font-size:.68rem; color:var(--dim); line-height:1.5; }
+    .actor-card .desc { font-size:.8rem; color:var(--dim); line-height:1.5; }
 
     .main-chart-card { background:var(--surface); border:1px solid var(--border); border-radius:6px; padding:1rem 1.2rem 1.2rem; }
     .main-head { display:flex; justify-content:space-between; align-items:center; margin-bottom:.6rem; }
-    .chart-eyebrow { font-family:'IBM Plex Mono',monospace; font-size:.56rem; letter-spacing:.16em; color:var(--muted); text-transform:uppercase; }
+    .chart-eyebrow { font-family:'Archivo Narrow',monospace; font-size:.74rem; letter-spacing:.08em; color:var(--muted); text-transform:uppercase; }
     .main-legend {
       display:flex; flex-wrap:wrap; gap:1.1rem;
-      font-family:'IBM Plex Mono',monospace; font-size:.58rem; color:var(--muted);
+      font-family:'Archivo Narrow',monospace; font-size:.76rem; color:var(--muted);
       margin-top:.6rem; padding-top:.8rem; border-top:1px solid var(--border);
     }
     .main-legend .swatch { display:inline-block; width:10px; height:10px; border-radius:2px; margin-right:.4rem; vertical-align:middle; }
 
     #timeline-chart { width:100%; position:relative; min-height:360px; }
     #timeline-chart svg { display:block; overflow:visible; }
-    .tl-annotation { font-family:'IBM Plex Mono',monospace; font-size:.6rem; fill:var(--accent); letter-spacing:.06em; }
-    .tl-layer-label { font-family:'IBM Plex Mono',monospace; font-size:.62rem; letter-spacing:.16em; fill:rgba(255,255,255,.85); pointer-events:none; }
+    .tl-annotation { font-family:'Archivo Narrow',monospace; font-size:.76rem; fill:var(--muted); letter-spacing:.06em; }
+    .tl-layer-label { font-family:'Archivo Narrow',monospace; font-size:.78rem; letter-spacing:.08em; fill:rgba(255,255,255,.85); pointer-events:none; }
     .chart-hint {
-      font-family:'IBM Plex Mono',monospace; font-size:.6rem;
+      font-family:'Archivo Narrow',monospace; font-size:.76rem;
       letter-spacing:.1em; color:var(--muted); margin-top:.8rem;
     }
     .chart-hint b { color:var(--accent); }
@@ -69,16 +69,16 @@
 <body>
 
 <div id="file-protocol-warning">
-  <strong>⚠ CHARTS WON'T LOAD VIA FILE://</strong>
+  <strong>Charts won't load from a file:// URL</strong>
   Run a local server: <code>python3 -m http.server 8000</code>
-  <span class="close-x" onclick="this.parentElement.style.display='none'">✕</span>
+  <button class="close-x" type="button" aria-label="Dismiss" onclick="this.parentElement.style.display='none'"></button>
 </div>
 
 <nav>
   <a href="index.html" class="nav-brand">Under Fire</a>
   <div class="nav-links">
     <div class="nav-group">
-      <button class="nav-group-btn" type="button">Charts<span class="caret">▾</span></button>
+      <button class="nav-group-btn" type="button">Charts<span class="caret" aria-hidden="true"></span></button>
       <div class="nav-dropdown">
         <a href="timeline.html">Timeline</a>
         <a href="fronts.html">Fronts</a>
@@ -87,7 +87,7 @@
       </div>
     </div>
     <div class="nav-group">
-      <button class="nav-group-btn" type="button">Maps<span class="caret">▾</span></button>
+      <button class="nav-group-btn" type="button">Maps<span class="caret" aria-hidden="true"></span></button>
       <div class="nav-dropdown">
         <a href="oct7.html">Oct 7</a>
         <a href="story.html">Story</a>
@@ -95,14 +95,14 @@
       </div>
     </div>
     <div class="nav-group">
-      <button class="nav-group-btn" type="button">Patterns<span class="caret">▾</span></button>
+      <button class="nav-group-btn" type="button">Patterns<span class="caret" aria-hidden="true"></span></button>
       <div class="nav-dropdown">
         <a href="patterns.html">Patterns</a>
         <a href="areas.html">By Area</a>
       </div>
     </div>
     <div class="nav-group">
-      <button class="nav-group-btn" type="button">More<span class="caret">▾</span></button>
+      <button class="nav-group-btn" type="button">More<span class="caret" aria-hidden="true"></span></button>
       <div class="nav-dropdown">
         <a href="live.html">Live Feed</a>
         <a href="records.html">Records &amp; Stats</a>
@@ -112,17 +112,16 @@
       </div>
     </div>
   </div>
-  <a href="live.html" class="nav-badge" id="nav-badge">🔔 Loading…</a>
+  <a href="live.html" class="nav-badge" id="nav-badge">160,000+ alerts</a>
 </nav>
 
 <div id="tooltip"></div>
 
 <div class="chart-page">
   <div class="section-wrapper">
-    <a href="index.html" class="back-link">← Back to all charts</a>
-    <div class="section-label">01 — Timeline</div>
+    <a href="index.html" class="back-link">All charts</a>
     <h1 class="section-title">Six Years of Alerts</h1>
-    <p class="section-desc">Weekly alert totals from January 2020 to <span data-live="end-month-year">today</span>. Each bar is one week. The scale of October 7, 2023 is not a typo.</p>
+    <p class="section-desc">Weekly alert totals from January 2020 to <span data-live="end-month-year">today</span>. Each bar is one week.</p>
 
     <div class="finding-row">
       <div class="finding-card">
@@ -185,12 +184,11 @@
     </div>
 
     <p class="chart-hint" id="click-hint" style="display:none;">
-      <b>Tip:</b> click any week on the main chart to launch a salvo animation scaled to that week's alert count.
+      Click any week on the main chart to replay it as a salvo, scaled to that week's alert count.
     </p>
     <p class="chart-note">Weekly alert counts. Vertical line marks October 7, 2023.</p>
 
     <div id="year-wrap" class="chart-gated" style="margin-top:3.5rem;">
-      <div class="section-label" style="margin-bottom:.5rem;">Year by year</div>
       <h2 class="section-title" style="font-size:1.8rem;margin-bottom:.25rem;">Annual Alert Totals</h2>
       <p class="section-desc" style="margin-bottom:1.5rem;max-width:600px;">Alerts recorded each calendar year, <span data-live="year-range">since 2020</span>. The <span data-live="end-year">latest</span> figure covers January to <span data-live="end-month-name">date</span> only.</p>
       <div id="year-chart"></div>
@@ -205,7 +203,7 @@
   </div>
 </footer>
 
-<script src="src/js/shared.js?v=20260613e"></script>
+<script src="src/js/shared.js?v=20260927b"></script>
 <script src="src/js/salvo.js"></script>
 <script>
 // ── Timeline page ─────────────────────────────────────────────────────────
@@ -218,8 +216,8 @@ const ACTOR_RGB = {
   Unknown:   '200,200,216',
 };
 const ACTOR_HEX = {
-  Iran: '#c678dd', Hezbollah: '#f39c12',
-  Houthis: '#4a9eff', Hamas: '#d63031', Unknown: '#c8c8d8',
+  Iran: '#b27ce0', Hezbollah: '#ee8a2a',
+  Houthis: '#4f9be8', Hamas: '#e0493e', Unknown: '#c8c8d8',
 };
 const parseWeek = d3.timeParse('%Y-%m-%d');
 const oct7 = new Date('2023-10-07');
@@ -270,7 +268,7 @@ function drawMini(actor, data) {
   svg.append('line')
     .attr('x1', x(oct7)).attr('x2', x(oct7))
     .attr('y1', 0).attr('y2', H)
-    .attr('stroke', 'rgba(232,184,75,0.35)')
+    .attr('stroke', 'rgba(242,178,51,0.35)')
     .attr('stroke-width', 0.6)
     .attr('stroke-dasharray', '2,2');
 
@@ -376,7 +374,7 @@ function drawTimeline(data) {
   // Oct 7 line
   const oct7x = x(oct7);
   g.append('line').attr('x1', oct7x).attr('x2', oct7x).attr('y1', 0).attr('y2', h)
-    .attr('stroke', '#e8b84b').attr('stroke-width', 1.5).attr('stroke-dasharray', '4,3');
+    .attr('stroke', '#b9b5ac').attr('stroke-width', 1.5).attr('stroke-dasharray', '4,3');
   g.append('text').attr('x', oct7x + 6).attr('y', 14).attr('class', 'tl-annotation').text('Oct 7, 2023');
 
   // Axes
@@ -384,13 +382,13 @@ function drawTimeline(data) {
     .call(d3.axisBottom(x).ticks(8).tickFormat(d3.timeFormat('%Y')))
     .call(g => {
       g.select('.domain').attr('stroke', 'var(--border)');
-      g.selectAll('text').attr('fill','var(--muted)').attr('font-family','IBM Plex Mono').attr('font-size','10px');
+      g.selectAll('text').attr('fill','var(--muted)').attr('font-family','Archivo Narrow').attr('font-size','12px');
       g.selectAll('line').attr('stroke','var(--border)');
     });
   g.append('g').call(d3.axisLeft(y).ticks(5).tickFormat(d => d >= 1000 ? (d/1000)+'k' : d))
     .call(g => {
       g.select('.domain').remove();
-      g.selectAll('text').attr('fill','var(--muted)').attr('font-family','IBM Plex Mono').attr('font-size','10px');
+      g.selectAll('text').attr('fill','var(--muted)').attr('font-family','Archivo Narrow').attr('font-size','12px');
       g.selectAll('line').remove();
     });
 
@@ -416,7 +414,7 @@ function drawTimeline(data) {
       hoverLine.attr('x1', mx).attr('x2', mx).attr('opacity', 1);
       const parts = STACK_KEYS.filter(k => d[k] > 0)
         .map(k => `${k === 'Unknown' ? 'Unattributed' : k}: ${fmtNum(d[k])}`).join('<br>');
-      showTip(`<b>${d.week}</b><br>${parts}<br><b>Total: ${fmtNum(d.total)}</b><br><span style="color:var(--accent)">click to launch salvo</span>`, event);
+      showTip(`<b>${d.week}</b><br>${parts}<br><b>Total: ${fmtNum(d.total)}</b><br><span style="color:var(--accent)">Click to replay as a salvo</span>`, event);
     })
     .on('mouseleave', () => { hoverLine.attr('opacity', 0); hideTip(); })
     .on('click', function(event) {
@@ -566,19 +564,19 @@ function drawYearChart(weekly) {
     // Year label
     g.append('text').attr('x', -8).attr('y', yPos + barH / 2 + 4)
       .attr('text-anchor', 'end').attr('fill', 'var(--muted)')
-      .attr('font-family', 'IBM Plex Mono').attr('font-size', '11px').text(d.year);
+      .attr('font-family', 'Archivo Narrow').attr('font-size', '11px').text(d.year);
 
     // Total count label
     const totalW = x(d.total);
     g.append('text').attr('x', totalW + 10).attr('y', yPos + barH / 2 + 4)
-      .attr('fill', 'var(--text)').attr('font-family', 'IBM Plex Mono').attr('font-size', '11px')
+      .attr('fill', 'var(--text)').attr('font-family', 'Archivo Narrow').attr('font-size', '11px')
       .attr('opacity', 0).text(d.total.toLocaleString())
       .transition().duration(300).delay(i * 90 + 500).attr('opacity', 1);
 
     if (ANNO[d.year]) {
       g.append('text').attr('x', totalW + 10).attr('y', yPos + barH / 2 + 16)
-        .attr('fill', d.year === '2023' ? 'var(--accent)' : 'var(--muted)')
-        .attr('font-family', 'IBM Plex Mono').attr('font-size', '8px')
+        .attr('fill', d.year === '2023' ? 'var(--text)' : 'var(--muted)')
+        .attr('font-family', 'Archivo Narrow').attr('font-size', '10.5px')
         .attr('letter-spacing', '.07em').attr('opacity', 0).text(ANNO[d.year])
         .transition().duration(300).delay(i * 90 + 500).attr('opacity', 1);
     }

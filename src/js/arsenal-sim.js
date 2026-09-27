@@ -13,7 +13,7 @@
 
 (function () {
   const ACTOR_COLOR = {
-    hamas: '#d63031', hezbollah: '#f39c12', houthis: '#4a9eff', iran: '#c678dd',
+    hamas: '#e0493e', hezbollah: '#ee8a2a', houthis: '#4f9be8', iran: '#b27ce0',
   };
   const ACTOR_RGB = {
     hamas: '214,48,49', hezbollah: '243,156,18', houthis: '74,158,255', iran: '198,120,221',
@@ -227,7 +227,7 @@
           `Warhead: ${s.warhead_kg == null ? 'undisclosed' : (Array.isArray(s.warhead_kg) ? s.warhead_kg[0] + '–' + s.warhead_kg[1] : '~' + s.warhead_kg) + ' kg'}<br>` +
           `Guidance: ${s.guidance.split(';')[0].split('(')[0].trim()}<br>` +
           `Cost: ${fmtUsd(cost.v)}${cost.est ? ' (class est.)' : ''}/round<br>` +
-          `<span style="color:var(--accent);">▶ click for the full entry</span>`;
+          `<span style="color:var(--accent);">Click for the full entry</span>`;
         fig.addEventListener('mouseover', e => showTip(tip(), e));
         fig.addEventListener('mousemove', moveTip);
         fig.addEventListener('mouseleave', hideTip);
@@ -258,7 +258,7 @@
           <button class="filter-btn" data-n="20" type="button">×20</button>
           <button class="filter-btn" data-n="80" type="button">×80</button>
         </span>
-        <button class="filter-btn duel-fire" id="duel-fire" type="button">▶ Fire</button>
+        <button class="filter-btn duel-fire" id="duel-fire" type="button">Fire</button>
         ${hasLeaflet ? `<span id="duel-views" style="margin-left:auto;">
           <button class="filter-btn active" data-view="map" type="button">Map</button>
           <button class="filter-btn" data-view="side" type="button">Side</button>
@@ -364,7 +364,7 @@
         `<div class="dr-row"><span>Est. flight time</span><span>${fmtDuration(secs)}</span></div>` +
         `<div class="dr-row"><span>Defense</span><span>${def.name}${def.autoPicked ? ' (auto)' : ''}</span></div>` +
         (p === 0
-          ? `<div class="dr-row"><span style="color:var(--red);">⚠ wrong layer</span><span style="color:var(--red);">${def.name} cannot engage a ${s.class}</span></div>`
+          ? `<div class="dr-row"><span style="color:var(--red);">Wrong layer</span><span style="color:var(--red);">${def.name} cannot engage a ${s.class}</span></div>`
           : `<div class="dr-row"><span>Kill probability / threat</span><span>~${Math.round(p * 100)}%${salvoN > 1 ? ' at ×' + salvoN : ''}</span></div>`);
       renderCounters(salvoN, 0, 0, atk, defCost, cost.est, s, true);
     }
@@ -373,10 +373,10 @@
       const asym = (defSpend / Math.max(1, atk));
       countersEl.innerHTML =
         `<div class="duel-counter"><div class="dc-num">${fired}</div><div class="dc-lbl">${idle ? 'to fire' : 'fired'}</div></div>` +
-        `<div class="duel-counter"><div class="dc-num" style="color:#4a9eff">${idle ? '—' : stopped}</div><div class="dc-lbl">intercepted</div></div>` +
+        `<div class="duel-counter"><div class="dc-num" style="color:#4f9be8">${idle ? '—' : stopped}</div><div class="dc-lbl">intercepted</div></div>` +
         `<div class="duel-counter"><div class="dc-num" style="color:var(--red)">${idle ? '—' : through}</div><div class="dc-lbl">got through</div></div>` +
         `<div class="duel-counter"><div class="dc-num" style="color:${ACTOR_COLOR[s.actor]}">${fmtUsd(atk)}${est ? '*' : ''}</div><div class="dc-lbl">attacker ${idle ? 'spends' : 'spent'}</div></div>` +
-        `<div class="duel-counter"><div class="dc-num" style="color:#4a9eff">${fmtUsd(defSpend)}</div><div class="dc-lbl">defense ${idle ? 'spends' : 'spent'}</div></div>` +
+        `<div class="duel-counter"><div class="dc-num" style="color:#4f9be8">${fmtUsd(defSpend)}</div><div class="dc-lbl">defense ${idle ? 'spends' : 'spent'}</div></div>` +
         `<div class="duel-counter"><div class="dc-num">${asym.toFixed(asym >= 10 ? 0 : 1)}×</div><div class="dc-lbl">cost asymmetry</div></div>`;
     }
 
@@ -414,7 +414,7 @@
       ctx.lineWidth = 1;
       ctx.beginPath(); ctx.moveTo(0, H * 0.88); ctx.lineTo(W, H * 0.88); ctx.stroke();
       ctx.fillStyle = ACTOR_COLOR[s.actor];
-      ctx.font = '9px "IBM Plex Mono", monospace';
+      ctx.font = '9px "Archivo Narrow", monospace';
       ctx.textAlign = 'left';
       ctx.globalAlpha = 0.85;
       ctx.fillRect(W * 0.03, H * 0.86, 14, 4);
@@ -425,7 +425,7 @@
         ctx.fillRect(cityX + dx, H * 0.88 - h, 5, h);
       });
       ctx.fillText(targetFor(s).name.toUpperCase().replace(/^THE /, ''), Math.min(cityX, W - 120), H * 0.94);
-      ctx.fillStyle = '#4a9eff';
+      ctx.fillStyle = '#4f9be8';
       for (const bx of BATTERIES) {
         ctx.fillRect(W * bx, H * 0.865, 4, 9);
         ctx.fillRect(W * bx + 5, H * 0.855, 3, 7);
@@ -532,7 +532,7 @@
         ctx.beginPath(); ctx.arc(px, py, 1.8, 0, Math.PI * 2);
         ctx.fillStyle = '#74b9ff'; ctx.fill();
         ctx.beginPath(); ctx.moveTo(it.x0, it.y0); ctx.lineTo(px, py);
-        ctx.strokeStyle = 'rgba(74,158,255,0.16)'; ctx.lineWidth = 1; ctx.stroke();
+        ctx.strokeStyle = 'rgba(79,155,232,0.16)'; ctx.lineWidth = 1; ctx.stroke();
         if (t >= 1) {
           it.dead = true; tally.stopped++;
           booms.push({ x: it.x1, y: it.y1, start: ts, big: false });
@@ -610,7 +610,7 @@
 
     function drawMapScene(sc) {
       const s = sc.s, W = sc.W;
-      mapCtx.font = '600 9px "IBM Plex Mono", monospace';
+      mapCtx.font = '600 9px "Archivo Narrow", monospace';
       // origin
       mapCtx.beginPath(); mapCtx.arc(sc.O.x, sc.O.y, 5, 0, Math.PI * 2);
       mapCtx.fillStyle = ACTOR_COLOR[s.actor]; mapCtx.fill();
@@ -620,11 +620,11 @@
       mapCtx.textAlign = sc.O.x > W - 80 ? 'right' : 'left';
       mapCtx.fillText(ACTOR_LABEL[s.actor].toUpperCase(), sc.O.x + (sc.O.x > W - 80 ? -10 : 10), sc.O.y + 3);
       // batteries
-      mapCtx.fillStyle = '#4a9eff';
+      mapCtx.fillStyle = '#4f9be8';
       for (const b of sc.batteries) { mapCtx.fillRect(b.x - 1.5, b.y - 1.5, 3, 3); }
       // target
       mapCtx.beginPath(); mapCtx.arc(sc.T.x, sc.T.y, 4, 0, Math.PI * 2);
-      mapCtx.fillStyle = '#e8b84b'; mapCtx.fill();
+      mapCtx.fillStyle = '#f2b233'; mapCtx.fill();
       mapCtx.textAlign = sc.T.x > W - 80 ? 'right' : 'left';
       mapCtx.fillText(targetFor(s).name.toUpperCase().replace(/^THE /, ''),
         sc.T.x + (sc.T.x > W - 80 ? -9 : 9), sc.T.y - 8);
@@ -741,7 +741,7 @@
         mapCtx.beginPath(); mapCtx.arc(px, py, 1.8, 0, Math.PI * 2);
         mapCtx.fillStyle = '#74b9ff'; mapCtx.fill();
         mapCtx.beginPath(); mapCtx.moveTo(it.x0, it.y0); mapCtx.lineTo(px, py);
-        mapCtx.strokeStyle = 'rgba(74,158,255,0.18)'; mapCtx.lineWidth = 1; mapCtx.stroke();
+        mapCtx.strokeStyle = 'rgba(79,155,232,0.18)'; mapCtx.lineWidth = 1; mapCtx.stroke();
         if (t >= 1) {
           it.dead = true; tally.stopped++;
           mBooms.push({ x: it.x1, y: it.y1, start: ts, big: false });
@@ -775,8 +775,8 @@
         const R = (b.big ? 26 : 13) * t + 3;
         const grad = c.createRadialGradient(b.x, b.y, 0, b.x, b.y, R);
         grad.addColorStop(0, `rgba(255,255,255,${(1 - t) * 0.9})`);
-        grad.addColorStop(0.5, `rgba(232,184,75,${(1 - t) * 0.7})`);
-        grad.addColorStop(1, 'rgba(214,48,49,0)');
+        grad.addColorStop(0.5, `rgba(242,178,51,${(1 - t) * 0.7})`);
+        grad.addColorStop(1, 'rgba(224,73,62,0)');
         c.beginPath(); c.arc(b.x, b.y, R, 0, Math.PI * 2);
         c.fillStyle = grad; c.fill();
       }

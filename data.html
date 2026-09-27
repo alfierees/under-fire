@@ -13,22 +13,22 @@
   <meta property="og:image" content="https://under-fire.org/images/og-card.png">
   <meta property="og:url" content="https://under-fire.org/data">
   <meta name="twitter:card" content="summary_large_image">
-  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400;1,700&family=IBM+Plex+Mono:wght@300;400;500&family=IBM+Plex+Sans:wght@300;400;500&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="src/css/shared.css">
+  <link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,300..800&family=Archivo+Narrow:wght@400..700&family=Bodoni+Moda:opsz,wght@6..96,500..900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="src/css/shared.css?v=20260927c">
   <style>
     .data-section { margin-top: 3rem; }
-    .file-table { width:100%; border-collapse:collapse; font-family:'IBM Plex Mono',monospace; font-size:.68rem; }
-    .file-table th { text-align:left; font-size:.55rem; letter-spacing:.14em; text-transform:uppercase; color:var(--muted); font-weight:400; padding:.5rem .8rem; border-bottom:1px solid var(--border); }
+    .file-table { width:100%; border-collapse:collapse; font-family:'Archivo Narrow',monospace; font-size:.8rem; }
+    .file-table th { text-align:left; font-size:.74rem; letter-spacing:.08em; text-transform:uppercase; color:var(--muted); font-weight:400; padding:.5rem .8rem; border-bottom:1px solid var(--border); }
     .file-table td { padding:.55rem .8rem; border-bottom:1px solid rgba(255,255,255,.05); color:var(--text); vertical-align:top; }
-    .file-table td.desc-col { color:var(--muted); line-height:1.55; font-family:'IBM Plex Sans',sans-serif; font-size:.74rem; }
-    .file-table a { color:var(--accent); text-decoration:none; border-bottom:1px solid rgba(232,184,75,.3); }
+    .file-table td.desc-col { color:var(--muted); line-height:1.55; font-family:'Archivo',sans-serif; font-size:.86rem; }
+    .file-table a { color:var(--accent); text-decoration:none; border-bottom:1px solid rgba(242,178,51,.3); }
     .file-table a:hover { border-color:var(--accent); }
     .file-table .size { color:var(--muted); white-space:nowrap; }
     .table-scroll { overflow-x:auto; border:1px solid var(--border); border-radius:4px; }
     .schema-table { margin:0; }
-    .cite-block { border:1px solid var(--border); border-left:2px solid var(--accent); border-radius:4px; padding:1.2rem 1.4rem; margin-top:1rem;
-      font-family:'IBM Plex Mono',monospace; font-size:.7rem; color:var(--text); line-height:1.7; background:rgba(255,255,255,.015); }
-    .pill { display:inline-block; font-size:.52rem; letter-spacing:.1em; text-transform:uppercase; padding:.15rem .5rem; border:1px solid var(--border); border-radius:2px; color:var(--muted); margin-left:.5rem; vertical-align:middle; }
+    .cite-block { border:1px solid var(--border); border-radius:4px; padding:1.2rem 1.4rem; margin-top:1rem;
+      font-family:'Archivo Narrow',monospace; font-size:.82rem; color:var(--text); line-height:1.7; background:rgba(255,255,255,.015); }
+    .pill { display:inline-block; font-size:.72rem; letter-spacing:.1em; text-transform:uppercase; padding:.15rem .5rem; border:1px solid var(--border); border-radius:2px; color:var(--muted); margin-left:.5rem; vertical-align:middle; }
     code.inline { background:rgba(255,255,255,.06); padding:.1rem .35rem; border-radius:2px; font-size:.92em; }
   </style>
   <!-- Google Analytics -->
@@ -81,7 +81,7 @@
   <a href="index.html" class="nav-brand">Under Fire</a>
   <div class="nav-links">
     <div class="nav-group">
-      <button class="nav-group-btn" type="button">Charts<span class="caret">▾</span></button>
+      <button class="nav-group-btn" type="button">Charts<span class="caret" aria-hidden="true"></span></button>
       <div class="nav-dropdown">
         <a href="timeline.html">Timeline</a>
         <a href="fronts.html">Fronts</a>
@@ -90,7 +90,7 @@
       </div>
     </div>
     <div class="nav-group">
-      <button class="nav-group-btn" type="button">Maps<span class="caret">▾</span></button>
+      <button class="nav-group-btn" type="button">Maps<span class="caret" aria-hidden="true"></span></button>
       <div class="nav-dropdown">
         <a href="oct7.html">Oct 7</a>
         <a href="story.html">Story</a>
@@ -98,14 +98,14 @@
       </div>
     </div>
     <div class="nav-group">
-      <button class="nav-group-btn" type="button">Patterns<span class="caret">▾</span></button>
+      <button class="nav-group-btn" type="button">Patterns<span class="caret" aria-hidden="true"></span></button>
       <div class="nav-dropdown">
         <a href="patterns.html">Patterns</a>
         <a href="areas.html">By Area</a>
       </div>
     </div>
     <div class="nav-group">
-      <button class="nav-group-btn" type="button">More<span class="caret">▾</span></button>
+      <button class="nav-group-btn" type="button">More<span class="caret" aria-hidden="true"></span></button>
       <div class="nav-dropdown">
         <a href="live.html">Live Feed</a>
         <a href="records.html">Records &amp; Stats</a>
@@ -115,20 +115,18 @@
       </div>
     </div>
   </div>
-  <a href="live.html" class="nav-badge" id="nav-badge">🔔 Loading…</a>
+  <a href="live.html" class="nav-badge" id="nav-badge">160,000+ alerts</a>
 </nav>
 
 <div id="tooltip"></div>
 
 <div class="chart-page">
   <div class="section-wrapper">
-    <a href="index.html" class="back-link">← Back to all charts</a>
-    <div class="section-label">Open Data</div>
-    <h1 class="section-title">The Data</h1>
+    <a href="index.html" class="back-link">All charts</a>
+    <h1 class="section-title grad-night">The Data</h1>
     <p class="section-desc">Everything on this site is built from one dataset: every Home Front Command alert since January 12, 2020 — <span data-live="total">160,000+</span> events and counting, refreshed every 30 minutes. All of it is free to download, from this page or from the <a href="https://github.com/alfierees/under-fire" target="_blank" style="color:var(--accent);">GitHub repository</a>. If you use it, cite Under Fire and link back here.</p>
 
     <div class="data-section">
-      <div class="section-label" style="margin-bottom:.5rem;">The master dataset</div>
       <h2 class="section-title" style="font-size:1.8rem;margin-bottom:.5rem;">alerts.csv.gz <span class="pill">CSV · gzip · ~2.4 MB</span></h2>
       <p class="section-desc" style="margin-bottom:1rem;max-width:640px;">One row per alert, per location. Timestamps are Israel local time. Origin is attributed from alert location and timing — see the <a href="mission.html" style="color:var(--accent);">mission page</a> for methodology and caveats. <a href="data/master/alerts.csv.gz" download style="color:var(--accent);">Download ↓</a></p>
       <div class="table-scroll">
@@ -149,7 +147,6 @@
     </div>
 
     <div class="data-section">
-      <div class="section-label" style="margin-bottom:.5rem;">Processed aggregates</div>
       <h2 class="section-title" style="font-size:1.8rem;margin-bottom:.5rem;">Ready-made JSON</h2>
       <p class="section-desc" style="margin-bottom:1rem;max-width:640px;">The pre-computed files the site's charts consume, regenerated from the master every 30 minutes. All paths live under <code class="inline">data/processed/</code>.</p>
       <div class="table-scroll">
@@ -177,7 +174,6 @@
     </div>
 
     <div class="data-section">
-      <div class="section-label" style="margin-bottom:.5rem;">Provenance &amp; caveats</div>
       <h2 class="section-title" style="font-size:1.8rem;margin-bottom:.5rem;">What this data is — and isn't</h2>
       <p class="section-desc" style="max-width:680px;margin-bottom:.9rem;">
         Alerts are Home Front Command (Pikud HaOref) "Tzeva Adom" warnings, aggregated by
@@ -196,7 +192,6 @@
     </div>
 
     <div class="data-section">
-      <div class="section-label" style="margin-bottom:.5rem;">Reuse</div>
       <h2 class="section-title" style="font-size:1.8rem;margin-bottom:.5rem;">How to cite</h2>
       <div class="cite-block">
         Under Fire — Israel Rocket Alert Dataset (2020–present).<br>
@@ -214,6 +209,6 @@
   <div class="footer-credit">Alert data from <a href="https://rocketalert.live" target="_blank">RocketAlert.live</a>.</div>
 </footer>
 
-<script src="src/js/shared.js?v=20260613e"></script>
+<script src="src/js/shared.js?v=20260927b"></script>
 </body>
 </html>

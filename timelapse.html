@@ -13,30 +13,30 @@
   <meta property="og:image" content="https://under-fire.org/images/og-card.png">
   <meta property="og:url" content="https://under-fire.org/timelapse">
   <meta name="twitter:card" content="summary_large_image">
-  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400;1,700&family=IBM+Plex+Mono:wght@300;400;500&family=IBM+Plex+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,300..800&family=Archivo+Narrow:wght@400..700&family=Bodoni+Moda:opsz,wght@6..96,500..900&display=swap" rel="stylesheet">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.8.5/d3.min.js"></script>
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-  <link rel="stylesheet" href="src/css/shared.css">
+  <link rel="stylesheet" href="src/css/shared.css?v=20260927c">
   <style>
     #map-container { position:relative; width:100%; height:70vh; min-height:500px; border:1px solid var(--border); border-radius:4px; overflow:hidden; }
-    #lapse-map { width:100%; height:100%; background:#07070a; }
-    .leaflet-container { background:#07070a; }
+    #lapse-map { width:100%; height:100%; background:#0e0f11; }
+    .leaflet-container { background:#0e0f11; }
 
     /* month readout, top-left over the map */
     .lapse-info { position:absolute; z-index:1000; top:1.25rem; left:1.25rem; width:236px; max-width:calc(100% - 2.5rem);
-      background:rgba(7,7,10,.9); backdrop-filter:blur(10px); border:1px solid var(--border); border-radius:4px; padding:1.1rem 1.3rem; pointer-events:none; }
-    .lapse-info .li-mode { font-family:'IBM Plex Mono',monospace; font-size:.52rem; letter-spacing:.14em; text-transform:uppercase; color:var(--muted); margin-bottom:.35rem; }
-    .lapse-info .li-month { font-family:'Playfair Display',serif; font-weight:900; font-size:1.55rem; color:#fff; line-height:1.1; margin-bottom:.7rem; }
-    .lapse-info .li-count { font-family:'Playfair Display',serif; font-weight:700; font-size:1.65rem; color:var(--red); line-height:1; }
-    .lapse-info .li-count-lbl { font-family:'IBM Plex Mono',monospace; font-size:.52rem; letter-spacing:.1em; text-transform:uppercase; color:var(--muted); margin-top:.25rem; margin-bottom:.75rem; }
-    .lapse-info .li-top { font-family:'IBM Plex Mono',monospace; font-size:.62rem; color:var(--text); border-top:1px solid rgba(255,255,255,.07); padding-top:.5rem; }
+      background:rgba(14,15,17,.9); backdrop-filter:blur(10px); border:1px solid var(--border); border-radius:4px; padding:1.1rem 1.3rem; pointer-events:none; }
+    .lapse-info .li-mode { font-family:'Archivo Narrow',monospace; font-size:.72rem; letter-spacing:.08em; text-transform:uppercase; color:var(--muted); margin-bottom:.35rem; }
+    .lapse-info .li-month { font-family:'Bodoni Moda',serif; font-weight:900; font-size:1.55rem; color:#fff; line-height:1.1; margin-bottom:.7rem; }
+    .lapse-info .li-count { font-family:'Bodoni Moda',serif; font-weight:700; font-size:1.65rem; color:var(--red); line-height:1; }
+    .lapse-info .li-count-lbl { font-family:'Archivo Narrow',monospace; font-size:.72rem; letter-spacing:.1em; text-transform:uppercase; color:var(--muted); margin-top:.25rem; margin-bottom:.75rem; }
+    .lapse-info .li-top { font-family:'Archivo Narrow',monospace; font-size:.78rem; color:var(--text); border-top:1px solid rgba(255,255,255,.07); padding-top:.5rem; }
     .lapse-info .li-top span { color:var(--muted); }
 
-    .map-legend2 { position:absolute; z-index:1000; bottom:1.25rem; right:1.25rem; background:rgba(7,7,10,.85); border:1px solid var(--border); border-radius:4px; padding:.8rem 1rem; }
-    .map-legend2 .ml-lbl { font-family:'IBM Plex Mono',monospace; font-size:.5rem; letter-spacing:.12em; text-transform:uppercase; color:var(--muted); margin-bottom:.45rem; }
+    .map-legend2 { position:absolute; z-index:1000; bottom:1.25rem; right:1.25rem; background:rgba(14,15,17,.85); border:1px solid var(--border); border-radius:4px; padding:.8rem 1rem; }
+    .map-legend2 .ml-lbl { font-family:'Archivo Narrow',monospace; font-size:.72rem; letter-spacing:.08em; text-transform:uppercase; color:var(--muted); margin-bottom:.45rem; }
     .map-legend2 .ml-bar { width:160px; height:9px; border-radius:2px; }
-    .map-legend2 .ml-ends { display:flex; justify-content:space-between; font-family:'IBM Plex Mono',monospace; font-size:.55rem; color:var(--muted); margin-top:.3rem; }
+    .map-legend2 .ml-ends { display:flex; justify-content:space-between; font-family:'Archivo Narrow',monospace; font-size:.74rem; color:var(--muted); margin-top:.3rem; }
 
     /* transport bar: play button + scrubber chart */
     .transport { display:flex; align-items:center; gap:1rem; margin-top:.9rem; }
@@ -89,16 +89,16 @@
 <body>
 
 <div id="file-protocol-warning">
-  <strong>⚠ CHARTS WON'T LOAD VIA FILE://</strong>
+  <strong>Charts won't load from a file:// URL</strong>
   Run: <code>python3 -m http.server 8000</code>
-  <span class="close-x" onclick="this.parentElement.style.display='none'">✕</span>
+  <button class="close-x" type="button" aria-label="Dismiss" onclick="this.parentElement.style.display='none'"></button>
 </div>
 
 <nav>
   <a href="index.html" class="nav-brand">Under Fire</a>
   <div class="nav-links">
     <div class="nav-group">
-      <button class="nav-group-btn" type="button">Charts<span class="caret">▾</span></button>
+      <button class="nav-group-btn" type="button">Charts<span class="caret" aria-hidden="true"></span></button>
       <div class="nav-dropdown">
         <a href="timeline.html">Timeline</a>
         <a href="fronts.html">Fronts</a>
@@ -107,7 +107,7 @@
       </div>
     </div>
     <div class="nav-group">
-      <button class="nav-group-btn" type="button">Maps<span class="caret">▾</span></button>
+      <button class="nav-group-btn" type="button">Maps<span class="caret" aria-hidden="true"></span></button>
       <div class="nav-dropdown">
         <a href="oct7.html">Oct 7</a>
         <a href="story.html">Story</a>
@@ -115,14 +115,14 @@
       </div>
     </div>
     <div class="nav-group">
-      <button class="nav-group-btn" type="button">Patterns<span class="caret">▾</span></button>
+      <button class="nav-group-btn" type="button">Patterns<span class="caret" aria-hidden="true"></span></button>
       <div class="nav-dropdown">
         <a href="patterns.html">Patterns</a>
         <a href="areas.html">By Area</a>
       </div>
     </div>
     <div class="nav-group">
-      <button class="nav-group-btn" type="button">More<span class="caret">▾</span></button>
+      <button class="nav-group-btn" type="button">More<span class="caret" aria-hidden="true"></span></button>
       <div class="nav-dropdown">
         <a href="live.html">Live Feed</a>
         <a href="records.html">Records &amp; Stats</a>
@@ -132,17 +132,16 @@
       </div>
     </div>
   </div>
-  <a href="live.html" class="nav-badge" id="nav-badge">🔔 Loading…</a>
+  <a href="live.html" class="nav-badge" id="nav-badge">160,000+ alerts</a>
 </nav>
 
 <div id="tooltip"></div>
 
 <div class="chart-page">
   <div class="section-wrapper">
-    <a href="index.html" class="back-link">← Back to all charts</a>
-    <div class="section-label">08 — Time-Lapse</div>
-    <h1 class="section-title">The Spread</h1>
-    <p class="section-desc">Every month since January 2020, drawn on the map. For years the fire was a Gaza-border story — one red corner of an otherwise dark map. Then October 2023, and front after front lights up until, by the 2026 war, all 30 alert regions are burning at once. Press play, or drag the timeline.</p>
+    <a href="index.html" class="back-link">All charts</a>
+    <h1 class="section-title grad-dusk">The Spread</h1>
+    <p class="section-desc">Every month since January 2020, drawn on the map. For years the fire was a Gaza-border story — one red corner of an otherwise dark map. Then October 2023, and front after front lights up until, by the 2026 war, all 30 alert regions are under alert at once. Play it, or drag the timeline.</p>
 
     <div id="map-container">
       <div id="lapse-map"></div>
@@ -173,7 +172,6 @@
     <p class="chart-note">One frame per calendar month. Colour scaled by alerts per region (log). Region boundaries: Home Front Command alert polygons (tzevaadom.co.il).</p>
 
     <div style="margin-top:3.5rem;">
-      <div class="section-label" style="margin-bottom:.5rem;">What the animation shows</div>
       <h2 class="section-title" style="font-size:1.8rem;margin-bottom:.5rem;">From one front to every front</h2>
       <p class="section-desc" style="margin-bottom:0;">
         Before October 2023, <span id="tl-pre-lead">only one month</span> in nearly four years
@@ -196,9 +194,9 @@
   <div class="footer-credit">Alert data from <a href="https://rocketalert.live" target="_blank">RocketAlert.live</a>.</div>
 </footer>
 
-<script src="src/js/shared.js?v=20260613e"></script>
+<script src="src/js/shared.js?v=20260927b"></script>
 <script>
-const RAMP = d3.interpolateRgbBasis(['#4a9eff', '#5fb0d8', '#e8b84b', '#e0793c', '#d63031']);
+const RAMP = d3.interpolateRgbBasis(['#4f9be8', '#5fb0d8', '#f2b233', '#e0793c', '#e0493e']);
 const MONTH_NAMES = ['January','February','March','April','May','June','July','August','September','October','November','December'];
 const EVENTS = [
   { month: '2021-05', label: 'Guardian of the Walls' },
@@ -280,7 +278,7 @@ function fillNarrative(am) {
 
   const layerByArea = new Map();
   const layer = L.geoJSON(geo, {
-    style: { fillColor: '#14141c', fillOpacity: 0.82, color: 'rgba(7,7,10,0.85)', weight: 1 },
+    style: { fillColor: '#14141c', fillOpacity: 0.82, color: 'rgba(14,15,17,0.85)', weight: 1 },
     onEachFeature: (feat, lyr) => {
       layerByArea.set(feat.properties.area, lyr);
       lyr.on('mouseover', e => {
@@ -337,7 +335,7 @@ function fillNarrative(am) {
 
   const areaGen = () => d3.area().x((d, i) => x(i)).y0(H - PAD_B).y1(d => y(d)).curve(d3.curveMonotoneX);
   const path = svg.append('path').datum(am.totals)
-    .attr('fill', 'rgba(214,48,49,0.28)').attr('stroke', 'rgba(214,48,49,0.85)').attr('stroke-width', 1);
+    .attr('fill', 'rgba(224,73,62,0.28)').attr('stroke', 'rgba(224,73,62,0.85)').attr('stroke-width', 1);
 
   const evG = svg.append('g');
   const marker = svg.append('line')
@@ -431,7 +429,7 @@ function fillNarrative(am) {
 })().catch(e => {
   console.warn('timelapse', e);
   document.getElementById('map-container').innerHTML =
-    '<p style="padding:2rem;color:var(--muted);font-family:IBM Plex Mono,monospace;font-size:.7rem;">Failed to load time-lapse data.</p>';
+    '<p style="padding:2rem;color:var(--muted);font-family:Archivo Narrow,monospace;font-size:.82rem;">Failed to load time-lapse data.</p>';
 });
 </script>
 </body>

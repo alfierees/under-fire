@@ -13,8 +13,8 @@
   <meta property="og:image" content="https://under-fire.org/images/og-card.png">
   <meta property="og:url" content="https://under-fire.org/mission">
   <meta name="twitter:card" content="summary_large_image">
-  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400;1,700&family=IBM+Plex+Mono:wght@300;400;500&family=IBM+Plex+Sans:wght@300;400;500&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="src/css/shared.css">
+  <link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,300..800&family=Archivo+Narrow:wght@400..700&family=Bodoni+Moda:opsz,wght@6..96,500..900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="src/css/shared.css?v=20260927c">
   <style>
     /* ─── PAGE LAYOUT ─── */
     .mission-wrap {
@@ -27,27 +27,8 @@
     .mission-hero {
       margin-bottom: 4.5rem;
     }
-    .mission-eyebrow {
-      font-family: 'IBM Plex Mono', monospace;
-      font-size: .62rem;
-      letter-spacing: .22em;
-      text-transform: uppercase;
-      color: var(--accent);
-      margin-bottom: 1.5rem;
-      display: flex;
-      align-items: center;
-      gap: 1rem;
-    }
-    .mission-eyebrow::before {
-      content: '';
-      display: block;
-      width: 36px;
-      height: 1px;
-      background: var(--accent);
-      flex-shrink: 0;
-    }
     .mission-title {
-      font-family: 'Playfair Display', serif;
+      font-family: 'Bodoni Moda', serif;
       font-size: clamp(2.4rem, 4.5vw, 3.8rem);
       font-weight: 900;
       color: #fff;
@@ -56,17 +37,12 @@
       margin-bottom: 2rem;
     }
     .mission-lead {
-      font-family: 'Playfair Display', serif;
-      font-size: 1.25rem;
-      font-style: italic;
+      font-size: 1.2rem;
       color: var(--text);
       line-height: 1.7;
       max-width: 720px;
     }
-    .mission-lead em {
-      color: var(--accent);
-      font-style: italic;
-    }
+    .mission-lead em { font-style: italic; }
 
     /* ─── SECTIONS ─── */
     .mission-section {
@@ -74,23 +50,23 @@
       max-width: 720px;
     }
     .mission-section h2 {
-      font-family: 'IBM Plex Mono', monospace;
-      font-size: .68rem;
-      letter-spacing: .22em;
-      text-transform: uppercase;
-      color: var(--accent);
-      margin-bottom: 1.4rem;
-      padding-bottom: .8rem;
-      border-bottom: 1px solid var(--border);
+      font-family: 'Bodoni Moda', serif;
+      font-size: clamp(1.7rem, 2.6vw, 2.2rem);
+      font-weight: 800;
+      letter-spacing: -.015em;
+      color: var(--text);
+      line-height: 1.1;
+      padding-top: 1.2rem;
+      border-top: 1px solid var(--border);
+      margin-bottom: .6rem;
     }
     .mission-section h3 {
-      font-family: 'Playfair Display', serif;
-      font-size: 1.6rem;
-      font-weight: 700;
-      color: #fff;
-      letter-spacing: -.01em;
+      font-family: 'Archivo', sans-serif;
+      font-size: 1.15rem;
+      font-weight: 500;
+      color: var(--text);
       margin-bottom: 1.1rem;
-      line-height: 1.2;
+      line-height: 1.45;
     }
     .mission-section p {
       font-size: .98rem;
@@ -103,13 +79,13 @@
       font-weight: 500;
     }
     .mission-section p em {
-      color: var(--accent);
+      color: var(--text);
       font-style: italic;
     }
     .mission-section a {
       color: var(--accent);
       text-decoration: none;
-      border-bottom: 1px dotted rgba(232,184,75,.4);
+      border-bottom: 1px dotted rgba(242,178,51,.4);
     }
     .mission-section a:hover {
       border-bottom-color: var(--accent);
@@ -124,25 +100,24 @@
     }
     .pipeline-card {
       background: var(--surface);
-      border: 1px solid var(--border);
-      border-top: 2px solid var(--accent);
-      border-radius: 0 0 4px 4px;
+      border: 1px solid #000;
+      border-radius: 3px;
       padding: 1.4rem 1.4rem 1.6rem;
     }
     .pipeline-card h4 {
-      font-family: 'IBM Plex Mono', monospace;
-      font-size: .6rem;
-      letter-spacing: .18em;
-      text-transform: uppercase;
-      color: var(--accent);
-      margin-bottom: .9rem;
+      font-family: 'Bodoni Moda', serif;
+      font-size: 1.25rem;
+      font-weight: 800;
+      letter-spacing: -.01em;
+      color: var(--text);
+      line-height: 1.15;
+      margin-bottom: .4rem;
     }
     .pipeline-card .pipeline-headline {
-      font-family: 'Playfair Display', serif;
-      font-size: 1.05rem;
-      font-weight: 700;
-      color: #fff;
-      line-height: 1.3;
+      font-size: .95rem;
+      font-weight: 600;
+      color: var(--text);
+      line-height: 1.4;
       margin-bottom: .75rem;
     }
     .pipeline-card p {
@@ -156,23 +131,21 @@
     .dedication {
       margin-top: 5rem;
       padding: 3rem 3rem 3rem;
-      background: linear-gradient(180deg, rgba(232,184,75,.04), rgba(232,184,75,.01));
-      border-top: 2px solid var(--accent);
-      border-bottom: 1px solid var(--border);
-      border-radius: 4px;
+      background: var(--surface);
+      border: 1px solid #000;
+      border-radius: 3px;
       max-width: 760px;
     }
     .dedication-eyebrow {
-      font-family: 'IBM Plex Mono', monospace;
-      font-size: .62rem;
-      letter-spacing: .24em;
-      text-transform: uppercase;
-      color: var(--accent);
-      margin-bottom: 1.6rem;
+      font-family: 'Bodoni Moda', serif;
+      font-size: 1.6rem;
+      font-weight: 800;
+      color: var(--text);
+      margin-bottom: 1.4rem;
       text-align: center;
     }
     .dedication p {
-      font-family: 'Playfair Display', serif;
+      font-family: 'Bodoni Moda', serif;
       font-style: italic;
       font-size: 1.18rem;
       color: var(--text);
@@ -184,12 +157,11 @@
     .dedication-rule {
       width: 60px;
       height: 1px;
-      background: var(--accent);
+      background: var(--border);
       margin: 2rem auto;
-      opacity: .7;
     }
     .dedication p.dedication-iran {
-      color: var(--accent);
+      color: var(--text);
       font-size: 1.12rem;
     }
 
@@ -230,16 +202,16 @@
 <body>
 
 <div id="file-protocol-warning">
-  <strong>⚠ CHARTS WON'T LOAD VIA FILE://</strong>
+  <strong>Charts won't load from a file:// URL</strong>
   Run: <code>python3 -m http.server 8000</code>
-  <span class="close-x" onclick="this.parentElement.style.display='none'">✕</span>
+  <button class="close-x" type="button" aria-label="Dismiss" onclick="this.parentElement.style.display='none'"></button>
 </div>
 
 <nav>
   <a href="index.html" class="nav-brand">Under Fire</a>
   <div class="nav-links">
     <div class="nav-group">
-      <button class="nav-group-btn" type="button">Charts<span class="caret">▾</span></button>
+      <button class="nav-group-btn" type="button">Charts<span class="caret" aria-hidden="true"></span></button>
       <div class="nav-dropdown">
         <a href="timeline.html">Timeline</a>
         <a href="fronts.html">Fronts</a>
@@ -248,7 +220,7 @@
       </div>
     </div>
     <div class="nav-group">
-      <button class="nav-group-btn" type="button">Maps<span class="caret">▾</span></button>
+      <button class="nav-group-btn" type="button">Maps<span class="caret" aria-hidden="true"></span></button>
       <div class="nav-dropdown">
         <a href="oct7.html">Oct 7</a>
         <a href="story.html">Story</a>
@@ -256,14 +228,14 @@
       </div>
     </div>
     <div class="nav-group">
-      <button class="nav-group-btn" type="button">Patterns<span class="caret">▾</span></button>
+      <button class="nav-group-btn" type="button">Patterns<span class="caret" aria-hidden="true"></span></button>
       <div class="nav-dropdown">
         <a href="patterns.html">Patterns</a>
         <a href="areas.html">By Area</a>
       </div>
     </div>
     <div class="nav-group">
-      <button class="nav-group-btn" type="button">More<span class="caret">▾</span></button>
+      <button class="nav-group-btn" type="button">More<span class="caret" aria-hidden="true"></span></button>
       <div class="nav-dropdown">
         <a href="live.html">Live Feed</a>
         <a href="records.html">Records &amp; Stats</a>
@@ -273,18 +245,17 @@
       </div>
     </div>
   </div>
-  <a href="live.html" class="nav-badge" id="nav-badge">🔔 Loading…</a>
+  <a href="live.html" class="nav-badge" id="nav-badge">160,000+ alerts</a>
 </nav>
 
 <div id="tooltip"></div>
 
 <div class="chart-page">
   <div class="mission-wrap">
-    <a href="index.html" class="back-link">← Back to all charts</a>
+    <a href="index.html" class="back-link">All charts</a>
 
     <!-- HERO -->
     <div class="mission-hero">
-      <div class="mission-eyebrow">Mission Statement</div>
       <h1 class="mission-title">Structuring <span data-live="years-word">six</span> years of alerts over Israel.</h1>
       <p class="mission-lead">
         Between 2020 and 2026, Israel was the target of an unprecedented sustained
@@ -297,7 +268,7 @@
 
     <!-- THE EXPERIMENT -->
     <section class="mission-section">
-      <h2>01 — The Experiment</h2>
+      <h2>The Experiment</h2>
       <h3>Can modern AI synthesise a fast-moving, multi-source conflict in near real-time?</h3>
       <p>
         At its core, <em>Under Fire</em> is an experiment — an exploration of whether
@@ -322,7 +293,7 @@
 
     <!-- THE SUBJECT -->
     <section class="mission-section">
-      <h2>02 — The Subject</h2>
+      <h2>The Subject</h2>
       <h3><span class="live-total">160,000+</span> alerts. 30 areas. Four actors. <span data-live="years-word-cap">Six</span> years.</h3>
       <p>
         The dataset is a six-year sweep of every alert recorded across Israel between
@@ -343,7 +314,7 @@
 
     <!-- AI-DRIVEN OSINT SYNTHESIS -->
     <section class="mission-section">
-      <h2>03 — AI-Driven OSINT Synthesis</h2>
+      <h2>AI-Driven OSINT Synthesis</h2>
       <h3>A potpourri of frontier models, open-source intelligence, and human judgement.</h3>
       <p>
         The pipeline behind <em>Under Fire</em> combines large language models with a
@@ -387,7 +358,7 @@
 
     <!-- WHY THIS MATTERS -->
     <section class="mission-section">
-      <h2>04 — Why This Matters</h2>
+      <h2>Why This Matters</h2>
       <h3>Four actors. Four fronts. <span class="live-total">160,000+</span> alerts.</h3>
       <p>
         Tens of thousands of munitions. Arrow, David's Sling, Iron Dome, THAAD,
@@ -406,7 +377,7 @@
 
     <!-- DEDICATION -->
     <div class="dedication">
-      <div class="dedication-eyebrow">Dedication</div>
+      <h2 class="dedication-eyebrow">Dedication</h2>
       <p>
         This project is dedicated to every soldier who stands between Israel and the
         storm of rockets, missiles, and drones recorded on these pages — to the
@@ -434,7 +405,7 @@
   </div>
 </footer>
 
-<script src="src/js/shared.js?v=20260613e"></script>
+<script src="src/js/shared.js?v=20260927b"></script>
 <script>
   // live figures from the auto-updating pipeline
   fetchData('stats_summary.json').then(s => {
