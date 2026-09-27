@@ -148,7 +148,7 @@ h1.hero-title {
 .row-desc { font-size:.95rem; color:var(--muted); line-height:1.5; max-width: 58ch; }
 .row-kind { color:var(--dim); }
 .row-preview { height: 4.5rem; opacity:.85; transition: opacity .15s; }
-.row-preview svg { width:100%; height:100%; display:block; overflow:visible; }
+.row-preview svg { width:100%; height:100%; display:block; overflow:hidden; }
 .row-go { color:var(--accent); justify-self:end; }
 
 /* ─── MISSION ─── */
