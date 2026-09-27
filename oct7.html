@@ -227,7 +227,7 @@ const colorScale = d3.scaleSequential()
     : d3.interpolateRgb('#e8b84b', '#d63031')((t - 0.5) * 2));
 
 oct7Map = L.map('oct7-map', { center: [31.55, 34.95], zoom: 7 });
-L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png?key=cb1_40j0_1_91751175af3590b466a71c43', {
   attribution: '&copy; OpenStreetMap &copy; CARTO', subdomains: 'abcd', maxZoom: 19
 }).addTo(oct7Map);
 
