@@ -158,9 +158,11 @@ window.__statsPromise = fetchData('stats_summary.json')
 // hover-only (plus keyboard focus); click-to-pin was removed because a pinned
 // menu stayed open and got in the way.
 (function initNavDropdowns() {
-  const path = (location.pathname.split('/').pop() || 'index.html').toLowerCase();
+  // Compare without ".html": Vercel cleanUrls serves /timeline for timeline.html.
+  const page = h => ((h || '').split(/[?#]/)[0].split('/').pop() || 'index').toLowerCase().replace(/\.html$/, '');
+  const path = page(location.pathname);
   document.querySelectorAll('.nav-dropdown a').forEach(a => {
-    if ((a.getAttribute('href') || '').toLowerCase() === path) {
+    if (page(a.getAttribute('href')) === path) {
       a.classList.add('active');
       const grp = a.closest('.nav-group');
       if (grp) grp.classList.add('active');
