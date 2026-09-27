@@ -28,8 +28,11 @@
 h1.hero-title {
   font-family:var(--f-display); font-weight:900; font-variation-settings:'opsz' 40;
   font-size: clamp(4.2rem, 11vw, 9.4rem); line-height:.86; letter-spacing:-.01em;
-  text-transform: uppercase; color:var(--text);
-  text-shadow: 0 2px 30px rgba(0,0,0,.35);
+  text-transform: uppercase;
+  background: var(--fire); -webkit-background-clip: text; background-clip: text;
+  -webkit-text-fill-color: transparent; color: transparent;
+  width: fit-content;
+  filter: drop-shadow(0 2px 18px rgba(0,0,0,.45));
 }
 .hero-deck {
   margin-top:1.3rem; max-width: 36rem;
@@ -124,6 +127,11 @@ h1.hero-title {
   font-family:var(--f-display); font-weight:800; font-size: clamp(1.7rem, 2.6vw, 2.2rem); line-height:1.1;
   padding-bottom: .8rem; border-bottom: 1px solid var(--border);
 }
+.category-title span {
+  background: var(--fire); -webkit-background-clip: text; background-clip: text;
+  -webkit-text-fill-color: transparent; color: transparent;
+}
+.row:hover .row-title { color: var(--accent); }
 .rows { display:flex; flex-direction:column; }
 .row {
   display:grid; align-items:center; gap: 1.5rem;

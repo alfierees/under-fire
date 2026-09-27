@@ -154,8 +154,9 @@ window.__statsPromise = fetchData('stats_summary.json')
   });
 })();
 
-// Nav dropdowns: mark the current page's link + group as active, and enable
-// click-toggle for touch devices (desktop relies on CSS :hover / :focus-within).
+// Nav dropdowns: mark the current page's link + group as active. Dropdowns are
+// hover-only (plus keyboard focus); click-to-pin was removed because a pinned
+// menu stayed open and got in the way.
 (function initNavDropdowns() {
   const path = (location.pathname.split('/').pop() || 'index.html').toLowerCase();
   document.querySelectorAll('.nav-dropdown a').forEach(a => {
@@ -166,16 +167,4 @@ window.__statsPromise = fetchData('stats_summary.json')
     }
   });
 
-  document.querySelectorAll('.nav-group-btn').forEach(btn => {
-    btn.addEventListener('click', (e) => {
-      e.stopPropagation();
-      const grp = btn.closest('.nav-group');
-      const wasOpen = grp.classList.contains('open');
-      document.querySelectorAll('.nav-group.open').forEach(g => g.classList.remove('open'));
-      if (!wasOpen) grp.classList.add('open');
-    });
-  });
-  document.addEventListener('click', () => {
-    document.querySelectorAll('.nav-group.open').forEach(g => g.classList.remove('open'));
-  });
 })();

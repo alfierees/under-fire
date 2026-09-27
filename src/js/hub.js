@@ -77,6 +77,7 @@ function fmtBoardTime(ts) {
           const name = document.createElement('span');
           name.className = 'origin-name';
           name.textContent = txt;
+          name.style.color = `var(--${ev.origin.toLowerCase()})`;
           td.appendChild(name);
           td.title = txt;
         } else {

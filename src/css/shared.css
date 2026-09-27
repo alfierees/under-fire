@@ -14,6 +14,9 @@
   --red: #e0493e; --orange: #ee8a2a; --blue: #4f9be8; --purple: #b27ce0;
   --hamas: #e0493e; --hezbollah: #ee8a2a; --houthis: #4f9be8; --iran: #b27ce0; --unknown: #6f6c66;
 
+  /* Fire: the brand gradient, used only on display titles (wordmark, page and hub titles). */
+  --fire: linear-gradient(100deg, #ffd27a 0%, #f2b233 28%, #ee8a2a 58%, #e0493e 100%);
+
   --f-display: 'Bodoni Moda', 'Didot', Georgia, serif;
   --f-body: 'Archivo', system-ui, sans-serif;
   --f-label: 'Archivo Narrow', 'Archivo', system-ui, sans-serif;
@@ -45,6 +48,13 @@ html { scrollbar-color: var(--border) var(--bg); }
   letter-spacing:.08em; text-transform:uppercase; color:var(--dim);
 }
 
+/* Fire text: gradient clipped to the glyphs, sized to the text so short titles get the full sweep. */
+.fire-text, .nav-brand, h1.section-title {
+  background: var(--fire); -webkit-background-clip: text; background-clip: text;
+  -webkit-text-fill-color: transparent; color: transparent;
+  width: fit-content; max-width: 100%;
+}
+
 /* Actor chip: the only way actor colour marks a container. */
 .chip { display:inline-block; width:10px; height:10px; border-radius:1px; flex-shrink:0; vertical-align:baseline; margin-right:.55rem; }
 
@@ -72,13 +82,12 @@ nav {
   transition: color .15s;
 }
 .nav-group-btn:hover, .nav-group:hover .nav-group-btn,
-.nav-group:focus-within .nav-group-btn { color:var(--text); }
+.nav-group:has(:focus-visible) .nav-group-btn { color:var(--text); }
 .nav-group-btn .caret {
   width:6px; height:6px; border-right:1.5px solid currentColor; border-bottom:1.5px solid currentColor;
   transform: translateY(-2px) rotate(45deg); opacity:.7; transition: transform .2s;
 }
-.nav-group:hover .nav-group-btn .caret,
-.nav-group.open .nav-group-btn .caret { transform: translateY(1px) rotate(-135deg); }
+.nav-group:hover .nav-group-btn .caret { transform: translateY(1px) rotate(-135deg); }
 .nav-group.active > .nav-group-btn { color:var(--text); box-shadow:0 1px 0 #000, inset 0 -2px 0 var(--accent); }
 
 .nav-dropdown {
@@ -92,8 +101,7 @@ nav {
   z-index:100;
 }
 .nav-group:hover .nav-dropdown,
-.nav-group:focus-within .nav-dropdown,
-.nav-group.open .nav-dropdown { opacity:1; pointer-events:auto; transform: translateY(0); }
+.nav-group:has(:focus-visible) .nav-dropdown { opacity:1; pointer-events:auto; transform: translateY(0); }
 .nav-dropdown a {
   font-family:var(--f-label); font-weight:600; font-size:.88rem; letter-spacing:.06em; text-transform:uppercase;
   padding:.6rem .75rem; border-radius:2px;

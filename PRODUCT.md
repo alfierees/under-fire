@@ -30,7 +30,7 @@ A single, live-updating, attributed record of every alert since 2020 (160,000+ a
 - Actor colours (Hamas, Hezbollah, Houthis, Iran, Unknown) are one token set shared by CSS and every D3 chart. They may be retuned, but must stay one consistent system.
 
 ## Brand Commitments
-- Name and wordmark: **UNDER FIRE**, set in a heavy serif.
+- Name and wordmark: **UNDER FIRE**, set in a heavy serif with a fire-coloured gradient (owner request, 2026-09-27).
 - The homepage hero keeps the animated Iron Dome interceptor canvas over a city photograph.
 - Neutral framing: no political commentary, no advocacy.
 
