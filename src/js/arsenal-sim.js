@@ -564,7 +564,7 @@
         // from the shifting basemap. We reframe ourselves when idle.
         trackResize: false,
       });
-      L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_nolabels/{z}/{x}/{y}{r}.png', {
+      L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_nolabels/{z}/{x}/{y}{r}.png?key=cb1_40j0_1_91751175af3590b466a71c43', {
         attribution: '&copy; OpenStreetMap &copy; CARTO', subdomains: 'abcd', maxZoom: 12,
       }).addTo(map);
       map.setView([31.5, 35], 7);
