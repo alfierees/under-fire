@@ -1,53 +1,108 @@
-// ── Hub page — hero counters + card sparkline previews ─────────────────────
+// ── Hub page — the board (flap counters + latest alerts) + row previews ─────
 
-function animateCounter(el, target, duration = 2000, suffix = '') {
-  if (!el) return;
-  const start = performance.now();
-  const startVal = parseInt(el.textContent) || 0;
-  function update(ts) {
-    const pct = Math.min((ts - start) / duration, 1);
-    const ease = 1 - Math.pow(1 - pct, 3);
-    el.textContent = Math.round(startVal + (target - startVal) * ease).toLocaleString() + suffix;
-    if (pct < 1) requestAnimationFrame(update);
-  }
-  requestAnimationFrame(update);
+const REDUCED_MOTION = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+const MONTH_ABBR = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+
+// Split a figure into flap cells. Digits cycle briefly before settling, left to
+// right, like a board catching up with new data. Separators never flap.
+function renderFlaps(container, text, delay = 0) {
+  if (!container) return;
+  container.setAttribute('aria-label', text);
+  const cells = [...text].map(ch => {
+    const el = document.createElement('span');
+    el.className = /\d/.test(ch) ? 'flap' : 'flap sep';
+    el.setAttribute('aria-hidden', 'true');
+    el.textContent = ch;
+    return el;
+  });
+  container.replaceChildren(...cells);
+  if (REDUCED_MOTION) return;
+  cells.forEach((el, i) => {
+    if (el.classList.contains('sep')) return;
+    const final = el.textContent;
+    let steps = 5 + i;
+    el.textContent = String((+final + 5) % 10);
+    const turn = () => {
+      el.classList.remove('tick'); void el.offsetWidth; el.classList.add('tick');
+      steps -= 1;
+      el.textContent = steps <= 0 ? final : String((+el.textContent + 1) % 10);
+      if (steps > 0) setTimeout(turn, 60);
+    };
+    setTimeout(turn, delay + i * 35);
+  });
+}
+
+function fmtBoardTime(ts) {
+  const [d, t] = ts.split(' ');
+  const [, m, day] = d.split('-');
+  return `${day} ${MONTH_ABBR[+m - 1]} ${t.slice(0, 5)}`;
 }
 
 (async () => {
   try {
     const s = await fetchData('stats_summary.json');
-    const nYears = Math.floor(
-      (new Date(s.date_range.end) - new Date(s.date_range.start)) / (365.25 * 86400e3));
-    animateCounter(document.getElementById('counter-alerts'), s.total_alerts, 2200, '+');
-    animateCounter(document.getElementById('counter-actors'), 4, 1000);
-    animateCounter(document.getElementById('counter-years'), nYears, 800);
+    const start = new Date(s.date_range.start), end = new Date(s.date_range.end);
+    const long = d => `${d.getDate()} ${MONTH_ABBR[d.getMonth()]} ${d.getFullYear()}`;
+    document.getElementById('board-range').textContent = `Alerts recorded, ${long(start)} to ${long(end)}`;
+    renderFlaps(document.getElementById('board-total'), fmtNum(s.total_alerts));
+    document.querySelectorAll('[data-front]').forEach((el, i) => {
+      const n = s.origins[el.dataset.front];
+      if (n != null) renderFlaps(el, fmtNum(n), 250 + i * 120);
+    });
+  } catch (e) { /* static floors in the HTML stay in place */ }
+})();
+
+(async () => {
+  const body = document.getElementById('board-latest');
+  if (!body) return;
+  try {
+    const data = await fetchData('recent_alerts.json');
+    const rows = (data.events || []).slice(0, 5).map(ev => {
+      const tr = document.createElement('tr');
+      const who = ev.origin === 'Unknown' ? 'Unattributed' : ev.origin;
+      const extra = ev.areas.length - 1;
+      const cells = [
+        fmtBoardTime(ev.ts),
+        (ev.areas[0] || 'Israel') + (extra > 0 ? ` +${extra}` : ''),
+        who,
+        fmtNum(ev.count),
+      ];
+      cells.forEach((txt, i) => {
+        const td = document.createElement('td');
+        if (i === 2) {
+          const chip = document.createElement('span');
+          chip.className = 'chip';
+          chip.style.background = `var(--${ev.origin.toLowerCase()})`;
+          td.appendChild(chip);
+          const name = document.createElement('span');
+          name.className = 'origin-name';
+          name.textContent = txt;
+          td.appendChild(name);
+          td.title = txt;
+        } else {
+          td.appendChild(document.createTextNode(txt));
+        }
+        if (i === 1) td.title = ev.areas.join(', ');
+        tr.appendChild(td);
+      });
+      return tr;
+    });
+    if (rows.length) {
+      body.replaceChildren(...rows);
+      document.getElementById('board-fresh').textContent =
+        `Last alert ${alertRelTime(data.events[0].ts)}. Origin estimated from location and timing.`;
+    } else {
+      throw new Error('no events');
+    }
   } catch (e) {
-    document.getElementById('counter-alerts').textContent = '160,000+';
-    document.getElementById('counter-actors').textContent = '4';
-    document.getElementById('counter-years').textContent = '6';
+    const tr = document.createElement('tr'); tr.className = 'empty';
+    const td = document.createElement('td'); td.colSpan = 4;
+    td.textContent = 'Latest alerts are unavailable right now. The full record below is unaffected.';
+    tr.appendChild(td); body.replaceChildren(tr);
   }
 })();
 
-
-// ── Live ticker under the hero ──────────────────────────────────────────────
-(async () => {
-  const strip = document.getElementById('live-strip');
-  if (!strip) return;
-  try {
-    const data = await fetchData('recent_alerts.json');
-    const ev = data.events && data.events[0];
-    if (!ev) return;
-    const who = ev.origin === 'Unknown' ? 'Unattributed' : ev.origin;
-    const extra = ev.areas.length - 1;
-    document.getElementById('live-strip-text').textContent =
-      `Last alert ${alertRelTime(ev.ts)} — ${who}, ${ev.areas[0] || 'Israel'}` +
-      (extra > 0 ? ` +${extra} more areas` : '') +
-      (ev.count > 1 ? ` (${ev.count.toLocaleString()} alerts)` : '');
-    strip.style.display = '';
-  } catch (e) { /* ticker is optional */ }
-})();
-
-// ── Card sparkline previews ────────────────────────────────────────────────
+// ── Row previews ────────────────────────────────────────────────
 // Each card gets a tiny live D3 chart rendered on first scroll into view.
 // Data is shared/cached so loading one chart costs nothing for siblings.
 
@@ -74,9 +129,9 @@ async function drawPreviewTimeline(svgEl) {
   const pre = data.filter(d => parse(d.week) < oct7);
   const post = data.filter(d => parse(d.week) >= oct7);
   svg.append('path').datum(pre).attr('fill','rgba(200,200,216,0.25)').attr('stroke','rgba(200,200,216,0.5)').attr('stroke-width',0.8).attr('d', area);
-  svg.append('path').datum(post).attr('fill','rgba(214,48,49,0.4)').attr('stroke','rgba(214,48,49,0.8)').attr('stroke-width',0.8).attr('d', area);
+  svg.append('path').datum(post).attr('fill','rgba(224,73,62,0.4)').attr('stroke','rgba(224,73,62,0.8)').attr('stroke-width',0.8).attr('d', area);
   svg.append('line').attr('x1', x(oct7)).attr('x2', x(oct7)).attr('y1', 0).attr('y2', H)
-    .attr('stroke','#e8b84b').attr('stroke-width',0.8).attr('stroke-dasharray','2,2');
+    .attr('stroke','#b9b5ac').attr('stroke-width',0.8).attr('stroke-dasharray','2,2');
 }
 
 // Stacked bars fronts (mini)
@@ -84,7 +139,7 @@ async function drawPreviewFronts(svgEl) {
   const raw = await getData('actors_monthly.json');
   const W = svgEl.clientWidth || 280, H = svgEl.clientHeight || 70;
   const actors = ['Hamas', 'Hezbollah', 'Houthis', 'Iran', 'Unknown'];
-  const colors = { Iran:'#c678dd', Hezbollah:'#f39c12', Houthis:'#4a9eff', Hamas:'#d63031', Unknown:'#3a3a4a' };
+  const colors = { Iran:'#b27ce0', Hezbollah:'#ee8a2a', Houthis:'#4f9be8', Hamas:'#e0493e', Unknown:'#6f6c66' };
   const data = raw.map(d => { const r = { month: d.month }; actors.forEach(a => r[a] = d[a] || 0); return r; });
   const xBand = d3.scaleBand().domain(data.map(d => d.month)).range([0, W]).paddingInner(0.15);
   const stack = d3.stack().keys(actors)(data);
@@ -108,24 +163,25 @@ async function drawPreviewCalendar(svgEl) {
   const W = svgEl.clientWidth || 280, H = svgEl.clientHeight || 70;
   const svg = d3.select(svgEl).attr('viewBox', `0 0 ${W} ${H}`);
   const maxC = d3.max(data, d => d.count);
-  const scale = d3.scaleSequential(t => d3.interpolateRgb('#15151c', '#d63031')(t))
+  const scale = d3.scaleSequential(t => d3.interpolateRgb('#15151c', '#e0493e')(t))
     .domain([0, Math.log10(maxC + 1)]);
-  // Sample every Nth day to fit
-  const stride = Math.ceil(data.length / (W * 0.9));
-  const cellW = (W - 4) / Math.ceil(data.length / stride / 7);
+  // One column per week, one row per weekday. (Sampling every Nth day broke
+  // when N landed on 7: every sample fell on the same weekday.)
+  const first = new Date(data[0].date + 'T00:00:00');
+  const offset = (first.getDay() + 6) % 7;
+  const nWeeks = Math.ceil((data.length + offset) / 7);
+  const cellW = (W - 4) / nWeeks;
   const cellH = (H - 2) / 7;
-  let col = 0, row = 0;
-  for (let i = 0; i < data.length; i += stride) {
+  for (let i = 0; i < data.length; i++) {
     const d = data[i];
-    const dt = new Date(d.date + 'T00:00:00');
-    row = (dt.getDay() + 6) % 7;
-    col = Math.floor(i / stride / 7);
+    const row = (i + offset) % 7;
+    const col = Math.floor((i + offset) / 7);
     svg.append('rect')
       .attr('x', 2 + col * cellW)
       .attr('y', 1 + row * cellH)
-      .attr('width', Math.max(1, cellW - 0.6))
+      .attr('width', Math.max(0.8, cellW - (cellW > 2 ? 0.6 : 0)))
       .attr('height', Math.max(1, cellH - 0.6))
-      .attr('fill', d.count === 0 ? '#0f0f14' : scale(Math.log10(d.count + 1)))
+      .attr('fill', d.count === 0 ? '#16171a' : scale(Math.log10(d.count + 1)))
       .attr('rx', 0.8);
   }
 }
@@ -210,7 +266,7 @@ function drawIsraelStipple(svg, W, H, opts = {}) {
     const r = rng() * 0.5 + 0.4;
     const a = 0.35 + rng() * 0.45;
     svg.append('circle').attr('cx', x).attr('cy', y).attr('r', r)
-      .attr('fill', `rgba(232,184,75,${a.toFixed(3)})`);
+      .attr('fill', `rgba(242,178,51,${a.toFixed(3)})`);
     placed++;
   }
 
@@ -221,7 +277,7 @@ function drawIsraelStipple(svg, W, H, opts = {}) {
   }).join(' ') + ' Z';
   svg.append('path').attr('d', pathD)
     .attr('fill', 'none')
-    .attr('stroke', 'rgba(232,184,75,0.55)')
+    .attr('stroke', 'rgba(242,178,51,0.55)')
     .attr('stroke-width', 0.7)
     .attr('stroke-linejoin', 'round');
 
@@ -229,8 +285,8 @@ function drawIsraelStipple(svg, W, H, opts = {}) {
   const [gx, gy] = project(0.10, 0.46);
   svg.append('rect')
     .attr('x', gx - 4).attr('y', gy - 3).attr('width', 5).attr('height', 8)
-    .attr('fill', 'rgba(214,48,49,0.18)')
-    .attr('stroke', 'rgba(214,48,49,0.55)').attr('stroke-width', 0.5)
+    .attr('fill', 'rgba(224,73,62,0.18)')
+    .attr('stroke', 'rgba(224,73,62,0.55)').attr('stroke-width', 0.5)
     .attr('rx', 0.6);
 
   return { project, boxX, boxY, boxW, boxH };
@@ -265,14 +321,14 @@ async function drawPreviewRecords(svgEl) {
   const svg = d3.select(svgEl).attr('viewBox', `0 0 ${W} ${H}`);
   svg.append('text').attr('x', W/2).attr('y', H * 0.50)
     .attr('text-anchor','middle')
-    .attr('font-family','Playfair Display').attr('font-weight', 900)
-    .attr('font-size', H * 0.55).attr('fill', '#d63031')
+    .attr('font-family','Archivo Narrow').attr('font-weight', 700)
+    .attr('font-size', H * 0.58).attr('fill', '#f1ede4')
     .text(records.busiest_day.count.toLocaleString());
   svg.append('text').attr('x', W/2).attr('y', H * 0.88)
     .attr('text-anchor','middle')
-    .attr('font-family','IBM Plex Mono').attr('font-size', 8).attr('fill','#5a5a70')
-    .attr('letter-spacing', '0.1em')
-    .text('BUSIEST DAY · ALL-TIME RECORD');
+    .attr('font-family','Archivo Narrow').attr('font-weight', 600).attr('font-size', 11).attr('fill','#8f8b83')
+    .attr('letter-spacing', '0.08em')
+    .text('BUSIEST DAY ON RECORD');
 }
 
 // Polar clock mini
@@ -292,7 +348,7 @@ async function drawPreviewClock(svgEl) {
     const arc = d3.arc().innerRadius(innerR).outerRadius(rS(row.count)).startAngle(startA).endAngle(startA + sA - 0.01);
     const isPeak = row.hour === 10;
     const isNight = row.hour < 6 || row.hour >= 22;
-    g.append('path').attr('d', arc).attr('fill', isPeak ? '#d63031' : isNight ? 'rgba(74,158,255,0.5)' : 'rgba(232,184,75,0.6)');
+    g.append('path').attr('d', arc).attr('fill', isPeak ? '#e0493e' : isNight ? 'rgba(79,155,232,0.5)' : 'rgba(242,178,51,0.6)');
   });
 }
 
@@ -307,7 +363,7 @@ async function drawPreviewAreas(svgEl) {
   data.forEach((d, i) => {
     svg.append('rect').attr('x', 0).attr('y', y(d.area))
       .attr('width', x(d.total)).attr('height', y.bandwidth())
-      .attr('fill', i < 3 ? '#d63031' : 'rgba(232,184,75,0.55)').attr('rx', 1);
+      .attr('fill', i < 3 ? '#e0493e' : 'rgba(242,178,51,0.55)').attr('rx', 1);
   });
 }
 
@@ -324,15 +380,15 @@ async function drawPreviewDow(svgEl) {
     svg.append('rect')
       .attr('x', x(row.day)).attr('y', y(row.count))
       .attr('width', x.bandwidth()).attr('height', H - y(row.count))
-      .attr('fill', isSat ? '#d63031' : 'rgba(232,184,75,0.55)').attr('rx', 1);
+      .attr('fill', isSat ? '#e0493e' : 'rgba(242,178,51,0.55)').attr('rx', 1);
   });
 }
 
 // Compare mini: operation totals as horizontal bars, coloured by front
 async function drawPreviewCompare(svgEl) {
   const ops = (await getData('operations.json')).operations;
-  const FRONT = { 'Gaza': '#d63031', 'Lebanon': '#f39c12', 'Yemen': '#4a9eff',
-                  'Iran': '#c678dd', 'All fronts': '#e8e8ea' };
+  const FRONT = { 'Gaza': '#e0493e', 'Lebanon': '#ee8a2a', 'Yemen': '#4f9be8',
+                  'Iran': '#b27ce0', 'All fronts': '#e8e8ea' };
   const data = [...ops].sort((a, b) => b.total - a.total).slice(0, 7);
   const W = svgEl.clientWidth || 280, H = svgEl.clientHeight || 70;
   const x = d3.scaleLinear().domain([0, data[0].total]).range([0, W]);
@@ -354,13 +410,13 @@ async function drawPreviewTimelapse(svgEl) {
   const svg = d3.select(svgEl).attr('viewBox', `0 0 ${W} ${H}`);
   svg.append('path').datum(am.totals)
     .attr('d', d3.area().x((d, i) => x(i)).y0(H).y1(d => y(d)).curve(d3.curveMonotoneX))
-    .attr('fill', 'rgba(214,48,49,0.3)').attr('stroke', '#d63031').attr('stroke-width', 1);
+    .attr('fill', 'rgba(224,73,62,0.3)').attr('stroke', '#e0493e').attr('stroke-width', 1);
 }
 
 // Arsenal mini: weapon ranges as log-scale bars, coloured by actor
 async function drawPreviewArsenal(svgEl) {
   const a = await getData('arsenal.json');
-  const ACTOR = { hamas: '#d63031', hezbollah: '#f39c12', houthis: '#4a9eff', iran: '#c678dd' };
+  const ACTOR = { hamas: '#e0493e', hezbollah: '#ee8a2a', houthis: '#4f9be8', iran: '#b27ce0' };
   const data = [...a.systems]
     .map(s => ({ actor: s.actor, r: Array.isArray(s.range_km) ? s.range_km[1] : s.range_km }))
     .filter(s => s.r > 0).sort((p, q) => q.r - p.r).slice(0, 9);
@@ -379,16 +435,15 @@ async function drawPreviewArsenal(svgEl) {
 async function drawPreviewData(svgEl) {
   const W = svgEl.clientWidth || 280, H = svgEl.clientHeight || 70;
   const svg = d3.select(svgEl).attr('viewBox', `0 0 ${W} ${H}`);
-  const files = ['alerts.csv.gz', 'stats_summary.json', 'timeline_weekly.json',
-                 'operations.json', 'area_polygons.json'];
+  const files = ['alerts.csv.gz', 'stats_summary.json', 'timeline_weekly.json', 'operations.json'];
   files.forEach((f, i) => {
-    const yPos = 10 + i * 13;
+    const yPos = 12 + i * (H - 14) / 3.2;
     svg.append('text').attr('x', 2).attr('y', yPos)
-      .attr('font-family', 'IBM Plex Mono').attr('font-size', '8.5px')
-      .attr('fill', i === 0 ? '#e8b84b' : 'rgba(255,255,255,0.45)').text(f);
+      .attr('font-family', 'Archivo Narrow').attr('font-size', '12px').attr('font-weight', 600)
+      .attr('fill', i === 0 ? '#f1ede4' : '#b9b5ac').text(f);
     svg.append('text').attr('x', W - 2).attr('y', yPos).attr('text-anchor', 'end')
-      .attr('font-family', 'IBM Plex Mono').attr('font-size', '8.5px')
-      .attr('fill', 'rgba(255,255,255,0.25)').text('↓');
+      .attr('font-family', 'Archivo Narrow').attr('font-size', '12px')
+      .attr('fill', '#8f8b83').text(i === 0 ? 'CSV' : 'JSON');
   });
 }
 

@@ -458,7 +458,7 @@ def write_llms_txt(rows):
 - [Fronts](https://under-fire.org/fronts): monthly stacked bars per actor (Hamas, Hezbollah, Houthis, Iran)
 - [Calendar](https://under-fire.org/calendar): GitHub-style daily heatmap, one cell per day
 - [Oct 7](https://under-fire.org/oct7): animated replay of the ~4,000-alert October 7, 2023 attack
-- [Story](https://under-fire.org/story): scroll-driven map narrative of the war, chapter by chapter
+- [Story](https://under-fire.org/story): guided map narrative of the war, chapter by chapter
 - [Patterns](https://under-fire.org/patterns): time-of-day polar clock, weekday pattern, actor×hour heatmap
 - [Areas](https://under-fire.org/areas): choropleth + ranking of alerts by Home Front Command region
 - [Time-lapse](https://under-fire.org/timelapse): month-by-month animated map of where alerts fell, 2020–today

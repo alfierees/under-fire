@@ -13,9 +13,9 @@
   <meta property="og:image" content="https://under-fire.org/images/og-card.png">
   <meta property="og:url" content="https://under-fire.org/compare">
   <meta name="twitter:card" content="summary_large_image">
-  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400;1,700&family=IBM+Plex+Mono:wght@300;400;500&family=IBM+Plex+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,300..800&family=Archivo+Narrow:wght@400..700&family=Bodoni+Moda:opsz,wght@6..96,500..900&display=swap" rel="stylesheet">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.8.5/d3.min.js"></script>
-  <link rel="stylesheet" href="src/css/shared.css">
+  <link rel="stylesheet" href="src/css/shared.css?v=20260927a">
   <style>
     #scatter-wrap { width:100%; overflow-x:auto; }
     #scatter { display:block; }
@@ -25,12 +25,12 @@
     .op-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(300px,1fr)); gap:1rem; margin-top:1.4rem; }
     .op-card { border:1px solid var(--border); border-radius:4px; padding:1.3rem 1.4rem; background:rgba(255,255,255,.015); position:relative; overflow:hidden; }
     .op-card::before { content:''; position:absolute; top:0; left:0; right:0; height:2px; background:var(--op-color,#666); }
-    .op-eyebrow { font-family:'IBM Plex Mono',monospace; font-size:.55rem; letter-spacing:.14em; text-transform:uppercase; color:var(--muted); margin-bottom:.4rem; }
-    .op-name { font-family:'Playfair Display',serif; font-weight:900; font-size:1.25rem; color:#fff; line-height:1.15; margin-bottom:.15rem; }
-    .op-dates { font-family:'IBM Plex Mono',monospace; font-size:.6rem; color:var(--op-color,#aaa); margin-bottom:.75rem; }
+    .op-eyebrow { font-family:'Archivo Narrow',monospace; font-size:.74rem; letter-spacing:.08em; text-transform:uppercase; color:var(--muted); margin-bottom:.4rem; }
+    .op-name { font-family:'Bodoni Moda',serif; font-weight:900; font-size:1.25rem; color:#fff; line-height:1.15; margin-bottom:.15rem; }
+    .op-dates { font-family:'Archivo Narrow',monospace; font-size:.76rem; color:var(--op-color,#aaa); margin-bottom:.75rem; }
     .op-desc { font-size:.8rem; color:var(--muted); line-height:1.65; margin-bottom:.9rem; }
     .op-stats { border-top:1px solid rgba(255,255,255,.07); }
-    .op-row { display:flex; justify-content:space-between; font-family:'IBM Plex Mono',monospace; font-size:.63rem; padding:.3rem 0; border-bottom:1px solid rgba(255,255,255,.05); }
+    .op-row { display:flex; justify-content:space-between; font-family:'Archivo Narrow',monospace; font-size:.63rem; padding:.3rem 0; border-bottom:1px solid rgba(255,255,255,.05); }
     .op-row span:first-child { color:var(--muted); }
     .op-row span:last-child { color:var(--text); }
     .op-row.hero-row span:last-child { color:var(--op-color,#fff); font-weight:500; }
@@ -70,16 +70,16 @@
 <body>
 
 <div id="file-protocol-warning">
-  <strong>⚠ CHARTS WON'T LOAD VIA FILE://</strong>
+  <strong>Charts won't load from a file:// URL</strong>
   Run: <code>python3 -m http.server 8000</code>
-  <span class="close-x" onclick="this.parentElement.style.display='none'">✕</span>
+  <button class="close-x" type="button" aria-label="Dismiss" onclick="this.parentElement.style.display='none'"></button>
 </div>
 
 <nav>
   <a href="index.html" class="nav-brand">Under Fire</a>
   <div class="nav-links">
     <div class="nav-group">
-      <button class="nav-group-btn" type="button">Charts<span class="caret">▾</span></button>
+      <button class="nav-group-btn" type="button">Charts<span class="caret" aria-hidden="true"></span></button>
       <div class="nav-dropdown">
         <a href="timeline.html">Timeline</a>
         <a href="fronts.html">Fronts</a>
@@ -88,7 +88,7 @@
       </div>
     </div>
     <div class="nav-group">
-      <button class="nav-group-btn" type="button">Maps<span class="caret">▾</span></button>
+      <button class="nav-group-btn" type="button">Maps<span class="caret" aria-hidden="true"></span></button>
       <div class="nav-dropdown">
         <a href="oct7.html">Oct 7</a>
         <a href="story.html">Story</a>
@@ -96,14 +96,14 @@
       </div>
     </div>
     <div class="nav-group">
-      <button class="nav-group-btn" type="button">Patterns<span class="caret">▾</span></button>
+      <button class="nav-group-btn" type="button">Patterns<span class="caret" aria-hidden="true"></span></button>
       <div class="nav-dropdown">
         <a href="patterns.html">Patterns</a>
         <a href="areas.html">By Area</a>
       </div>
     </div>
     <div class="nav-group">
-      <button class="nav-group-btn" type="button">More<span class="caret">▾</span></button>
+      <button class="nav-group-btn" type="button">More<span class="caret" aria-hidden="true"></span></button>
       <div class="nav-dropdown">
         <a href="live.html">Live Feed</a>
         <a href="records.html">Records &amp; Stats</a>
@@ -113,37 +113,34 @@
       </div>
     </div>
   </div>
-  <a href="live.html" class="nav-badge" id="nav-badge">🔔 Loading…</a>
+  <a href="live.html" class="nav-badge" id="nav-badge">160,000+ alerts</a>
 </nav>
 
 <div id="tooltip"></div>
 
 <div class="chart-page">
   <div class="section-wrapper">
-    <a href="index.html" class="back-link">← Back to all charts</a>
-    <div class="section-label">09 — Compare</div>
+    <a href="index.html" class="back-link">All charts</a>
     <h1 class="section-title">The Wars, Side by Side</h1>
     <p class="section-desc"><span id="op-count">Ten</span> named operations and campaigns — every one since 2020, measured in the same unit — Home Front Command alerts. Some wars are a violent night; some are a two-year grind. The May 2021 Gaza war, the biggest of its era, produced 6,325 alerts in twelve days. The June 2025 Israel–Iran war produced three times that in the same span — and the war that began in February 2026 has passed 83,000, more than every previous round combined.</p>
 
     <div class="filter-bar">
       <span class="filter-label">Fronts</span>
-      <span style="font-family:'IBM Plex Mono',monospace;font-size:.62rem;color:#d63031;">■ Gaza</span>
-      <span style="font-family:'IBM Plex Mono',monospace;font-size:.62rem;color:#f39c12;">■ Lebanon</span>
-      <span style="font-family:'IBM Plex Mono',monospace;font-size:.62rem;color:#4a9eff;">■ Yemen</span>
-      <span style="font-family:'IBM Plex Mono',monospace;font-size:.62rem;color:#c678dd;">■ Iran</span>
-      <span style="font-family:'IBM Plex Mono',monospace;font-size:.62rem;color:#e8e8ea;">■ All fronts</span>
+      <span style="font-family:'Archivo Narrow',monospace;font-size:.78rem;color:#e0493e;">■ Gaza</span>
+      <span style="font-family:'Archivo Narrow',monospace;font-size:.78rem;color:#ee8a2a;">■ Lebanon</span>
+      <span style="font-family:'Archivo Narrow',monospace;font-size:.78rem;color:#4f9be8;">■ Yemen</span>
+      <span style="font-family:'Archivo Narrow',monospace;font-size:.78rem;color:#b27ce0;">■ Iran</span>
+      <span style="font-family:'Archivo Narrow',monospace;font-size:.78rem;color:#e8e8ea;">■ All fronts</span>
     </div>
 
     <div id="intensity" class="chart-gated">
-      <div class="section-label" style="margin-bottom:.5rem;">Duration × intensity</div>
       <h2 class="section-title" style="font-size:1.8rem;margin-bottom:.5rem;">A night of terror or a year of attrition</h2>
-      <p class="section-desc" style="margin-bottom:1.25rem;max-width:640px;">Each circle is one operation — the further right, the longer it lasted; the higher, the more intense the average day. Circle area = total alerts. Both axes are logarithmic. <strong style="color:var(--accent);font-weight:500;">Click a circle to fire that war's salvo across the chart.</strong></p>
+      <p class="section-desc" style="margin-bottom:1.25rem;max-width:640px;">Each circle is one operation — the further right, the longer it lasted; the higher, the more intense the average day. Circle area = total alerts. Both axes are logarithmic. <strong style="color:var(--accent);font-weight:500;">Click a circle to replay that operation's salvo across the chart.</strong></p>
       <div id="scatter-wrap"><svg id="scatter"></svg></div>
       <p class="chart-note">Intensity = alerts per calendar day across the window. Iran's single-night barrages sit top-left; the Houthi drip-campaign bottom-right; the 2026 war top-right.</p>
     </div>
 
     <div style="margin-top:3.5rem;" id="ranked" class="chart-gated">
-      <div class="section-label" style="margin-bottom:.5rem;">The leaderboard</div>
       <h2 class="section-title" style="font-size:1.8rem;margin-bottom:.5rem;">Total alerts per operation</h2>
       <p class="section-desc" style="margin-bottom:1.25rem;max-width:620px;">Every operation ranked by total alerts in its window. The marker on each bar is its single worst day.</p>
       <div id="rank-chart"></div>
@@ -151,7 +148,6 @@
     </div>
 
     <div style="margin-top:3.5rem;">
-      <div class="section-label" style="margin-bottom:.5rem;">Operation files</div>
       <h2 class="section-title" style="font-size:1.8rem;margin-bottom:.5rem;">Every operation, on one card each</h2>
       <div class="op-grid" id="op-grid"></div>
     </div>
@@ -164,13 +160,13 @@
   <div class="footer-credit">Alert data from <a href="https://rocketalert.live" target="_blank">RocketAlert.live</a>.</div>
 </footer>
 
-<script src="src/js/shared.js?v=20260613e"></script>
+<script src="src/js/shared.js?v=20260927a"></script>
 <script src="src/js/salvo.js"></script>
 <script>
 let salvoScatter = null;
 const FRONT_COLORS = {
-  'Gaza': '#d63031', 'Lebanon': '#f39c12', 'Yemen': '#4a9eff',
-  'Iran': '#c678dd', 'All fronts': '#e8e8ea',
+  'Gaza': '#e0493e', 'Lebanon': '#ee8a2a', 'Yemen': '#4f9be8',
+  'Iran': '#b27ce0', 'All fronts': '#e8e8ea',
 };
 const MONTHS_ABBR = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
 function fmtDate(d) {
@@ -195,19 +191,19 @@ function drawScatter(ops, animate) {
   g.append('g').attr('transform', `translate(0,${h})`)
     .call(d3.axisBottom(x).ticks(5, d => d >= 365 ? Math.round(d / 365) + 'y' : d + 'd'))
     .call(s => { s.select('.domain').attr('stroke', 'var(--border)');
-      s.selectAll('text').attr('fill', 'var(--muted)').attr('font-family', 'IBM Plex Mono').attr('font-size', '10px');
+      s.selectAll('text').attr('fill', 'var(--muted)').attr('font-family', 'Archivo Narrow').attr('font-size', '12px');
       s.selectAll('line').attr('stroke', 'var(--border)'); });
   g.append('g')
     .call(d3.axisLeft(y).ticks(4, d3.format('~s')))
     .call(s => { s.select('.domain').attr('stroke', 'var(--border)');
-      s.selectAll('text').attr('fill', 'var(--muted)').attr('font-family', 'IBM Plex Mono').attr('font-size', '10px');
+      s.selectAll('text').attr('fill', 'var(--muted)').attr('font-family', 'Archivo Narrow').attr('font-size', '12px');
       s.selectAll('line').attr('stroke', 'var(--border)'); });
 
   g.append('text').attr('x', w / 2).attr('y', h + 38).attr('text-anchor', 'middle')
-    .attr('font-family', 'IBM Plex Mono').attr('font-size', '9.5px').attr('fill', 'var(--muted)')
+    .attr('font-family', 'Archivo Narrow').attr('font-size', '11.5px').attr('fill', 'var(--muted)')
     .attr('letter-spacing', '.12em').text('DURATION (LOG)');
   g.append('text').attr('transform', 'rotate(-90)').attr('x', -h / 2).attr('y', -46)
-    .attr('text-anchor', 'middle').attr('font-family', 'IBM Plex Mono').attr('font-size', '9.5px')
+    .attr('text-anchor', 'middle').attr('font-family', 'Archivo Narrow').attr('font-size', '11.5px')
     .attr('fill', 'var(--muted)').attr('letter-spacing', '.12em').text('ALERTS / DAY (LOG)');
 
   // hand-tuned label offsets so nothing collides
@@ -231,7 +227,7 @@ function drawScatter(ops, animate) {
         `Total: ${fmtNum(o.total)}<br>Days: ${fmtNum(o.days)}<br>` +
         `Avg/day: ${fmtNum(Math.round(o.per_day))}<br>` +
         `Worst day: ${fmtNum(o.peak ? o.peak.count : 0)}<br>` +
-        `<span style="color:var(--accent);">▶ click to fire the salvo</span>`, e))
+        `<span style="color:var(--accent);">Click to replay the salvo</span>`, e))
       .on('mousemove', moveTip).on('mouseleave', hideTip)
       .on('click', () => { if (salvoScatter) salvoScatter.fire({ count: o.total, label: o.name }); });
     if (animate) {
@@ -241,7 +237,7 @@ function drawScatter(ops, animate) {
     const [dx, dy] = nudge[o.id] || [8, -8];
     const lbl = g.append('text').attr('x', cx + dx).attr('y', cy + dy - (nudge[o.id] ? 0 : r(o.total)))
       .attr('text-anchor', dx === 0 ? 'middle' : (dx > 0 ? 'start' : 'end'))
-      .attr('font-family', 'IBM Plex Mono').attr('font-size', '9.5px').attr('fill', col)
+      .attr('font-family', 'Archivo Narrow').attr('font-size', '11.5px').attr('fill', col)
       .text(o.name.replace(' — the 12-Day War', ''));
     if (animate) {
       lbl.attr('opacity', 0)
@@ -280,11 +276,11 @@ function drawRank(ops) {
         .transition().delay(i * 70 + 420).duration(220).attr('opacity', .85);
     }
     g.append('text').attr('x', -8).attr('y', yPos + barH / 2 + 4)
-      .attr('text-anchor', 'end').attr('font-family', 'IBM Plex Mono').attr('font-size', '10.5px')
+      .attr('text-anchor', 'end').attr('font-family', 'Archivo Narrow').attr('font-size', '12.5px')
       .attr('fill', i < 3 ? '#fff' : 'var(--muted)')
       .text(d.name.length > 24 ? d.name.slice(0, 23) + '…' : d.name);
     g.append('text').attr('x', x(d.total) + 8).attr('y', yPos + barH / 2 + 4)
-      .attr('font-family', 'IBM Plex Mono').attr('font-size', '10px').attr('fill', 'var(--muted)')
+      .attr('font-family', 'Archivo Narrow').attr('font-size', '12px').attr('fill', 'var(--muted)')
       .attr('opacity', 0).text(fmtNum(d.total))
       .transition().delay(i * 70 + 420).duration(200).attr('opacity', 1);
   });
@@ -292,7 +288,7 @@ function drawRank(ops) {
   g.append('g').attr('transform', `translate(0,${H - M.top - M.bottom})`)
     .call(d3.axisBottom(x).ticks(5).tickFormat(d => d >= 1000 ? (d / 1000) + 'k' : d))
     .call(s => { s.select('.domain').attr('stroke', 'var(--border)');
-      s.selectAll('text').attr('fill', 'var(--muted)').attr('font-family', 'IBM Plex Mono').attr('font-size', '10px');
+      s.selectAll('text').attr('fill', 'var(--muted)').attr('font-family', 'Archivo Narrow').attr('font-size', '12px');
       s.selectAll('line').attr('stroke', 'var(--border)'); });
 }
 

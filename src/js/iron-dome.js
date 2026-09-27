@@ -6,6 +6,8 @@
   const canvas = document.getElementById('iron-dome-canvas');
   if (!canvas) return;
   const ctx = canvas.getContext('2d');
+  // Reduced motion: paint a single still frame (stars + one salvo) and stop.
+  const REDUCED = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
   function resize() {
     const rect = canvas.getBoundingClientRect();
@@ -23,16 +25,6 @@
     phase: Math.random() * Math.PI * 2
   }));
 
-  const BUILDINGS = [
-    [0.00,0.030,0.055],[0.03,0.018,0.095],[0.05,0.035,0.048],
-    [0.09,0.025,0.085],[0.12,0.045,0.065],[0.17,0.018,0.040],
-    [0.20,0.038,0.110],[0.24,0.028,0.075],[0.27,0.055,0.095],
-    [0.33,0.028,0.055],[0.36,0.048,0.130],[0.41,0.038,0.080],
-    [0.45,0.025,0.065],[0.48,0.058,0.120],[0.54,0.035,0.070],
-    [0.58,0.048,0.100],[0.63,0.028,0.055],[0.66,0.055,0.140],
-    [0.72,0.038,0.082],[0.76,0.048,0.115],[0.81,0.028,0.062],
-    [0.84,0.048,0.095],[0.89,0.038,0.058],[0.93,0.065,0.078]
-  ];
   const GROUND_Y = 0.83;
   const BATTERIES = [0.14, 0.33, 0.52, 0.71, 0.88];
 
@@ -122,7 +114,7 @@
       p.trail.forEach(pt => { pt.alpha *= 0.89; });
       p.trail = p.trail.filter(pt => pt.alpha > 0.018);
 
-      const trailRGB = isMissile ? '214,68,49' : '74,158,255';
+      const trailRGB = isMissile ? '240,120,80' : '205,222,255';
       for (let i = 1; i < p.trail.length; i++) {
         const a = p.trail[i - 1], b = p.trail[i];
         ctx.beginPath();
@@ -135,7 +127,7 @@
       }
 
       if (p.t < 1 && !p.intercepted) {
-        const headColor = isMissile ? '#ff7675' : '#74b9ff';
+        const headColor = isMissile ? '#ffb08a' : '#e4eeff';
         const headR     = isMissile ? 5 : 3.5;
         const grad = ctx.createRadialGradient(px * W, py * H, 0, px * W, py * H, headR * 2.5);
         grad.addColorStop(0, headColor);
@@ -168,8 +160,8 @@
         const coreR = (1 - t) * 22 + t * 8;
         const grad  = ctx.createRadialGradient(ex, ey, 0, ex, ey, coreR);
         grad.addColorStop(0,   `rgba(255,255,255,${(1 - t) * 0.98})`);
-        grad.addColorStop(0.35,`rgba(232,184,75,${(1 - t) * 0.85})`);
-        grad.addColorStop(1,   'rgba(214,48,49,0)');
+        grad.addColorStop(0.35,`rgba(242,178,51,${(1 - t) * 0.85})`);
+        grad.addColorStop(1,   'rgba(224,73,62,0)');
         ctx.beginPath();
         ctx.arc(ex, ey, coreR, 0, Math.PI * 2);
         ctx.fillStyle = grad;
@@ -179,7 +171,7 @@
       const ringR = t * 62;
       ctx.beginPath();
       ctx.arc(ex, ey, ringR, 0, Math.PI * 2);
-      ctx.strokeStyle = `rgba(232,184,75,${Math.max(0, 0.55 - t * 0.65)})`;
+      ctx.strokeStyle = `rgba(242,178,51,${Math.max(0, 0.55 - t * 0.65)})`;
       ctx.lineWidth = 1.2;
       ctx.stroke();
 
@@ -196,7 +188,7 @@
         const py2  = ey + Math.sin(part.angle) * dist;
         const pr   = part.r * (1 - t * 0.7);
         if (pr <= 0) return;
-        const pRGB = t < 0.35 ? '232,184,75' : '214,68,49';
+        const pRGB = t < 0.35 ? '242,178,51' : '224,73,62';
         ctx.beginPath();
         ctx.arc(px2, py2, pr, 0, Math.PI * 2);
         ctx.fillStyle = `rgba(${pRGB},${fadeOut * 0.88})`;
@@ -206,55 +198,8 @@
       if (t >= 1) exp.done = true;
     });
 
-    const groundPx = GROUND_Y * H;
-    BATTERIES.forEach(bx => {
-      const bgx = bx * W;
-      const battGrad = ctx.createRadialGradient(bgx, groundPx, 0, bgx, groundPx, 48);
-      battGrad.addColorStop(0, 'rgba(74,158,255,0.22)');
-      battGrad.addColorStop(1, 'rgba(74,158,255,0)');
-      ctx.beginPath();
-      ctx.arc(bgx, groundPx, 48, 0, Math.PI * 2);
-      ctx.fillStyle = battGrad;
-      ctx.fill();
-      ctx.beginPath();
-      ctx.arc(bgx, groundPx - 3, 2.5, 0, Math.PI * 2);
-      ctx.fillStyle = 'rgba(74,158,255,0.80)';
-      ctx.fill();
-    });
 
-    ctx.save();
-    ctx.beginPath();
-    ctx.moveTo(0, H);
-    ctx.lineTo(0, groundPx);
-    BUILDINGS.forEach(([bx, bw, bh]) => {
-      const bpx = bx * W, bpw = bw * W, bph = bh * H;
-      ctx.lineTo(bpx, groundPx);
-      ctx.lineTo(bpx, groundPx - bph);
-      ctx.lineTo(bpx + bpw, groundPx - bph);
-      ctx.lineTo(bpx + bpw, groundPx);
-    });
-    ctx.lineTo(W, groundPx);
-    ctx.lineTo(W, H);
-    ctx.closePath();
-    ctx.fillStyle = '#07070a';
-    ctx.fill();
-
-    ctx.beginPath();
-    ctx.moveTo(0, groundPx);
-    BUILDINGS.forEach(([bx, bw, bh]) => {
-      const bpx = bx * W, bpw = bw * W, bph = bh * H;
-      ctx.lineTo(bpx, groundPx);
-      ctx.lineTo(bpx, groundPx - bph);
-      ctx.lineTo(bpx + bpw, groundPx - bph);
-      ctx.lineTo(bpx + bpw, groundPx);
-    });
-    ctx.lineTo(W, groundPx);
-    ctx.strokeStyle = 'rgba(37,37,58,0.90)';
-    ctx.lineWidth = 0.8;
-    ctx.stroke();
-    ctx.restore();
-
-    requestAnimationFrame(draw);
+    if (!REDUCED) requestAnimationFrame(draw);
   }
 
   spawnEvent();

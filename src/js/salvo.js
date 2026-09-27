@@ -40,10 +40,10 @@
       position: 'absolute', top: '1rem', left: '50%',
       transform: 'translateX(-50%)',
       padding: '.6rem 1.2rem',
-      background: 'rgba(7,7,10,.88)',
+      background: 'rgba(14,15,17,.88)',
       border: '1px solid var(--red)',
       borderRadius: '3px',
-      fontFamily: "'IBM Plex Mono', monospace",
+      fontFamily: "'Archivo Narrow', monospace",
       fontSize: '.7rem', letterSpacing: '.12em',
       textTransform: 'uppercase', color: 'var(--accent)',
       zIndex: '51', opacity: '0',
@@ -173,8 +173,8 @@
           const coreR = (1 - t) * 14 + 4;
           const grad = ctx.createRadialGradient(ex, ey, 0, ex, ey, coreR);
           grad.addColorStop(0, `rgba(255,255,255,${(1 - t) * 0.95})`);
-          grad.addColorStop(0.4, `rgba(232,184,75,${(1 - t) * 0.8})`);
-          grad.addColorStop(1, 'rgba(214,48,49,0)');
+          grad.addColorStop(0.4, `rgba(242,178,51,${(1 - t) * 0.8})`);
+          grad.addColorStop(1, 'rgba(224,73,62,0)');
           ctx.beginPath();
           ctx.arc(ex, ey, coreR, 0, Math.PI * 2);
           ctx.fillStyle = grad;
@@ -184,7 +184,7 @@
         const ringR = t * 40;
         ctx.beginPath();
         ctx.arc(ex, ey, ringR, 0, Math.PI * 2);
-        ctx.strokeStyle = `rgba(232,184,75,${Math.max(0, 0.5 - t * 0.6)})`;
+        ctx.strokeStyle = `rgba(242,178,51,${Math.max(0, 0.5 - t * 0.6)})`;
         ctx.lineWidth = 1;
         ctx.stroke();
 
@@ -196,7 +196,7 @@
           if (pr <= 0) return;
           ctx.beginPath();
           ctx.arc(px2, py2, pr, 0, Math.PI * 2);
-          ctx.fillStyle = `rgba(232,184,75,${(1 - t) * 0.85})`;
+          ctx.fillStyle = `rgba(242,178,51,${(1 - t) * 0.85})`;
           ctx.fill();
         });
 

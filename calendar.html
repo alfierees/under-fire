@@ -13,13 +13,13 @@
   <meta property="og:image" content="https://under-fire.org/images/og-card.png">
   <meta property="og:url" content="https://under-fire.org/calendar">
   <meta name="twitter:card" content="summary_large_image">
-  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400;1,700&family=IBM+Plex+Mono:wght@300;400;500&family=IBM+Plex+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,300..800&family=Archivo+Narrow:wght@400..700&family=Bodoni+Moda:opsz,wght@6..96,500..900&display=swap" rel="stylesheet">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.8.5/d3.min.js"></script>
-  <link rel="stylesheet" href="src/css/shared.css">
+  <link rel="stylesheet" href="src/css/shared.css?v=20260927a">
   <style>
     #cal-wrap { overflow-x:auto; margin-top:1.5rem; padding-bottom:1rem; }
     #cal-chart svg { display:block; }
-    .cal-legend { display:flex; align-items:center; gap:.8rem; margin-top:1.5rem; font-family:'IBM Plex Mono',monospace; font-size:.58rem; color:var(--muted); letter-spacing:.08em; }
+    .cal-legend { display:flex; align-items:center; gap:.8rem; margin-top:1.5rem; font-family:'Archivo Narrow',monospace; font-size:.76rem; color:var(--muted); letter-spacing:.08em; }
     .cal-legend .scale-strip { display:flex; gap:2px; }
     .cal-legend .scale-strip span { width:14px; height:14px; border-radius:2px; }
   </style>
@@ -40,16 +40,16 @@
 <body>
 
 <div id="file-protocol-warning">
-  <strong>⚠ CHARTS WON'T LOAD VIA FILE://</strong>
+  <strong>Charts won't load from a file:// URL</strong>
   Run: <code>python3 -m http.server 8000</code>
-  <span class="close-x" onclick="this.parentElement.style.display='none'">✕</span>
+  <button class="close-x" type="button" aria-label="Dismiss" onclick="this.parentElement.style.display='none'"></button>
 </div>
 
 <nav>
   <a href="index.html" class="nav-brand">Under Fire</a>
   <div class="nav-links">
     <div class="nav-group">
-      <button class="nav-group-btn" type="button">Charts<span class="caret">▾</span></button>
+      <button class="nav-group-btn" type="button">Charts<span class="caret" aria-hidden="true"></span></button>
       <div class="nav-dropdown">
         <a href="timeline.html">Timeline</a>
         <a href="fronts.html">Fronts</a>
@@ -58,7 +58,7 @@
       </div>
     </div>
     <div class="nav-group">
-      <button class="nav-group-btn" type="button">Maps<span class="caret">▾</span></button>
+      <button class="nav-group-btn" type="button">Maps<span class="caret" aria-hidden="true"></span></button>
       <div class="nav-dropdown">
         <a href="oct7.html">Oct 7</a>
         <a href="story.html">Story</a>
@@ -66,14 +66,14 @@
       </div>
     </div>
     <div class="nav-group">
-      <button class="nav-group-btn" type="button">Patterns<span class="caret">▾</span></button>
+      <button class="nav-group-btn" type="button">Patterns<span class="caret" aria-hidden="true"></span></button>
       <div class="nav-dropdown">
         <a href="patterns.html">Patterns</a>
         <a href="areas.html">By Area</a>
       </div>
     </div>
     <div class="nav-group">
-      <button class="nav-group-btn" type="button">More<span class="caret">▾</span></button>
+      <button class="nav-group-btn" type="button">More<span class="caret" aria-hidden="true"></span></button>
       <div class="nav-dropdown">
         <a href="live.html">Live Feed</a>
         <a href="records.html">Records &amp; Stats</a>
@@ -83,15 +83,14 @@
       </div>
     </div>
   </div>
-  <a href="live.html" class="nav-badge" id="nav-badge">🔔 Loading…</a>
+  <a href="live.html" class="nav-badge" id="nav-badge">160,000+ alerts</a>
 </nav>
 
 <div id="tooltip"></div>
 
 <div class="chart-page">
   <div class="section-wrapper">
-    <a href="index.html" class="back-link">← Back to all charts</a>
-    <div class="section-label">01c — Calendar Heatmap</div>
+    <a href="index.html" class="back-link">All charts</a>
     <h1 class="section-title">Every Day, Six Years</h1>
     <p class="section-desc">A GitHub-contributions-style view: each cell is one day from January 2020 to the present, estimated from weekly totals. Darker red means more alerts. The post-Oct-7 era shows as a near-continuous red band.</p>
 
@@ -115,7 +114,7 @@
   <div class="footer-credit">Alert data from <a href="https://rocketalert.live" target="_blank">RocketAlert.live</a>.</div>
 </footer>
 
-<script src="src/js/shared.js?v=20260613e"></script>
+<script src="src/js/shared.js?v=20260927a"></script>
 <script>
 (async () => {
   const raw = await fetchData('daily_counts.json');
@@ -159,15 +158,15 @@
 
   const maxC = d3.max(data, d => d.count);
   const scale = d3.scaleSequential(
-    t => d3.interpolateRgb('#15151c', '#d63031')(t)
+    t => d3.interpolateRgb('#15151c', '#e0493e')(t)
   ).domain([0, Math.log10(maxC + 1)]);
-  const cellFill = v => v === 0 ? '#0f0f14' : scale(Math.log10(v + 1));
+  const cellFill = v => v === 0 ? '#16171a' : scale(Math.log10(v + 1));
 
   const dayLabels = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
   dayLabels.forEach((d, i) => {
     g.append('text').attr('x', -8).attr('y', i * rowH + cell - 2)
       .attr('text-anchor','end').attr('fill','var(--muted)')
-      .attr('font-family','IBM Plex Mono').attr('font-size','10px').text(d);
+      .attr('font-family','Archivo Narrow').attr('font-size','12px').text(d);
   });
 
   // Month labels: pin to the column of the 1st of each month, regardless of
@@ -183,8 +182,8 @@
       ? d.dateObj.getFullYear().toString()
       : d3.timeFormat('%b')(d.dateObj);
     g.append('text').attr('x', d.col * weekW).attr('y', -8)
-      .attr('fill', isJan ? 'var(--accent)' : 'var(--muted)')
-      .attr('font-family','IBM Plex Mono')
+      .attr('fill', isJan ? 'var(--text)' : 'var(--muted)')
+      .attr('font-family','Archivo Narrow')
       .attr('font-size', isJan ? '10px' : '9px')
       .attr('font-weight', isJan ? '600' : '400')
       .attr('letter-spacing', isJan ? '.08em' : '0')
@@ -196,7 +195,7 @@
     .attr('x', d => d.col * weekW)
     .attr('y', d => d.row * rowH)
     .attr('width', cell).attr('height', cell).attr('rx', 2)
-    .attr('fill', '#0f0f14')
+    .attr('fill', '#16171a')
     .on('mouseover', (e, d) => {
       const fmt = d3.timeFormat('%a %d %b %Y');
       showTip(`<b>${fmt(d.dateObj)}</b><br>~${fmtNum(d.count)} alerts (estimated)`, e);
@@ -209,8 +208,8 @@
   [0, 0.2, 0.4, 0.6, 0.8, 1].forEach(t => {
     const s = document.createElement('span');
     s.style.background = t === 0
-      ? '#0f0f14'
-      : d3.interpolateRgb('#15151c', '#d63031')(t);
+      ? '#16171a'
+      : d3.interpolateRgb('#15151c', '#e0493e')(t);
     strip.appendChild(s);
   });
 })();

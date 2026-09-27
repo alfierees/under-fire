@@ -13,17 +13,17 @@
   <meta property="og:image" content="https://under-fire.org/images/og-card.png">
   <meta property="og:url" content="https://under-fire.org/patterns">
   <meta name="twitter:card" content="summary_large_image">
-  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400;1,700&family=IBM+Plex+Mono:wght@300;400;500&family=IBM+Plex+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,300..800&family=Archivo+Narrow:wght@400..700&family=Bodoni+Moda:opsz,wght@6..96,500..900&display=swap" rel="stylesheet">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.8.5/d3.min.js"></script>
-  <link rel="stylesheet" href="src/css/shared.css">
+  <link rel="stylesheet" href="src/css/shared.css?v=20260927a">
   <style>
     .patterns-grid { display:grid; grid-template-columns:1fr 1fr; gap:4rem; align-items:start; }
     #clock-chart, #dow-chart, #actor-hour-chart { width:100%; }
     #clock-chart svg, #dow-chart svg, #actor-hour-chart svg { display:block; overflow:visible; }
-    .chart-title { font-family:'IBM Plex Mono',monospace; font-size:.62rem; letter-spacing:.14em; text-transform:uppercase; color:var(--text); margin-bottom:1.5rem; }
-    .chart-sub { font-family:'IBM Plex Mono',monospace; font-size:.58rem; letter-spacing:.08em; color:var(--muted); margin-bottom:2rem; }
+    .chart-title { font-family:'Archivo Narrow',monospace; font-size:.78rem; letter-spacing:.08em; text-transform:uppercase; color:var(--text); margin-bottom:1.5rem; }
+    .chart-sub { font-family:'Archivo Narrow',monospace; font-size:.76rem; letter-spacing:.08em; color:var(--muted); margin-bottom:2rem; }
     .actor-legend { display:flex; gap:1.2rem; flex-wrap:wrap; margin:1.5rem 0 2rem; }
-    .actor-tag { display:flex; align-items:center; gap:.5rem; font-family:'IBM Plex Mono',monospace; font-size:.6rem; letter-spacing:.08em; color:var(--muted); }
+    .actor-tag { display:flex; align-items:center; gap:.5rem; font-family:'Archivo Narrow',monospace; font-size:.76rem; letter-spacing:.08em; color:var(--muted); }
     .actor-swatch { width:10px; height:10px; border-radius:2px; flex-shrink:0; }
     .pattern-section { margin-top:5rem; padding-top:4rem; border-top:1px solid var(--border); }
     @media (max-width:900px) { .patterns-grid { grid-template-columns:1fr; gap:2.5rem; } }
@@ -45,16 +45,16 @@
 <body>
 
 <div id="file-protocol-warning">
-  <strong>⚠ CHARTS WON'T LOAD VIA FILE://</strong>
+  <strong>Charts won't load from a file:// URL</strong>
   Run: <code>python3 -m http.server 8000</code>
-  <span class="close-x" onclick="this.parentElement.style.display='none'">✕</span>
+  <button class="close-x" type="button" aria-label="Dismiss" onclick="this.parentElement.style.display='none'"></button>
 </div>
 
 <nav>
   <a href="index.html" class="nav-brand">Under Fire</a>
   <div class="nav-links">
     <div class="nav-group">
-      <button class="nav-group-btn" type="button">Charts<span class="caret">▾</span></button>
+      <button class="nav-group-btn" type="button">Charts<span class="caret" aria-hidden="true"></span></button>
       <div class="nav-dropdown">
         <a href="timeline.html">Timeline</a>
         <a href="fronts.html">Fronts</a>
@@ -63,7 +63,7 @@
       </div>
     </div>
     <div class="nav-group">
-      <button class="nav-group-btn" type="button">Maps<span class="caret">▾</span></button>
+      <button class="nav-group-btn" type="button">Maps<span class="caret" aria-hidden="true"></span></button>
       <div class="nav-dropdown">
         <a href="oct7.html">Oct 7</a>
         <a href="story.html">Story</a>
@@ -71,14 +71,14 @@
       </div>
     </div>
     <div class="nav-group">
-      <button class="nav-group-btn" type="button">Patterns<span class="caret">▾</span></button>
+      <button class="nav-group-btn" type="button">Patterns<span class="caret" aria-hidden="true"></span></button>
       <div class="nav-dropdown">
         <a href="patterns.html">Patterns</a>
         <a href="areas.html">By Area</a>
       </div>
     </div>
     <div class="nav-group">
-      <button class="nav-group-btn" type="button">More<span class="caret">▾</span></button>
+      <button class="nav-group-btn" type="button">More<span class="caret" aria-hidden="true"></span></button>
       <div class="nav-dropdown">
         <a href="live.html">Live Feed</a>
         <a href="records.html">Records &amp; Stats</a>
@@ -88,17 +88,16 @@
       </div>
     </div>
   </div>
-  <a href="live.html" class="nav-badge" id="nav-badge">🔔 Loading…</a>
+  <a href="live.html" class="nav-badge" id="nav-badge">160,000+ alerts</a>
 </nav>
 
 <div id="tooltip"></div>
 
 <div class="chart-page">
   <div class="section-wrapper">
-    <a href="index.html" class="back-link">← Back to all charts</a>
-    <div class="section-label">04 — Patterns</div>
+    <a href="index.html" class="back-link">All charts</a>
     <h1 class="section-title">When Do They Strike?</h1>
-    <p class="section-desc">Alerts happen around the clock — there is no safe hour. But the data reveals clear patterns: a 10am peak, and Saturday as the single most targeted day of the week. Press Run to watch the hour-by-hour breakdown reveal itself.</p>
+    <p class="section-desc">Alerts happen around the clock — there is no safe hour. But the data reveals clear patterns: a 10am peak, and Saturday as the single most targeted day of the week.</p>
 
     <div class="actor-legend">
       <div class="actor-tag"><div class="actor-swatch" style="background:var(--hamas)"></div>Hamas</div>
@@ -123,7 +122,6 @@
       <p class="chart-note">Weekday bar: all <span data-live="total">160,000+</span> alerts, <span data-live="year-range">2020–2026</span>. The clock shows the four attributed actors only — unattributed alerts (mostly pre-Oct 2023) are excluded.</p>
 
       <div class="pattern-section">
-        <div class="section-label" style="margin-bottom:.5rem;">04b — Attribution × Time</div>
         <h2 class="section-title" style="font-size:2rem;">Who Attacks When</h2>
         <p class="section-desc" style="max-width:720px;">Each actor has a signature time-of-day pattern. Iran clusters heavily around 10am strikes. Hezbollah runs from mid-morning into evening. Houthis operate disproportionately through the small hours of the night.</p>
         <div id="actor-hour-chart"></div>
@@ -138,7 +136,7 @@
   <div class="footer-credit">Alert data from <a href="https://rocketalert.live" target="_blank">RocketAlert.live</a>.</div>
 </footer>
 
-<script src="src/js/shared.js?v=20260613e"></script>
+<script src="src/js/shared.js?v=20260927a"></script>
 <script>
 const ACTORS = ['Hamas', 'Hezbollah', 'Houthis', 'Iran'];
 const ACTOR_COLORS = {
@@ -237,12 +235,12 @@ function drawClock(data, totals) {
     const r = outerMaxR + 16;
     g.append('text').attr('x', Math.cos(angle)*r).attr('y', Math.sin(angle)*r + 4)
       .attr('text-anchor','middle').attr('fill','var(--muted)')
-      .attr('font-family','IBM Plex Mono').attr('font-size','10px')
+      .attr('font-family','Archivo Narrow').attr('font-size','12px')
       .text(String(h).padStart(2,'0') + ':00');
   });
 
   g.append('text').attr('text-anchor','middle').attr('dy','0.35em')
-    .attr('fill','var(--muted)').attr('font-family','IBM Plex Mono').attr('font-size','9px').text('24h');
+    .attr('fill','var(--muted)').attr('font-family','Archivo Narrow').attr('font-size','11px').text('24h');
 
   // Animated sweep: a clock hand rotates 0 → 2π over 2.2s. Each hour's wedge
   // fades in when the hand passes it. 10am flares briefly.
@@ -263,9 +261,9 @@ function drawClock(data, totals) {
     hg.transition().delay(delay).duration(240).attr('opacity', 1);
     if (d.hour === 10) {
       hg.transition().delay(delay).duration(240)
-        .style('filter', 'drop-shadow(0 0 10px rgba(214,48,49,0.85))')
+        .style('filter', 'drop-shadow(0 0 10px rgba(224,73,62,0.85))')
         .transition().duration(900)
-        .style('filter', 'drop-shadow(0 0 0 rgba(214,48,49,0))');
+        .style('filter', 'drop-shadow(0 0 0 rgba(224,73,62,0))');
     }
   });
 
@@ -290,16 +288,16 @@ function drawClock(data, totals) {
 
     ann.append('text')
       .attr('x', tipX + 6).attr('y', tipY - 8)
-      .attr('fill', 'var(--accent)').attr('font-family', 'IBM Plex Mono')
-      .attr('font-size', '9px').attr('font-weight', 500)
+      .attr('fill', 'var(--accent)').attr('font-family', 'Archivo Narrow')
+      .attr('font-size', '11px').attr('font-weight', 500)
       .text('10:00 peak');
 
     // Iran → Hamas order (largest first)
     [...RING_ORDER].reverse().forEach((actor, i) => {
       ann.append('text')
         .attr('x', tipX + 6).attr('y', tipY + 4 + i * 12)
-        .attr('fill', ACTOR_COLORS[actor]).attr('font-family', 'IBM Plex Mono')
-        .attr('font-size', '9px')
+        .attr('fill', ACTOR_COLORS[actor]).attr('font-family', 'Archivo Narrow')
+        .attr('font-size', '11px')
         .text(`${actor}: ${fmtNum(h10[actor] || 0)}`);
     });
 
@@ -318,22 +316,22 @@ function drawDoW(data) {
   const maxVal = d3.max(data, d => d.count);
   const x = d3.scaleLinear().domain([0, maxVal]).range([0, w]);
   const y = d3.scaleBand().domain(data.map(d => d.day)).range([0, h]).padding(0.25);
-  const col = { Saturday:'var(--red)', Sunday:'rgba(214,48,49,0.6)' };
+  const col = { Saturday:'var(--red)', Sunday:'rgba(224,73,62,0.6)' };
   data.forEach(d => {
     const isWknd = d.day === 'Saturday' || d.day === 'Sunday';
     g.append('rect').attr('x',0).attr('y', y(d.day)).attr('width', 0).attr('height', y.bandwidth())
-      .attr('fill', col[d.day] || 'rgba(232,184,75,0.5)').attr('rx', 2)
+      .attr('fill', col[d.day] || 'rgba(242,178,51,0.5)').attr('rx', 2)
       .transition().duration(1200).delay(400).ease(d3.easeCubicOut)
       .attr('width', x(d.count));
     g.append('text').attr('x', x(d.count)+8).attr('y', y(d.day)+y.bandwidth()/2+4)
-      .attr('font-family','IBM Plex Mono').attr('font-size','10px')
+      .attr('font-family','Archivo Narrow').attr('font-size','12px')
       .attr('fill', isWknd ? '#fff' : 'var(--muted)').attr('opacity', 0)
       .text(fmtNum(d.count))
       .transition().duration(300).delay(1400).attr('opacity', 1);
   });
   g.append('g').call(d3.axisLeft(y).tickSize(0)).call(g => {
     g.select('.domain').remove();
-    g.selectAll('text').attr('fill','var(--muted)').attr('font-family','IBM Plex Mono').attr('font-size','11px').attr('dx','-6px');
+    g.selectAll('text').attr('fill','var(--muted)').attr('font-family','Archivo Narrow').attr('font-size','11px').attr('dx','-6px');
   });
 }
 
@@ -358,7 +356,7 @@ function drawActorHour(cells) {
   d3.range(24).forEach(h => {
     g.append('text').attr('x', x(h) + x.bandwidth()/2).attr('y', -10)
       .attr('text-anchor','middle').attr('fill','var(--muted)')
-      .attr('font-family','IBM Plex Mono').attr('font-size','9px')
+      .attr('font-family','Archivo Narrow').attr('font-size','11px')
       .text(String(h).padStart(2,'0'));
   });
 
@@ -366,7 +364,7 @@ function drawActorHour(cells) {
   ACTORS.forEach(a => {
     g.append('text').attr('x', -8).attr('y', y(a) + y.bandwidth()/2 + 4)
       .attr('text-anchor','end').attr('fill','var(--muted)')
-      .attr('font-family','IBM Plex Mono').attr('font-size','10px')
+      .attr('font-family','Archivo Narrow').attr('font-size','12px')
       .text(a);
   });
 

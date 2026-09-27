@@ -107,7 +107,7 @@ window.__statsPromise = fetchData('stats_summary.json')
   try { s = await window.__statsPromise; }
   catch (e) { if (badge) badge.style.display = 'none'; return; }
 
-  if (badge) badge.textContent = '🔔 ' + fmtNum(s.total_alerts) + ' alerts';
+  if (badge) badge.textContent = fmtNum(s.total_alerts) + ' alerts';
 
   const MONTHS = ['January','February','March','April','May','June',
                   'July','August','September','October','November','December'];

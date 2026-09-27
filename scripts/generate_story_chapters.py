@@ -185,7 +185,7 @@ def main():
             "title": "The Day Everything Changed",
             "date": "7 October 2023, 06:29 – 23:13",
             "actor": "Hamas",
-            "color": "#d63031",
+            "color": "#e0493e",
             "description": "On a Saturday morning that should have been the quiet peak of the Jewish holiday season, the silence was shattered. At 06:29, Hamas launched a coordinated, multi-front invasion that would become the deadliest day in Israel's history.Within minutes, thousands of rockets began raining down across the Gaza Envelope, the Negev, and the coastal heartland. As families scrambled into bomb shelters, thousands of terrorists breached the border by land, sea, and air. By the time the first day ended, nearly 4,000 rocket alerts had been triggered, and 1,200 lives—children, parents, and festival-goers—had been taken.",
             "stats": [
                 {"label": "Alerts in one day", "value": str(len(oct7))},
@@ -203,7 +203,7 @@ def main():
             "title": "The Gaza Barrages",
             "date": "October 2023 – October 2024",
             "actor": "Hamas",
-            "color": "#d63031",
+            "color": "#e0493e",
             "description": "Even as the IDF moved into the Gaza Strip, the sky over southern Israel rarely stayed clear. For the residents of the Gaza Envelope, Lakhish, and the Western Negev, the war didn't just happen on the front lines—it happened in their living rooms and bomb shelters. Day after day, Hamas maintained a steady rhythm of rocket fire, a grinding campaign designed to ensure that life could not return to normal. These weren't just data points; they were the soundtrack of a region under siege, where the familiar whistle of an incoming projectile became a grim, daily certainty.",
             "stats": [
                 {"label": "Hamas alerts (total)", "value": str(stats['origins'].get('Hamas', 0))},
@@ -221,7 +221,7 @@ def main():
             "title": "The Northern Front",
             "date": "8 October 2023 – 27 November 2024",
             "actor": "Hezbollah",
-            "color": "#f39c12",
+            "color": "#ee8a2a",
             "description": "While the south was still reeling, a second front ignited in the north. On October 8, Hezbollah began a campaign of \"solidarity\" that effectively turned the Galilee into a combat zone. For more than a year, the Confrontation Line—once a string of thriving kibbutzim and tourist towns—became a landscape of sirens and smoke. The threat here was different: precision anti-tank missiles fired directly at homes and swarms of explosive UAVs that gave residents seconds to find cover. By the fall of 2024, more than 60,000 people had been forced from their homes, leaving behind \"ghost towns\" and a region in a state of suspended animation.",
             "stats": [
                 {"label": "Alerts, northern war", "value": str(n_hez_war)},
@@ -239,7 +239,7 @@ def main():
             "title": "Houthi Long-Range",
             "date": "November 2023 onwards",
             "actor": "Houthis",
-            "color": "#4a9eff",
+            "color": "#4f9be8",
             "description": "In November 2023, the war reached a distance previously thought impossible for non-state actors. From nearly 2,000 kilometers away in Yemen, the Houthi movement began launching a sophisticated arsenal of drones and ballistic missiles toward Israel. The first targets were the southern resort city of Eilat, turning a vacation destination into a front line. But the reach of these weapons quickly expanded, eventually triggering sirens in Tel Aviv and central Israel. This front redefined modern warfare: for the first time in history, ballistic missiles were intercepted in space by the Arrow system, neutralizing threats from half a continent away before they could reach Israeli soil.",
             "stats": [
                 {"label": "Houthi alerts", "value": str(stats['origins'].get('Houthis', 0))},
@@ -257,7 +257,7 @@ def main():
             "title": "Iran's First Direct Strikes",
             "date": "14 April 2024 and 1 October 2024",
             "actor": "Iran",
-            "color": "#c678dd",
+            "color": "#b27ce0",
             "description": "For decades, the conflict between Iran and Israel was fought in the shadows. In 2024, that shadow war vanished. On the night of April 14, the world watched as Iran launched over 300 drones and missiles in the first-ever direct assault from Iranian soil. It was a surreal spectacle: streaks of light across the Jerusalem sky as a historic coalition of five nations—Israel, the US, the UK, France, and Jordan—worked in unison to intercept nearly every threat before it reached its target. But the quiet didn't last. On October 1, Iran struck again, this time with a more aggressive barrage of nearly 200 high-speed ballistic missiles. This second wave bypassed the slower drone phase, sending millions of Israelis into shelters simultaneously. While the defense held, the impact sites in central Israel and the Negev signaled a new, dangerous era of direct confrontation where the \"front line\" was now the entire country. ",
             "stats": [
                 {"label": "True Promise 1 alerts", "value": str(n_tp1)},
@@ -275,7 +275,7 @@ def main():
             "title": "Total War",
             "date": "28 February – March 2026",
             "actor": "Iran",
-            "color": "#c678dd",
+            "color": "#b27ce0",
             "description": "On February 28, 2026, the long-simmering regional conflict exploded into what many had feared for decades: a total war. In a single 24-hour window, Iran launched the most massive coordinated missile and drone barrage in the history of modern warfare.This was no longer a limited front. From the northern peaks of the Golan Heights to the southern tip of Eilat, and from the coastal plains to the Jordan Valley, the entire country was unified under the scream of over 10,000 alerts. The sheer volume of fire tested the limits of the world’s most advanced defense systems and forced millions of Israelis into shelters for hours on end. It was the day the conflict moved from the borders into every single home, crossing a threshold from which the region would never be the same.",
             "stats": [
                 {"label": "Alerts — Feb 28 alone", "value": f"{n_busiest:,}"},

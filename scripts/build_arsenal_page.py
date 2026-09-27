@@ -56,8 +56,7 @@ for actor in ORDER:
     systems = [s for s in d['systems'] if s['actor'] == actor]
     parts.append(f'''
     <div class="actor-section" id="{actor}" style="--actor-color:{meta['color']};">
-      <div class="section-label" style="margin-bottom:.5rem;color:{meta['color']};">{escape(meta['label'])}</div>
-      <h2 class="section-title" style="font-size:1.8rem;margin-bottom:1rem;">{len(systems)} systems</h2>
+      <h2 class="section-title actor-heading" style="font-size:1.8rem;margin-bottom:1rem;"><span class="chip" style="background:{meta['color']}"></span>{escape(meta['label'])} <span class="count">{len(systems)} systems</span></h2>
       <div class="sys-grid">''')
     for s in systems:
         aka = ' · '.join(s['aka'][:2])
@@ -75,7 +74,7 @@ for actor in ORDER:
             f'<div class="sys-row"><span>{k}</span><span>{v}</span></div>' for k, v in rows)
         sim_btn = ('' if s['class'] == 'ATGM' else
                    f'<button class="sim-link" type="button" data-sim="{s["id"]}">'
-                   f'▶ Fire it in the simulator</button>')
+                   f'Try it in the simulator</button>')
         parts.append(f'''
         <article class="sys-card" id="sys-{s['id']}">
           <h3 class="sys-name">{escape(s['name'])}</h3>
@@ -110,7 +109,7 @@ est_parts = []
 for e in d['actor_arsenal_estimates']:
     meta = ACTORS[e['actor']]
     est_parts.append(f'''
-      <div class="est-block" style="border-left:2px solid {meta['color']};">
+      <div class="est-block" style="border-top:2px solid {meta['color']};">
         <div class="est-actor" style="color:{meta['color']};">{escape(meta['label'])}</div>
         <p>{escape(e['estimate'])} {srcs(e['sources'])}</p>
       </div>''')
