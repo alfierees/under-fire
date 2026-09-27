@@ -115,9 +115,12 @@ async function getData(file) {
   return _cache[file];
 }
 
-const FIRE_STOPS = ['#e0493e', '#ee8a2a', '#f2b233', '#ffd27a'];
+const FIRE_STOPS  = ['#e0493e', '#ee8a2a', '#f2b233', '#ffd27a'];
+const NIGHT_STOPS = ['#2f5fa8', '#4f9be8', '#8f86ee', '#d4b0ff'];
+const DUSK_STOPS  = ['#3f63b8', '#b27ce0', '#e0493e', '#f2b233'];
 const ACTOR_HEX = { Hamas: '#e0493e', Hezbollah: '#ee8a2a', Houthis: '#4f9be8', Iran: '#b27ce0', Unknown: '#6f6c66' };
-const fireScale = d3.scaleLinear().domain([0, 0.45, 0.75, 1]).range(FIRE_STOPS).clamp(true);
+const rampScale = stops => d3.scaleLinear().domain([0, 0.45, 0.75, 1]).range(stops).clamp(true);
+const fireScale = rampScale(FIRE_STOPS), nightScale = rampScale(NIGHT_STOPS), duskScale = rampScale(DUSK_STOPS);
 
 function previewSvg(svgEl) {
   const W = svgEl.clientWidth || 240, H = svgEl.clientHeight || 72;
@@ -127,14 +130,14 @@ function previewSvg(svgEl) {
 
 // Linear gradient in the fire palette. Vertical runs red (bottom) → gold (top).
 let _gradId = 0;
-function fireGradient(svg, { vertical = true, fadeFrom = 1 } = {}) {
+function fireGradient(svg, { vertical = true, fadeFrom = 1, stops = FIRE_STOPS } = {}) {
   const id = 'uf-fire-' + (++_gradId);
   const g = svg.append('defs').append('linearGradient').attr('id', id)
     .attr('x1', 0).attr('y1', vertical ? 1 : 0).attr('x2', vertical ? 0 : 1).attr('y2', 0);
-  FIRE_STOPS.forEach((c, i) => g.append('stop')
-    .attr('offset', `${(i / (FIRE_STOPS.length - 1)) * 100}%`)
+  stops.forEach((c, i) => g.append('stop')
+    .attr('offset', `${(i / (stops.length - 1)) * 100}%`)
     .attr('stop-color', c)
-    .attr('stop-opacity', fadeFrom + (1 - fadeFrom) * (i / (FIRE_STOPS.length - 1))));
+    .attr('stop-opacity', fadeFrom + (1 - fadeFrom) * (i / (stops.length - 1))));
   return `url(#${id})`;
 }
 
@@ -229,7 +232,7 @@ async function drawPreviewTimelapse(svgEl) {
     const path = d3.geoPath(proj);
     svg.append('g').selectAll('path').data(geo.features).enter().append('path')
       .attr('d', path)
-      .attr('fill', f => { const v = cum[k][f.properties.area] || 0; return v ? fireScale(Math.log10(v + 1) / maxLog) : '#1f2024'; })
+      .attr('fill', f => { const v = cum[k][f.properties.area] || 0; return v ? duskScale(Math.log10(v + 1) / maxLog) : '#1f2024'; })
       .attr('stroke', '#0e0f11').attr('stroke-width', 0.3);
   });
 }
@@ -248,7 +251,7 @@ async function drawPreviewClock(svgEl) {
     const a0 = (row.hour / 24) * tau;
     g.append('path').attr('d', d3.arc().innerRadius(size * 0.12).outerRadius(rS(row.count))
       .startAngle(a0).endAngle(a0 + tau / 24 - 0.02))
-      .attr('fill', fireScale(row.count / maxH));
+      .attr('fill', nightScale(row.count / maxH));
   });
   const days = d.day_of_week;
   const bx0 = size + 14, bw = (W - bx0) / days.length;
@@ -257,7 +260,7 @@ async function drawPreviewClock(svgEl) {
   days.forEach((row, i) => {
     svg.append('rect').attr('x', bx0 + i * bw + 2).attr('width', Math.max(2, bw - 5))
       .attr('y', H - 1 - y(row.count)).attr('height', y(row.count)).attr('rx', 1)
-      .attr('fill', fireScale(row.count / maxD));
+      .attr('fill', nightScale(Math.pow(row.count / maxD, 3)));
   });
 }
 
@@ -267,7 +270,7 @@ async function drawPreviewAreas(svgEl) {
   const { svg, W, H } = previewSvg(svgEl);
   const x = d3.scaleSqrt().domain([0, d3.max(data, d => d.total)]).range([0, W]);
   const y = d3.scaleBand().domain(data.map(d => d.area)).range([0, H]).padding(0.28);
-  const fill = fireGradient(svg, { vertical: false });
+  const fill = fireGradient(svg, { vertical: false, stops: DUSK_STOPS });
   data.forEach((d, i) => {
     svg.append('rect').attr('x', 0).attr('y', y(d.area))
       .attr('width', x(d.total)).attr('height', y.bandwidth()).attr('rx', 1)

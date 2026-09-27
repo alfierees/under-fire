@@ -16,6 +16,10 @@
 
   /* Fire: the brand gradient, used only on display titles (wordmark, page and hub titles). */
   --fire: linear-gradient(100deg, #ffd27a 0%, #f2b233 28%, #ee8a2a 58%, #e0493e 100%);
+  /* Night and Dusk share the load so Fire isn't everywhere: Night for patterns and
+     reference, Dusk for maps. Built from the actor blue and purple. */
+  --night: linear-gradient(100deg, #9fd0ff 0%, #4f9be8 38%, #8f86ee 68%, #b27ce0 100%);
+  --dusk: linear-gradient(100deg, #6f9df0 0%, #b27ce0 36%, #e0493e 72%, #f2b233 100%);
 
   --f-display: 'Bodoni Moda', 'Didot', Georgia, serif;
   --f-body: 'Archivo', system-ui, sans-serif;
@@ -54,6 +58,9 @@ html { scrollbar-color: var(--border) var(--bg); }
   -webkit-text-fill-color: transparent; color: transparent;
   width: fit-content; max-width: 100%;
 }
+
+h1.section-title.grad-night, .category-title.grad-night span { background-image: var(--night); }
+h1.section-title.grad-dusk,  .category-title.grad-dusk span  { background-image: var(--dusk); }
 
 /* Actor chip: the only way actor colour marks a container. */
 .chip { display:inline-block; width:10px; height:10px; border-radius:1px; flex-shrink:0; vertical-align:baseline; margin-right:.55rem; }

@@ -270,7 +270,7 @@ The signature element: a number printed on a flap.
 - **Don't** put eyebrow or kicker labels above headings, and don't number sections.
 - **Don't** use unicode glyphs as icons (arrows, checks, crosses, triangles).
 - **Don't** run a seam line through inline figures. It reads as strikethrough.
-- **Do** use the Fire gradient (`--fire`: #ffd27a → #f2b233 → #ee8a2a → #e0493e) as clipped text on display titles only: the UNDER FIRE wordmark, the nav brand, hub category titles and each page's h1. Size it to the text (`width: fit-content`) so short titles get the full sweep. Owner request, 2026-09-27.
+- **Do** use the three title gradients as clipped text on display titles only, one per section so no single gradient dominates (owner request, 2026-09-27). **Fire** (`--fire`, gold → red): wordmark, nav brand, Charts and chart pages. **Dusk** (`--dusk`, blue → violet → red → gold): Maps and map pages (`.grad-dusk`). **Night** (`--night`, sky → blue → violet): Patterns, Reference and their pages (`.grad-night`). The mission title stays plain. Size gradients to the text (`width: fit-content`). Previews follow the same split: fire for the timeline and heatmap, dusk for the spread maps and area bars, night for the clock.
 - **Do** keep nav dropdowns hover-only (plus keyboard `:focus-visible`). No click-to-pin: a pinned menu stayed open and got in the way (owner request).
 - **Do** colour an actor's name in its actor colour where the name labels that actor's data (board front counters, latest-alert origin).
 - **Don't** use the Fire gradient on body text, sub-headings, figures or buttons.
