@@ -227,7 +227,7 @@ function buildAreaMap(areas, geo) {
   const color = d3.scaleSequentialLog(RAMP).domain([Math.min(...totals), Math.max(...totals)]);
 
   const map = L.map('areas-map', { zoomControl: true, attributionControl: true, scrollWheelZoom: false });
-  L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_nolabels/{z}/{x}/{y}{r}.png', {
+  L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_nolabels/{z}/{x}/{y}{r}.png?key=cb1_40j0_1_91751175af3590b466a71c43', {
     attribution: '&copy; OpenStreetMap &copy; CARTO', subdomains: 'abcd', maxZoom: 19
   }).addTo(map);
 
