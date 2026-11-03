@@ -1,17 +1,17 @@
 {
-  "total_alerts": 160170,
+  "total_alerts": 161370,
   "busiest_day": {
     "date": "2026-02-28",
     "count": 10162
   },
   "busiest_hour": {
     "hour": 10,
-    "count": 10677
+    "count": 10678
   },
   "longest_quiet_streak": {
-    "weeks": 7,
-    "start_week": "2026-06-29",
-    "end_week": "2026-09-28",
+    "weeks": 6,
+    "start_week": "2023-01-30",
+    "end_week": "2023-03-13",
     "threshold": 5
   },
   "biggest_area_spike": {
@@ -21,12 +21,12 @@
   },
   "busiest_weekday": {
     "day": "Saturday",
-    "count": 30723
+    "count": 30732
   },
   "days_under_attack": {
-    "days_with_alerts": 769,
-    "total_days": 2453,
-    "pct": 31
+    "days_with_alerts": 780,
+    "total_days": 2473,
+    "pct": 32
   },
   "major_attack_days": {
     "count": 216,
